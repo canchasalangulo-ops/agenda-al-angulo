@@ -1090,7 +1090,6 @@ function renderContacts() {
   const letters = Object.keys(groups).sort();
   // Auto-expand first group or all when searching
   if (q) letters.forEach(l => expandedGroups.add(l));
-  else if (expandedGroups.size === 0) expandedGroups.add(letters[0]);
 
   const html = letters.map(letter => {
     const contacts = groups[letter];
