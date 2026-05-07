@@ -9,17 +9,17 @@
 <style>
 :root {
   --verde:#1A6B55;--verde-dk:#124a3b;--verde-lt:#2a8a6e;
-  --verde-pale:#0d2e25;--verde-mid:#1a4a38;
-  --naranja:#E8501A;--naranja-dk:#c43e10;--naranja-pale:#2a1a10;
-  --negro:#F0F0F0;--gris:#8A8A8A;--bg:#111827;--card:#1e2535;
-  --border:rgba(255,255,255,.07);--border-md:rgba(255,255,255,.12);
-  --text:#F0F0F0;--muted:#8A8A8A;--faint:#4a4a5a;
+  --verde-pale:#0d2318;--verde-mid:#163d2c;
+  --naranja:#E8501A;--naranja-dk:#c43e10;--naranja-pale:#2a1208;
+  --negro:#EFEFEF;--gris:#8A8A8A;--bg:#0f1420;--card:#181f2e;
+  --border:rgba(255,255,255,.07);--border-md:rgba(255,255,255,.13);
+  --text:#EFEFEF;--muted:#7a8a9a;--faint:#3a4a5a;
   --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
   --shadow-md:0 2px 8px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
-  --d-bg:#0d2e25;--d-tx:#4ade9a;--d-bd:#1a4a38;
-  --p-bg:#2a2010;--p-tx:#fbbf24;--p-bd:#4a3a10;
-  --s-bg:#2a1508;--s-tx:#fb923c;--s-bd:#5a2a10;
-  --r-bg:#7f1d1d;--r-tx:#fecaca;--r-bd:#991b1b;
+  --d-bg:#0d2318;--d-tx:#1A6B55;--d-bd:#163d2c;
+  --p-bg:#241a06;--p-tx:#d4930a;--p-bd:#3d2e08;
+  --s-bg:#280e04;--s-tx:#E8501A;--s-bd:#4a1a08;
+  --r-bg:#5c0a0a;--r-tx:#ffb3b3;--r-bd:#7a1010;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
@@ -48,7 +48,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* NAV */
-.nav{background:#0a1119;border-bottom:1px solid rgba(255,255,255,.05);padding:0 28px;display:flex;flex-shrink:0}
+.nav{background:#0a1119;border-bottom:1px solid rgba(255,255,255,.05);padding:0 28px;display:flex;flex-shrink:0;justify-content:center}
 .ntab{padding:12px 20px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:6px;user-select:none}
 .ntab:hover{color:rgba(255,255,255,.8)}
 .ntab.on{color:#fff;border-bottom-color:var(--naranja)}
@@ -64,13 +64,13 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 .toast.err{border-left:3px solid #f87171}
 
 /* ─── AGENDA ─── */
-.wbar{background:#161d2a;border-bottom:1px solid var(--border);padding:0 28px;display:flex;flex-shrink:0}
+.wbar{background:#161d2a;border-bottom:1px solid var(--border);padding:0 28px;display:flex;flex-shrink:0;justify-content:center;gap:8px}
 .wtab{padding:14px 20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;display:flex;flex-direction:column;gap:2px;user-select:none}
 .wtab:hover{color:var(--negro)}
 .wtab.on{color:var(--verde);border-bottom-color:var(--verde)}
 .wrange{font-size:10px;font-weight:500;letter-spacing:0;color:var(--faint)}
 .wtab.on .wrange{color:var(--verde);opacity:.7}
-.dstrip{background:#161d2a;border-bottom:2px solid var(--border);padding:12px 28px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0}
+.dstrip{background:#161d2a;border-bottom:2px solid var(--border);padding:12px 28px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;justify-content:center}
 .dstrip::-webkit-scrollbar{height:0}
 .dpill{display:flex;flex-direction:column;align-items:center;padding:8px 14px;border-radius:12px;cursor:pointer;transition:all .15s;background:#1e2535;border:1.5px solid var(--border);min-width:62px;flex-shrink:0;gap:1px;user-select:none}
 .dpill:hover{border-color:var(--verde-mid);background:var(--verde-pale)}
@@ -105,6 +105,11 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 .tc.p .tbadge{color:var(--p-tx);background:rgba(160,96,0,.1)}
 .tc.s .tbadge{color:var(--s-tx);background:rgba(192,56,0,.1)}
 .tc.r .tbadge{color:rgba(255,255,255,.7);background:rgba(255,255,255,.15)}
+.evbadge{font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:4px;display:inline-block;white-space:nowrap}
+.tc.d .evbadge{color:var(--d-tx);background:rgba(26,107,85,.15)}
+.tc.p .evbadge{color:var(--p-tx);background:rgba(212,147,10,.12)}
+.tc.s .evbadge{color:var(--s-tx);background:rgba(232,80,26,.12)}
+.tc.r .evbadge{color:rgba(255,255,255,.65);background:rgba(255,255,255,.12)}
 .tplus{font-size:22px;color:var(--d-tx);opacity:.3;text-align:center;margin:auto}
 .tname{font-size:12px;font-weight:700;color:var(--negro);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
 .tc.r .tname{color:#fff}
@@ -394,6 +399,13 @@ c-125 -44 -235 -101 -240 -125 -13 -56 -35 -202 -35 -231 0 -27 13 -44 83
       <option value="Pendiente de seña">Pendiente de seña</option>
       <option value="Reservado">Reservado</option>
     </select>
+    <label class="flbl">Evento</label>
+    <select class="fctl" id="mevento">
+      <option value="Fútbol">Fútbol</option>
+      <option value="Escuelita de Fútbol">Escuelita de Fútbol</option>
+      <option value="Torneo">Torneo</option>
+      <option value="Cumpleaños">Cumpleaños</option>
+    </select>
     <label class="flbl">Cliente</label>
     <input class="fctl" id="mcliente" type="text" placeholder="Nombre del cliente"/>
     <label class="flbl">Teléfono WhatsApp</label>
@@ -672,13 +684,21 @@ function renderGrid(){
       const cls=ECLS[t.estado];
       if(t.estado==='Disponible'){
         html+=`<div class="tc d" onclick="openMod(${JSON.stringify(t).replace(/"/g,'&quot;')})">
-          <span class="tbadge">Libre</span><div class="tplus">+</div></div>`;
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <span class="tbadge">Libre</span>
+            <span class="evbadge">${t.evento||'Fútbol'}</span>
+          </div>
+          <div class="tplus">+</div>
+        </div>`;
       } else {
         html+=`<div class="tc ${cls}" onclick="openMod(${JSON.stringify(t).replace(/"/g,'&quot;')})">
-          <span class="tbadge">${ELBL[t.estado]}</span>
-          <div>
-            <div class="tname">${t.cliente||'—'}</div>
-            <div class="tphone">${t.numero?'···'+t.numero.slice(-6):''}</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px">
+            <span class="tbadge">${ELBL[t.estado]}</span>
+            <span class="evbadge">${(t.evento||'Fútbol')==='Escuelita de Fútbol'?'Escuelita':(t.evento||'Fútbol')}</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:5px">
+            <div class="tname" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.cliente||'—'}</div>
+            <div class="tphone" style="flex-shrink:0">${t.numero?'···'+t.numero.slice(-6):''}</div>
           </div>
         </div>`;
       }
@@ -960,6 +980,7 @@ function openMod(t){
   document.getElementById('mttl').textContent=`${t.horario.slice(0,5)} — ${canchaLb}`;
   document.getElementById('msub').textContent=`${d}/${mo}/${y}`;
   document.getElementById('mestado').value=t.estado;
+  document.getElementById('mevento').value=t.evento||'Fútbol';
   document.getElementById('mcliente').value=t.cliente||'';
   document.getElementById('mphone').value=t.numero||'';
   document.getElementById('mdel').style.display=t.estado==='Disponible'?'none':'block';
@@ -977,12 +998,13 @@ async function saveMod(){
   btn.disabled=true; btn.textContent='Guardando...';
   try {
     const estado=document.getElementById('mestado').value;
+    const evento=document.getElementById('mevento').value||'Fútbol';
     const cliente=document.getElementById('mcliente').value.trim()||null;
     const numero=document.getElementById('mphone').value.trim()||null;
-    await updateTurno(modalTurno.id, {estado, cliente, numero});
+    await updateTurno(modalTurno.id, {estado, evento, cliente, numero});
     // Update local map
     const key=tKey(modalTurno.fecha,modalTurno.horario,modalTurno.cancha,modalTurno.numero_cancha);
-    turnosMap[key]={...modalTurno, estado, cliente, numero};
+    turnosMap[key]={...modalTurno, estado, evento, cliente, numero};
     closeMod();
     renderAgenda();
     showToast('Turno actualizado ✓');
