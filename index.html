@@ -225,6 +225,45 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   .mside{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:140px;padding:12px 0}
   .modal{width:calc(100vw - 32px);margin:16px}
 }
+
+/* ─── CONTACTOS ─── */
+.con-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.con-topbar{background:#161d2a;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap}
+.con-search-wrap{flex:1;min-width:200px;position:relative;display:flex;align-items:center}
+.con-search-icon{position:absolute;left:12px;font-size:14px;pointer-events:none}
+.con-search{width:100%;background:#0f1420;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px 10px 36px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:500;outline:none;transition:border-color .15s}
+.con-search:focus{border-color:var(--verde)}
+.con-search::placeholder{color:var(--muted)}
+.con-meta{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.btn-nuevo-con{background:var(--naranja);color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0}
+.btn-nuevo-con:hover{background:var(--naranja-dk)}
+.con-list{flex:1;overflow-y:auto;padding:16px 28px}
+.con-list::-webkit-scrollbar{width:4px}
+.con-list::-webkit-scrollbar-thumb{background:var(--border-md);border-radius:2px}
+.alpha-group{margin-bottom:6px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.alpha-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#161d2a;cursor:pointer;user-select:none;transition:background .15s}
+.alpha-header:hover{background:#1e2a3a}
+.alpha-arrow{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.alpha-arrow.open{transform:rotate(90deg)}
+.alpha-letter{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--verde);width:28px}
+.alpha-count{font-size:10px;font-weight:700;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:10px;margin-left:auto}
+.alpha-body{display:none;background:var(--card)}
+.alpha-body.open{display:block}
+.con-cols{display:grid;grid-template-columns:1fr 1fr;padding:8px 16px 4px;border-bottom:1px solid var(--border)}
+.con-col-hdr{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.con-row{display:grid;grid-template-columns:1fr 1fr;padding:10px 16px;border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer}
+.con-row:last-child{border-bottom:none}
+.con-row:hover{background:#1e2535}
+.con-name{font-size:13px;font-weight:600;color:var(--text)}
+.con-phone{font-size:13px;font-weight:400;color:var(--muted);text-align:left}
+.con-no-results{padding:40px;text-align:center;color:var(--muted);font-size:13px}
+
+@media(max-width:768px){
+  .con-topbar{padding:12px 16px}
+  .con-list{padding:12px 16px}
+  .con-cols,.con-row{grid-template-columns:1fr 1fr}
+}
+
 </style>
 </head>
 <body>
@@ -255,6 +294,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   <div class="ntab on" onclick="showPage('agenda')">📅 Agenda</div>
   <div class="ntab" onclick="showPage('historial')">🗂 Historial</div>
   <div class="ntab" onclick="showPage('resumenes')">📊 Resúmenes</div>
+  <div class="ntab" onclick="showPage('contactos')">👥 Contactos</div>
 </nav>
 
 <!-- AGENDA -->
@@ -311,6 +351,46 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
       <button class="bsave" id="bsave" onclick="saveMod()">Guardar</button>
     </div>
     <button class="mdel" id="mdel" onclick="clearMod()">Liberar turno</button>
+  </div>
+</div>
+
+
+<!-- CONTACTOS -->
+<div class="page" id="page-contactos">
+  <div class="con-wrap">
+    <!-- Top bar -->
+    <div class="con-topbar">
+      <div class="con-search-wrap">
+        <span class="con-search-icon">🔍</span>
+        <input class="con-search" id="conSearch" type="text" placeholder="Buscar por nombre o teléfono..." oninput="filterContacts()"/>
+      </div>
+      <div class="con-meta" id="conMeta"></div>
+      <button class="btn-nuevo-con" onclick="openNewContact()">+ Nuevo Contacto</button>
+    </div>
+
+    <!-- List -->
+    <div class="con-list" id="conList">
+      <div class="empty-state"><span class="empty-icon">👥</span>Cargando contactos...</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACTOS MODAL -->
+<div class="mbg" id="conModal">
+  <div class="modal">
+    <button class="mx" onclick="closeConModal()">✕</button>
+    <div class="mttl" id="conModalTitle">Nuevo Contacto</div>
+    <div class="msub">Completá los datos del cliente</div>
+    <label class="flbl">Nombre completo</label>
+    <input class="fctl" id="conNombre" type="text" placeholder="Ej: Juan García"/>
+    <label class="flbl">Número WhatsApp</label>
+    <input class="fctl" id="conNumero" type="text" placeholder="5492604xxxxxxx"/>
+    <label class="flbl">suscriberId Manychat <span style="font-weight:400;opacity:.5">(opcional)</span></label>
+    <input class="fctl" id="conSuscriber" type="text" placeholder="ID de ManyChat"/>
+    <div class="mbtns">
+      <button class="bcancel" onclick="closeConModal()">Cancelar</button>
+      <button class="bsave" id="conSaveBtn" onclick="saveContact()">Guardar</button>
+    </div>
   </div>
 </div>
 
@@ -828,9 +908,10 @@ function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
   document.getElementById('page-'+n).classList.add('on');
-  document.querySelectorAll('.ntab')[['agenda','historial','resumenes'].indexOf(n)].classList.add('on');
+  document.querySelectorAll('.ntab')[['agenda','historial','resumenes','contactos'].indexOf(n)].classList.add('on');
   if(n==='historial' && !aMon) initHistorial();
   if(n==='resumenes') initResumenes();
+  if(n==='contactos') initContactos();
 }
 
 function setWeek(i){
@@ -944,6 +1025,170 @@ function hideLoader(){
   document.getElementById('pageLoader').classList.add('hidden');
   setTimeout(()=>document.getElementById('pageLoader').style.display='none', 500);
 }
+
+
+// ═══════════════════════════════════════════════
+// CONTACTOS
+// ═══════════════════════════════════════════════
+let allContacts = [];
+let contactsLoaded = false;
+let expandedGroups = new Set();
+let editingContactId = null;
+
+async function initContactos() {
+  if (contactsLoaded) { renderContacts(); return; }
+  document.getElementById('conList').innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando contactos...</div>';
+  setSyncing();
+  try {
+    const { data, error } = await db
+      .from('contactos')
+      .select('id, nombre_completo, nombre, numero, suscriber_id')
+      .order('nombre_completo', { ascending: true });
+    if (error) throw error;
+    allContacts = data || [];
+    contactsLoaded = true;
+    setSynced();
+    renderContacts();
+  } catch(e) {
+    setSyncErr();
+    document.getElementById('conList').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+}
+
+function groupContacts(list) {
+  const groups = {};
+  for (const c of list) {
+    const letter = (c.nombre_completo||'?')[0].toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (!groups[letter]) groups[letter] = [];
+    groups[letter].push(c);
+  }
+  return groups;
+}
+
+function filterContacts() {
+  renderContacts();
+}
+
+function renderContacts() {
+  const q = (document.getElementById('conSearch')?.value || '').toLowerCase().trim();
+  let list = allContacts;
+  if (q) {
+    list = allContacts.filter(c =>
+      (c.nombre_completo||'').toLowerCase().includes(q) ||
+      (c.numero||'').includes(q)
+    );
+  }
+
+  document.getElementById('conMeta').textContent = `${list.length} contacto${list.length!==1?'s':''}`;
+
+  if (!list.length) {
+    document.getElementById('conList').innerHTML = '<div class="con-no-results">Sin resultados para esa búsqueda</div>';
+    return;
+  }
+
+  const groups = groupContacts(list);
+  const letters = Object.keys(groups).sort();
+  // Auto-expand first group or all when searching
+  if (q) letters.forEach(l => expandedGroups.add(l));
+  else if (expandedGroups.size === 0) expandedGroups.add(letters[0]);
+
+  const html = letters.map(letter => {
+    const contacts = groups[letter];
+    const isOpen = expandedGroups.has(letter);
+    return `<div class="alpha-group">
+      <div class="alpha-header" onclick="toggleGroup('${letter}')">
+        <span class="alpha-arrow ${isOpen?'open':''}">▶</span>
+        <span class="alpha-letter">${letter}</span>
+        <span class="alpha-count">${contacts.length}</span>
+      </div>
+      <div class="alpha-body ${isOpen?'open':''}">
+        <div class="con-cols">
+          <span class="con-col-hdr">Cliente</span>
+          <span class="con-col-hdr">Teléfono</span>
+        </div>
+        ${contacts.map(c => `
+          <div class="con-row" onclick="openEditContact(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+            <div class="con-name">${c.nombre_completo||'—'}</div>
+            <div class="con-phone">${c.numero||'—'}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('conList').innerHTML = html;
+}
+
+function toggleGroup(letter) {
+  if (expandedGroups.has(letter)) expandedGroups.delete(letter);
+  else expandedGroups.add(letter);
+  renderContacts();
+}
+
+// ── MODAL NEW / EDIT ─────────────────────────────────────────
+function openNewContact() {
+  editingContactId = null;
+  document.getElementById('conModalTitle').textContent = 'Nuevo Contacto';
+  document.getElementById('conNombre').value = '';
+  document.getElementById('conNumero').value = '';
+  document.getElementById('conSuscriber').value = '';
+  document.getElementById('conModal').classList.add('on');
+}
+
+function openEditContact(c) {
+  editingContactId = c.id;
+  document.getElementById('conModalTitle').textContent = 'Editar Contacto';
+  document.getElementById('conNombre').value = c.nombre_completo || '';
+  document.getElementById('conNumero').value = c.numero || '';
+  document.getElementById('conSuscriber').value = c.suscriber_id || '';
+  document.getElementById('conModal').classList.add('on');
+}
+
+function closeConModal() {
+  document.getElementById('conModal').classList.remove('on');
+  editingContactId = null;
+}
+
+async function saveContact() {
+  const btn = document.getElementById('conSaveBtn');
+  const nombre_completo = document.getElementById('conNombre').value.trim();
+  const numero = document.getElementById('conNumero').value.trim();
+  const suscriber_id = document.getElementById('conSuscriber').value.trim() || null;
+
+  if (!nombre_completo || !numero) {
+    showToast('Nombre y número son obligatorios', 'err'); return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    if (editingContactId) {
+      const { error } = await db.from('contactos')
+        .update({ nombre_completo, numero, suscriber_id })
+        .eq('id', editingContactId);
+      if (error) throw error;
+      const idx = allContacts.findIndex(c => c.id === editingContactId);
+      if (idx > -1) allContacts[idx] = { ...allContacts[idx], nombre_completo, numero, suscriber_id };
+      showToast('Contacto actualizado ✓');
+    } else {
+      const { data, error } = await db.from('contactos')
+        .insert({ nombre_completo, numero, suscriber_id })
+        .select().single();
+      if (error) throw error;
+      allContacts.push(data);
+      allContacts.sort((a,b) => (a.nombre_completo||'').localeCompare(b.nombre_completo||'', 'es'));
+      showToast('Contacto guardado ✓');
+    }
+    closeConModal();
+    renderContacts();
+  } catch(e) {
+    showToast('Error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar';
+  }
+}
+
+document.getElementById('conModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('conModal')) closeConModal();
+});
 
 // ═══════════════════════════════════════════════
 // REALTIME — Supabase WebSocket subscription
