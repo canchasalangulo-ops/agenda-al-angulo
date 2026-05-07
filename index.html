@@ -1262,7 +1262,7 @@ function initRealtime(){
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-loadBisemana().then(() => initRealtime());
+setTimeout(() => { loadBisemana().then(() => initRealtime()); }, 3000);
 </script>
 </body>
 </html>
