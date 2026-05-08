@@ -298,6 +298,53 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 .viva-slot:hover .vs-toggle{color:rgba(255,255,255,.5)}
 @media(max-width:768px){.viva-wrap{padding:12px 16px}.viva-courts{gap:6px}.viva-slot{padding:10px 8px}}
 
+
+/* ─── VISTA EN VIVO ─── */
+.live-section{flex-shrink:0;background:#080e18;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.live-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;cursor:pointer;user-select:none}
+.live-topbar:hover{background:rgba(255,255,255,.02)}
+.live-title-row{display:flex;align-items:center;gap:10px}
+.live-pulse{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 0 rgba(74,222,128,.4);animation:livepulse 2s infinite}
+@keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 6px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.live-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.live-clock{font-family:'Courier New',monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:#4ade80}
+.live-toggle-icon{font-size:12px;color:rgba(255,255,255,.3);transition:transform .2s}
+.live-toggle-icon.open{transform:rotate(180deg)}
+.live-board{display:none;padding:0 28px 16px;grid-template-columns:repeat(4,1fr);gap:10px}
+.live-board.open{display:grid}
+.live-slot{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;transition:all .2s;position:relative;overflow:hidden}
+.live-slot.libre{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18)}
+.live-slot.ocupado{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2)}
+.live-slot.enuso{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3)}
+.live-slot-top{display:flex;align-items:center;justify-content:space-between}
+.live-dot-row{display:flex;align-items:center;gap:6px}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.live-slot.libre .ldot{background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,.8)}
+.live-slot.ocupado .ldot{background:#f87171;box-shadow:0 0 6px rgba(248,113,113,.8)}
+.live-slot.enuso .ldot{background:#a78bfa;box-shadow:0 0 6px rgba(167,139,250,.8);animation:livepulse2 1.5s infinite}
+@keyframes livepulse2{0%{box-shadow:0 0 0 0 rgba(167,139,250,.6)}70%{box-shadow:0 0 0 5px rgba(167,139,250,0)}100%{box-shadow:0 0 0 0 rgba(167,139,250,0)}}
+.live-cname{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.live-slot.libre .live-cname{color:rgba(74,222,128,.6)}
+.live-slot.ocupado .live-cname{color:rgba(248,113,113,.6)}
+.live-slot.enuso .live-cname{color:rgba(167,139,250,.6)}
+.live-event-badge{font-size:8px;font-weight:700;letter-spacing:.5px;padding:2px 6px;border-radius:3px;text-transform:uppercase}
+.live-client{font-size:13px;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:18px}
+.live-status{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.live-slot.libre .live-status{color:rgba(74,222,128,.45)}
+.live-slot.ocupado .live-status{color:rgba(248,113,113,.45)}
+.live-slot.enuso .live-status{color:rgba(167,139,250,.55)}
+.live-btn{width:100%;padding:6px;border-radius:6px;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid;transition:all .15s;margin-top:2px}
+.live-btn.btn-enuso{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:#a78bfa}
+.live-btn.btn-enuso:hover{background:rgba(167,139,250,.2)}
+.live-btn.btn-liberar{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.25);color:#f87171}
+.live-btn.btn-liberar:hover{background:rgba(248,113,113,.15)}
+.live-empty{padding:20px 28px;text-align:center;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase}
+@media(max-width:768px){
+  .live-board{grid-template-columns:repeat(2,1fr)}
+  .live-topbar{padding:10px 16px}
+  .live-board{padding:0 16px 16px}
+}
+
 </style>
 </head>
 <body>
@@ -368,6 +415,19 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
       <div class="viva-time" id="vivaTime">—</div>
     </div>
     <div class="viva-courts" id="vivaCourts"></div>
+  </div>
+
+  <!-- VISTA EN VIVO -->
+  <div class="live-section" id="liveSection">
+    <div class="live-topbar" onclick="toggleLive()">
+      <div class="live-title-row">
+        <div class="live-pulse"></div>
+        <span class="live-title">Vista en vivo</span>
+      </div>
+      <div class="live-clock" id="liveClock">--:--</div>
+      <span class="live-toggle-icon open" id="liveToggleIcon">▼</span>
+    </div>
+    <div class="live-board open" id="liveBoard"></div>
   </div>
   <div class="sbar" id="sbar"></div>
 </div>
@@ -672,7 +732,7 @@ async function loadHistorialMonths(){
 // ═══════════════════════════════════════════════
 // RENDER: AGENDA
 // ═══════════════════════════════════════════════
-function renderAgenda(){ renderWBar(); renderDStrip(); renderGrid(); renderSBar(); }
+function renderAgenda(){ renderWBar(); renderDStrip(); renderGrid(); renderSBar(); renderLiveBoard(); }
 
 function renderWBar(){
   document.getElementById('wbar').innerHTML = WEEKS.map((w,i) => `
@@ -1323,6 +1383,109 @@ renderGrid = function(){ _origRenderGrid(); renderVivaPanel(); };
 
 // Auto-refresh every 30s to update current time slot
 setInterval(renderVivaPanel, 30000);
+
+
+// ═══════════════════════════════════════════════
+// VISTA EN VIVO
+// ═══════════════════════════════════════════════
+let liveOpen = true;
+
+function toggleLive(){
+  liveOpen = !liveOpen;
+  document.getElementById('liveBoard').classList.toggle('open', liveOpen);
+  document.getElementById('liveToggleIcon').classList.toggle('open', liveOpen);
+}
+
+function getCurrentSlot(){
+  const h = new Date().getHours();
+  if(h >= 15 && h <= 23) return String(h).padStart(2,'0')+':00';
+  return null;
+}
+
+function enUsoKey(fecha, horario, cancha, num){
+  return `au_eu_${fecha}_${horario}_${cancha}_${num}`;
+}
+
+function isEnUso(fecha, horario, cancha, num){
+  try { return localStorage.getItem(enUsoKey(fecha,horario,cancha,num))==='1'; } catch(e){ return false; }
+}
+
+function toggleEnUso(fecha, horario, cancha, num){
+  try {
+    const k = enUsoKey(fecha,horario,cancha,num);
+    if(localStorage.getItem(k)==='1') localStorage.removeItem(k);
+    else localStorage.setItem(k,'1');
+  } catch(e){}
+  renderLiveBoard();
+}
+
+const EV_COLORS = {
+  'Torneo':              { bg:'rgba(6,182,212,.2)',   color:'#67e8f9' },
+  'Escuelita de Fútbol': { bg:'rgba(234,179,8,.2)',   color:'#fde047' },
+  'Cumpleaños':          { bg:'rgba(236,72,153,.2)',  color:'#f9a8d4' },
+  'Fútbol':              { bg:'rgba(74,222,128,.15)', color:'#4ade80' },
+};
+
+function renderLiveBoard(){
+  const slot = getCurrentSlot();
+  const clock = document.getElementById('liveClock');
+  const board = document.getElementById('liveBoard');
+  if(!board) return;
+
+  // Update clock every call
+  const now = new Date();
+  clock.textContent = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+
+  if(!slot){
+    board.innerHTML = '<div class="live-empty">Fuera del horario de canchas (15:00 – 23:00)</div>';
+    return;
+  }
+
+  const fecha = aDay; // use currently viewed day
+  const slotLabel = slot;
+
+  let html = '';
+  for(const c of CANCHAS){
+    const t = getT(fecha, slotLabel, c);
+    const enuso = isEnUso(fecha, slotLabel, c.cancha, c.numero);
+    const isOcupado = t && t.estado !== 'Disponible';
+    const cls = enuso ? 'enuso' : isOcupado ? 'ocupado' : 'libre';
+    const statusTxt = enuso ? 'EN USO' : isOcupado ? t.estado.toUpperCase() : 'LIBRE';
+    const clientTxt = t?.cliente || (isOcupado?'—':'');
+    const ev = t?.evento || 'Fútbol';
+    const evStyle = EV_COLORS[ev] || EV_COLORS['Fútbol'];
+
+    // Event badge only if not Fútbol or if ocupado
+    const evBadge = (isOcupado || enuso)
+      ? `<span class="live-event-badge" style="background:${evStyle.bg};color:${evStyle.color}">${ev==='Escuelita de Fútbol'?'Escuelita':ev}</span>`
+      : '';
+
+    // Button
+    let btn = '';
+    if(isOcupado && !enuso){
+      btn = `<button class="live-btn btn-enuso" onclick="toggleEnUso('${fecha}','${slotLabel}','${c.cancha}',${c.numero})">Marcar en uso</button>`;
+    } else if(enuso){
+      btn = `<button class="live-btn btn-liberar" onclick="toggleEnUso('${fecha}','${slotLabel}','${c.cancha}',${c.numero})">Liberar uso</button>`;
+    }
+
+    html += `<div class="live-slot ${cls}">
+      <div class="live-slot-top">
+        <div class="live-dot-row">
+          <div class="ldot"></div>
+          <span class="live-cname">${c.lb}</span>
+        </div>
+        ${evBadge}
+      </div>
+      <div class="live-client">${clientTxt}</div>
+      <div class="live-status">${statusTxt}</div>
+      ${btn}
+    </div>`;
+  }
+  board.innerHTML = html;
+}
+
+// Auto-refresh every 30s
+setInterval(renderLiveBoard, 30000);
 
 // ═══════════════════════════════════════════════
 // REALTIME — Supabase WebSocket subscription
