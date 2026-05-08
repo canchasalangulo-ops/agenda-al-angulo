@@ -87,7 +87,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .gwrap{flex:1;overflow:auto;padding:20px 28px;background:transparent}
 .ginner{min-width:580px}
 .ghead{display:grid;grid-template-columns:68px repeat(4,1fr);gap:6px;margin-bottom:6px}
-.chd{background:rgba(18,26,42,0.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center;}
+.chd{background:rgba(18,26,42,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center;}
 .chd.c5{border-top:3px solid var(--verde)}
 .chd.c6{border-top:3px solid var(--naranja)}
 .chlb{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;letter-spacing:1px;color:var(--negro);text-transform:uppercase}
@@ -97,10 +97,10 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .tlbl{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--muted)}
 .tc{border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;min-height:70px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow)}
 .tc:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.tc.d{background:rgba(13,35,24,.18);border-color:var(--d-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.tc.p{background:rgba(36,26,6,.18);border-color:var(--p-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.tc.s{background:rgba(40,14,8,.18);border-color:var(--s-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.tc.r{background:rgba(92,10,10,.28);border-color:var(--r-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tc.d{background:rgba(13,35,24,.72);border-color:var(--d-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tc.p{background:rgba(36,26,6,.72);border-color:var(--p-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tc.s{background:rgba(40,14,8,.72);border-color:var(--s-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tc.r{background:rgba(92,10,10,.80);border-color:var(--r-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .tc.torneo{background:#0a2a35;border-color:#06b6d4;border-width:2px}
 .tc.cumple{background:#350a28;border-color:#ec4899;border-width:2px}
 .tc.torneo .tbadge{color:#67e8f9;background:rgba(6,182,212,.2)}
@@ -153,7 +153,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hm-ttl{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--negro);margin-bottom:4px}
 .hm-sub{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:20px}
 .wcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.wcard{background:rgba(18,26,42,0.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);transition:all .15s}
+.wcard{background:rgba(18,26,42,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);transition:all .15s}
 .wch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .wcdates{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:var(--negro)}
 .wcpct{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--verde);line-height:1}
@@ -170,7 +170,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .rttl{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--negro);margin-bottom:4px}
 .rsub{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:20px}
 .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-.rcard{background:rgba(18,26,42,0.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:all .15s}
+.rcard{background:rgba(18,26,42,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:all .15s}
 .rcard:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
 .rchdr{background:var(--verde);padding:18px 20px;display:flex;justify-content:space-between;align-items:center}
 .rcwlbl{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,.65)}
@@ -303,7 +303,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 <!-- BACKGROUND VIDEO PLAYLIST -->
 <video id="bgVideo" autoplay muted playsinline style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none"></video>
-<div style="position:fixed;inset:0;background:rgba(8,13,24,0.50);z-index:-1;pointer-events:none"></div>
+<div style="position:fixed;inset:0;background:rgba(8,13,24,0.60);z-index:-1;pointer-events:none"></div>
 <script>
 (function(){
   const VIDEOS = [
