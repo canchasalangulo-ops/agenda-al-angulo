@@ -264,6 +264,40 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   .con-cols,.con-row{grid-template-columns:1fr 1fr}
 }
 
+
+/* ─── VISTA EN VIVO ─── */
+.viva-wrap{background:#070c16;border-top:1px solid rgba(255,255,255,.06);padding:14px 28px;flex-shrink:0}
+.viva-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.viva-dot-live{width:7px;height:7px;border-radius:50%;background:#f87171;box-shadow:0 0 6px #f87171;animation:viva-pulse 1.5s ease infinite;flex-shrink:0}
+@keyframes viva-pulse{0%,100%{opacity:1;box-shadow:0 0 6px #f87171}50%{opacity:.4;box-shadow:none}}
+.viva-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2.5px;color:rgba(255,255,255,.35)}
+.viva-time{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#4ade80;margin-left:auto}
+.viva-no-slot{font-size:12px;color:rgba(255,255,255,.3);text-align:center;padding:8px 0}
+.viva-courts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.viva-slot{border-radius:10px;padding:12px 12px 10px;cursor:pointer;transition:all .15s;border:1px solid transparent;user-select:none}
+.viva-slot:active{transform:scale(.97)}
+.viva-slot.vs-libre{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.15)}
+.viva-slot.vs-ocupado{background:rgba(248,113,113,.07);border-color:rgba(248,113,113,.2)}
+.viva-slot.vs-enuso{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.35)}
+.vs-row1{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.vs-led{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:all .3s}
+.vs-libre .vs-led{background:#4ade80;box-shadow:0 0 5px #4ade80}
+.vs-ocupado .vs-led{background:#f87171;box-shadow:0 0 5px #f87171}
+.vs-enuso .vs-led{background:#a78bfa;box-shadow:0 0 5px #a78bfa;animation:viva-pulse2 1.2s ease infinite}
+@keyframes viva-pulse2{0%,100%{opacity:1}50%{opacity:.5}}
+.vs-cname{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.vs-libre .vs-cname{color:rgba(74,222,128,.6)}
+.vs-ocupado .vs-cname{color:rgba(248,113,113,.6)}
+.vs-enuso .vs-cname{color:rgba(167,139,250,.7)}
+.vs-client{font-size:12px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:16px}
+.vs-status{font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-top:5px;padding:3px 0 0;border-top:1px solid rgba(255,255,255,.05)}
+.vs-libre .vs-status{color:rgba(74,222,128,.45)}
+.vs-ocupado .vs-status{color:rgba(248,113,113,.45)}
+.vs-enuso .vs-status{color:rgba(167,139,250,.6);font-weight:700}
+.vs-toggle{font-size:9px;letter-spacing:.5px;text-transform:uppercase;margin-top:4px;color:rgba(255,255,255,.25)}
+.viva-slot:hover .vs-toggle{color:rgba(255,255,255,.5)}
+@media(max-width:768px){.viva-wrap{padding:12px 16px}.viva-courts{gap:6px}.viva-slot{padding:10px 8px}}
+
 </style>
 </head>
 <body>
@@ -327,6 +361,14 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   <div class="wbar" id="wbar"></div>
   <div class="dstrip" id="dstrip"></div>
   <div class="gwrap"><div class="ginner" id="grid"></div></div>
+  <div class="viva-wrap" id="vivaWrap">
+    <div class="viva-header">
+      <div class="viva-dot-live"></div>
+      <div class="viva-title">Vista en vivo</div>
+      <div class="viva-time" id="vivaTime">—</div>
+    </div>
+    <div class="viva-courts" id="vivaCourts"></div>
+  </div>
   <div class="sbar" id="sbar"></div>
 </div>
 
@@ -1214,6 +1256,74 @@ document.getElementById('conModal').addEventListener('click', e => {
   if (e.target === document.getElementById('conModal')) closeConModal();
 });
 
+
+// ═══════════════════════════════════════════════
+// VISTA EN VIVO
+// ═══════════════════════════════════════════════
+const VIVA_SLOTS = ['15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00'];
+
+function getVivaSlot(){
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  // Current slot if within operating hours
+  const slotKey = `${String(h).padStart(2,'0')}:00`;
+  if(VIVA_SLOTS.includes(slotKey)) return slotKey;
+  // Outside hours — show next upcoming slot
+  for(const s of VIVA_SLOTS){
+    const sh = parseInt(s.split(':')[0]);
+    if(sh > h) return s;
+  }
+  return null;
+}
+
+function getEnUso(key){ return localStorage.getItem('enuso_'+key) === '1'; }
+function setEnUso(key, val){ val ? localStorage.setItem('enuso_'+key, '1') : localStorage.removeItem('enuso_'+key); }
+
+function renderVivaPanel(){
+  const slot = getVivaSlot();
+  const timeEl = document.getElementById('vivaTime');
+  const courtsEl = document.getElementById('vivaCourts');
+  if(!slot){ timeEl.textContent='—'; courtsEl.innerHTML='<div class="viva-no-slot">Fuera del horario operativo (15:00 – 23:00)</div>'; return; }
+  timeEl.textContent = slot;
+  // Use aDay (selected day) for the panel
+  const fecha = aDay;
+  let html = '';
+  for(const c of CANCHAS){
+    const t = getT(fecha, slot, c);
+    const key = `${fecha}|${slot}|${c.cancha}|${c.numero}`;
+    const enUso = getEnUso(key);
+    const isBooked = t && (t.estado==='Reservado'||t.estado==='Pendiente'||t.estado==='Pendiente de seña');
+    const cls = enUso ? 'vs-enuso' : isBooked ? 'vs-ocupado' : 'vs-libre';
+    const statusTxt = enUso ? '⚡ En uso ahora' : isBooked ? (t.estado==='Reservado'?'Reservado':t.estado) : 'Libre';
+    const clientName = (t && t.cliente) ? t.cliente : '';
+    const toggleTxt = enUso ? 'Toca para marcar libre' : isBooked ? 'Toca para marcar en uso' : 'Toca para marcar en uso';
+    html += `<div class="viva-slot ${cls}" onclick="vivaToggle('${fecha}','${slot}','${c.cancha}',${c.numero})">
+      <div class="vs-row1">
+        <div class="vs-led"></div>
+        <div class="vs-cname">${c.lb}</div>
+      </div>
+      <div class="vs-client">${clientName}</div>
+      <div class="vs-status">${statusTxt}</div>
+      <div class="vs-toggle">${toggleTxt}</div>
+    </div>`;
+  }
+  courtsEl.innerHTML = html;
+}
+
+function vivaToggle(fecha, slot, cancha, numero){
+  const key = `${fecha}|${slot}|${cancha}|${numero}`;
+  setEnUso(key, !getEnUso(key));
+  renderVivaPanel();
+}
+
+// Re-render panel when grid data changes
+const _origRenderGrid = renderGrid;
+renderGrid = function(){ _origRenderGrid(); renderVivaPanel(); };
+
+// Auto-refresh every 30s to update current time slot
+setInterval(renderVivaPanel, 30000);
+
 // ═══════════════════════════════════════════════
 // REALTIME — Supabase WebSocket subscription
 // ═══════════════════════════════════════════════
@@ -1262,7 +1372,7 @@ function initRealtime(){
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-setTimeout(() => { loadBisemana().then(() => initRealtime()); }, 3000);
+setTimeout(() => { loadBisemana().then(() => { initRealtime(); renderVivaPanel(); }); }, 3000);
 </script>
 </body>
 </html>
