@@ -1365,7 +1365,9 @@ function initRealtime(){
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
-setTimeout(() => { loadBisemana().then(() => { initRealtime(); renderVivaPanel(); }); }, 3000);
+renderLiveBoard();
+updateLiveClock();
+setTimeout(() => { loadBisemana().then(() => initRealtime()); }, 3000);
 </script>
 </body>
 </html>
