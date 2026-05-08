@@ -94,7 +94,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .chtp{display:none}
 .grow{display:grid;grid-template-columns:68px repeat(4,1fr);gap:6px;margin-bottom:6px}
 .tcol{display:flex;align-items:center;justify-content:center}
-.tlbl{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9),0 0 12px rgba(0,0,0,.7);font-weight:400}
+.tlbl{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--muted)}
 .tc{border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;min-height:70px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow)}
 .tc:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
 .tc.d{background:rgba(13,35,24,.18);border-color:var(--d-bd);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
@@ -301,75 +301,35 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 </head>
 <body>
 
-<!-- BACKGROUND VIDEO PLAYLIST — dual crossfade -->
-<style>
-#bgA,#bgB{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;transition:opacity 1.2s ease}
-#bgB{opacity:0}
-</style>
-<video id="bgA" autoplay muted playsinline></video>
-<video id="bgB" muted playsinline></video>
+<!-- BACKGROUND VIDEO PLAYLIST -->
+<video id="bgVideo" autoplay muted playsinline style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none"></video>
 <div style="position:fixed;inset:0;background:rgba(8,13,24,0.50);z-index:-1;pointer-events:none"></div>
 <script>
 (function(){
-  const VIDEOS=[
+  const VIDEOS = [
     "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/bg_alangulo.comprimido.mp4",
     "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid1_cartel%20comprimido.mp4",
     "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid2_entrada.comprimido.mp4",
     "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid3_entreno.comprimido.mp4",
     "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid4_primer_plano.comprimido.mp4"
   ];
-  let used=[],active=0;
-  const vids=[document.getElementById('bgA'),document.getElementById('bgB')];
-
-  function pickNext(){
-    if(used.length>=VIDEOS.length) used=[];
-    const avail=VIDEOS.map((_,i)=>i).filter(i=>!used.includes(i));
-    const idx=avail[Math.floor(Math.random()*avail.length)];
+  let used = [];
+  function nextVideo(){
+    if(used.length >= VIDEOS.length) used = [];
+    const remaining = VIDEOS.filter((_,i) => !used.includes(i));
+    const idx = VIDEOS.indexOf(remaining[Math.floor(Math.random()*remaining.length)]);
     used.push(idx);
     return VIDEOS[idx];
   }
-
-  function crossfade(){
-    const next=1-active;
-    vids[next].src=pickNext();
-    vids[next].load();
-    vids[next].play().then(()=>{
-      vids[next].style.opacity='1';
-      vids[active].style.opacity='0';
-      setTimeout(()=>{ vids[active].pause(); vids[active].src=''; },1400);
-      active=next;
-    }).catch(()=>setTimeout(crossfade,2000));
+  const v = document.getElementById('bgVideo');
+  function loadNext(){
+    v.src = nextVideo();
+    v.load();
+    v.play().catch(()=>{});
   }
-
-  // Start first video
-  vids[0].src=pickNext();
-  vids[0].load();
-  vids[0].play().catch(()=>{});
-  vids[0].style.opacity='1';
-
-  // Preload next 10s before end, then crossfade on ended
-  vids[0].addEventListener('timeupdate',function onTime(){
-    if(this.duration && this.currentTime >= this.duration-10){
-      this.removeEventListener('timeupdate',onTime);
-      const next=1-active;
-      vids[next].src=pickNext();
-      vids[next].load();
-    }
-  });
-
-  vids.forEach(v=>{
-    v.addEventListener('ended',crossfade);
-    v.addEventListener('error',()=>setTimeout(crossfade,1000));
-    v.addEventListener('timeupdate',function(){
-      if(this.duration && this.currentTime>=this.duration-10){
-        const next=1-active;
-        if(!vids[next].src && this===vids[active]){
-          vids[next].src=pickNext();
-          vids[next].load();
-        }
-      }
-    });
-  });
+  v.addEventListener('ended', loadNext);
+  v.addEventListener('error', loadNext);
+  loadNext();
 })();
 </script>
 
