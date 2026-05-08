@@ -267,7 +267,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
 
 /* ─── VISTA EN VIVO ─── */
 .live-section{flex-shrink:0;background:#080e18;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
-.live-clock-bar{display:flex;justify-content:center;align-items:center;padding:12px 0 4px}
+.live-clock-bar{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px 0 6px;gap:4px}
+.live-section-title{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.35)}
 .live-pulse{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 0 rgba(74,222,128,.4);animation:livepulse 2s infinite}
 @keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 6px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 .live-clock{font-family:'Courier New',monospace;font-size:26px;font-weight:700;letter-spacing:6px;color:#4ade80;text-align:center}
@@ -370,6 +371,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);
   <!-- VISTA EN VIVO -->
   <div class="live-section" id="liveSection">
     <div class="live-clock-bar">
+      <div class="live-section-title">Vista en vivo de las Canchas</div>
       <div class="live-clock" id="liveClock">--:--</div>
     </div>
     <div class="live-board" id="liveBoard"></div>
