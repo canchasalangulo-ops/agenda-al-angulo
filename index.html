@@ -301,9 +301,37 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 </head>
 <body>
 
-<!-- BACKGROUND VIDEO -->
-<video id="bgVideo" autoplay muted loop playsinline style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none"><source src="https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/bg_alangulo.comprimido.mp4" type="video/mp4"></video>
+<!-- BACKGROUND VIDEO PLAYLIST -->
+<video id="bgVideo" autoplay muted playsinline style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none"></video>
 <div style="position:fixed;inset:0;background:rgba(8,13,24,0.50);z-index:-1;pointer-events:none"></div>
+<script>
+(function(){
+  const VIDEOS = [
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/bg_alangulo.comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid1_cartel%20comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid2_entrada.comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid3_entreno.comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid4_primer_plano.comprimido.mp4"
+  ];
+  let used = [];
+  function nextVideo(){
+    if(used.length >= VIDEOS.length) used = [];
+    const remaining = VIDEOS.filter((_,i) => !used.includes(i));
+    const idx = VIDEOS.indexOf(remaining[Math.floor(Math.random()*remaining.length)]);
+    used.push(idx);
+    return VIDEOS[idx];
+  }
+  const v = document.getElementById('bgVideo');
+  function loadNext(){
+    v.src = nextVideo();
+    v.load();
+    v.play().catch(()=>{});
+  }
+  v.addEventListener('ended', loadNext);
+  v.addEventListener('error', loadNext);
+  loadNext();
+})();
+</script>
 
 <!-- PAGE LOADER -->
 <div class="page-loader" id="pageLoader">
