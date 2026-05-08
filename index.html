@@ -288,10 +288,10 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .live-slot.ocupado .live-cname{color:rgba(248,113,113,.7)}
 .live-clear-btn{background:rgba(248,113,113,.15);border:none;color:rgba(248,113,113,.7);width:20px;height:20px;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .live-clear-btn:hover{background:rgba(248,113,113,.3);color:#f87171}
-.live-input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.9);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;padding:4px 0;outline:none;width:100%;transition:border-color .15s}
-.live-input::placeholder{color:rgba(255,255,255,.18);font-weight:400;font-size:12px}
-.live-input:focus{border-bottom-color:rgba(74,222,128,.4)}
-.live-slot.ocupado .live-input:focus{border-bottom-color:rgba(248,113,113,.4)}
+.live-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:rgba(255,255,255,.85);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;padding:6px 8px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.live-select:focus{border-color:rgba(74,222,128,.5)}
+.live-slot.ocupado .live-select{border-color:rgba(248,113,113,.4)}
+.live-select option{background:#0f1420;color:#fff}
 .live-status{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 .live-slot.libre .live-status{color:rgba(74,222,128,.4)}
 .live-slot.ocupado .live-status{color:rgba(248,113,113,.6)}
@@ -1291,46 +1291,76 @@ document.getElementById('conModal').addEventListener('click', e => {
 // ═══════════════════════════════════════════════
 // VISTA EN VIVO — Estado independiente
 // ═══════════════════════════════════════════════
-function getLiveClient(courtId){
-  try{ return localStorage.getItem('au_lv_'+courtId)||''; }catch{ return ''; }
+// Live board helpers
+function liveStorageKey(courtId){
+  const now=new Date(), h=now.getHours();
+  const slot=(h>=15&&h<=23)?String(h).padStart(2,'0')+':00':'none';
+  return `au_lv3_${dk(today)}_${slot}_${courtId}`;
 }
-function saveLiveClient(courtId, val){
+function getLiveAssignment(courtId){
+  try{ return localStorage.getItem(liveStorageKey(courtId))||''; }catch{ return ''; }
+}
+function setLiveAssignment(courtId, val){
   try{
-    if(val.trim()) localStorage.setItem('au_lv_'+courtId, val.trim());
-    else localStorage.removeItem('au_lv_'+courtId);
+    if(val) localStorage.setItem(liveStorageKey(courtId), val);
+    else localStorage.removeItem(liveStorageKey(courtId));
   }catch{}
 }
-function updateLiveSlot(courtId, value){
-  const card=document.getElementById('lvc-'+courtId);
-  const status=document.getElementById('lvs-'+courtId);
-  const clearBtn=document.getElementById('lvx-'+courtId);
-  if(!card||!status) return;
-  const ocupado=value.trim().length>0;
-  card.className='live-slot '+(ocupado?'ocupado':'libre');
-  status.textContent=ocupado?'OCUPADA':'LIBRE';
-  if(clearBtn) clearBtn.style.display=ocupado?'flex':'none';
+
+function getClientsForCurrentSlot(){
+  const now=new Date(), h=now.getHours();
+  if(h<15||h>23) return [];
+  const slot=String(h).padStart(2,'0')+':00';
+  const todayKey=dk(today);
+  const clients=[];
+  for(const c of CANCHAS){
+    const t=getT(todayKey, slot, c);
+    if(t && t.estado!=='Disponible' && t.cliente && t.cliente.trim()){
+      if(!clients.includes(t.cliente.trim())) clients.push(t.cliente.trim());
+    }
+  }
+  return clients;
 }
-function saveLiveSlot(courtId, value){ saveLiveClient(courtId, value); }
+
+function assignLiveSlot(courtId, val){
+  setLiveAssignment(courtId, val);
+  renderLiveBoard();
+}
+
 function clearLiveSlot(courtId){
-  const input=document.getElementById('lvi-'+courtId);
-  if(input){ input.value=''; updateLiveSlot(courtId,''); saveLiveSlot(courtId,''); input.focus(); }
+  setLiveAssignment(courtId, '');
+  renderLiveBoard();
 }
+
 function renderLiveBoard(){
   const board=document.getElementById('liveBoard');
   if(!board) return;
+
+  const allClients=getClientsForCurrentSlot();
+  const assignments={};
+  for(const c of CANCHAS) assignments[c.id]=getLiveAssignment(c.id);
+  const assigned=Object.values(assignments).filter(v=>v);
+
   let h='';
   for(const c of CANCHAS){
-    const saved=getLiveClient(c.id);
-    const isOc=saved.length>0;
-    const escapedVal=saved.replace(/"/g,'&quot;');
+    const cur=assignments[c.id];
+    const isOc=!!cur;
+    // Options: clients not yet assigned to another court (or already this court's)
+    const opts=allClients.filter(cl=>!assigned.includes(cl)||cl===cur);
+    const optHtml=[
+      `<option value="">— Libre —</option>`,
+      ...opts.map(cl=>`<option value="${cl.replace(/"/g,'&quot;')}" ${cl===cur?'selected':''}>${cl}</option>`)
+    ].join('');
+
     h+=`<div class="live-slot ${isOc?'ocupado':'libre'}" id="lvc-${c.id}">
       <div class="live-slot-top">
         <div class="live-dot-row"><div class="ldot"></div><span class="live-cname">${c.lb}</span></div>
-        <button class="live-clear-btn" id="lvx-${c.id}" onclick="clearLiveSlot('${c.id}')" style="display:${isOc?'flex':'none'}">✕</button>
+        ${isOc?`<button class="live-clear-btn" onclick="clearLiveSlot('${c.id}')">✕</button>`:''}
       </div>
-      <input class="live-input" id="lvi-${c.id}" type="text" placeholder="Ingresar cliente..." value="${escapedVal}"
-        oninput="updateLiveSlot('${c.id}',this.value)" onblur="saveLiveSlot('${c.id}',this.value)"/>
-      <div class="live-status" id="lvs-${c.id}">${isOc?'OCUPADA':'LIBRE'}</div>
+      <select class="live-select" onchange="assignLiveSlot('${c.id}',this.value)">
+        ${optHtml}
+      </select>
+      <div class="live-status">${isOc?'OCUPADA':'LIBRE'}</div>
     </div>`;
   }
   board.innerHTML=h;
