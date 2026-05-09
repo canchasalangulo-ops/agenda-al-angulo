@@ -1377,6 +1377,7 @@ setInterval(updateLiveClock,10000);
 // REALTIME — Supabase WebSocket subscription
 // ═══════════════════════════════════════════════
 function initRealtime(){
+  // Realtime: turnos
   db.channel('turnos-live')
     .on('postgres_changes', {
       event: '*',
@@ -1413,9 +1414,34 @@ function initRealtime(){
         console.log('Realtime conectado ✓');
       } else if (status === 'CHANNEL_ERROR') {
         setSyncErr();
-        console.warn('Realtime error — recargá si los cambios no se reflejan');
       }
     });
+
+  // Realtime: contactos
+  db.channel('contactos-live')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'contactos'
+    }, payload => {
+      if (payload.eventType === 'INSERT') {
+        const c = payload.new;
+        if (!allContacts.find(x => x.id === c.id)) {
+          allContacts.push(c);
+          allContacts.sort((a,b) => (a.nombre_completo||'').localeCompare(b.nombre_completo||'', 'es'));
+        }
+      } else if (payload.eventType === 'UPDATE') {
+        const idx = allContacts.findIndex(x => x.id === payload.new.id);
+        if (idx > -1) allContacts[idx] = payload.new;
+        else allContacts.push(payload.new);
+        allContacts.sort((a,b) => (a.nombre_completo||'').localeCompare(b.nombre_completo||'', 'es'));
+      } else if (payload.eventType === 'DELETE') {
+        allContacts = allContacts.filter(x => x.id !== payload.old.id);
+      }
+      // Si el tab contactos está abierto, re-renderizar
+      if (currentPage === 'contactos') renderContacts();
+    })
+    .subscribe();
 }
 
 // ═══════════════════════════════════════════════
