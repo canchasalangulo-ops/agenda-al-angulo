@@ -1427,7 +1427,7 @@ function getClientsForCurrentSlot(){
       // Si tiene nombre de cliente usarlo, sino usar evento + cancha como etiqueta
       const label = (t.cliente && t.cliente.trim())
         ? t.cliente.trim()
-        : `${t.evento||'Turno'} · ${c.lb}`;
+        : `${t.evento||'Turno'}`;  // no mostrar cancha, ya se ve en el header de la tarjeta
       if(!clients.includes(label)) clients.push(label);
     }
   }
