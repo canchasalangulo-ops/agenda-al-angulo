@@ -1423,8 +1423,12 @@ function getClientsForCurrentSlot(){
   const clients=[];
   for(const c of CANCHAS){
     const t=getT(todayKey, slot, c);
-    if(t && t.estado!=='Disponible' && t.cliente && t.cliente.trim()){
-      if(!clients.includes(t.cliente.trim())) clients.push(t.cliente.trim());
+    if(t && t.estado!=='Disponible'){
+      // Si tiene nombre de cliente usarlo, sino usar evento + cancha como etiqueta
+      const label = (t.cliente && t.cliente.trim())
+        ? t.cliente.trim()
+        : `${t.evento||'Turno'} · ${c.lb}`;
+      if(!clients.includes(label)) clients.push(label);
     }
   }
   return clients;
