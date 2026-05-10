@@ -697,7 +697,7 @@ async function loadBisemana(){
 
     const { data, error } = await db
       .from('turnos')
-      .select('id, fecha, horario, cancha, numero_cancha, estado, cliente, numero')
+      .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero')
       .gte('fecha', start)
       .lte('fecha', end);
 
