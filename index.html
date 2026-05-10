@@ -1485,6 +1485,66 @@ setInterval(updateLiveClock,10000);
 // ═══════════════════════════════════════════════
 // TURNOS FIJOS
 // ═══════════════════════════════════════════════
+const TF_DAY_MAP = {'Domingo':0,'Lunes':1,'Martes':2,'Miércoles':3,'Jueves':4,'Viernes':5,'Sábado':6};
+
+function tfNextOccurrence(diaSemana){
+  // Next occurrence starting from TOMORROW to avoid overwriting today's bookings
+  const target = TF_DAY_MAP[diaSemana];
+  const now = new Date(); now.setHours(0,0,0,0);
+  const start = new Date(now); start.setDate(now.getDate()+1);
+  const diff = (target - start.getDay() + 7) % 7;
+  const next = new Date(start); next.setDate(start.getDate()+diff);
+  return dk(next);
+}
+
+async function tfSyncToAgenda(tf, isDelete=false){
+  try {
+    const fecha = tfNextOccurrence(tf.dia_semana);
+    const horario = (tf.horario||'').slice(0,5); // "20:00"
+    const horarioFull = horario + ':00';
+
+    if(isDelete){
+      // Find the turno and reset it to Disponible
+      const { data } = await db.from('turnos').select('id')
+        .eq('fecha', fecha).eq('horario', horarioFull)
+        .eq('cancha', tf.cancha).eq('cliente', tf.cliente)
+        .neq('estado','Disponible').limit(1);
+      if(data && data.length > 0){
+        await db.from('turnos').update({estado:'Disponible',cliente:null,numero:null}).eq('id',data[0].id);
+        // Update local turnosMap
+        for(const k of Object.keys(turnosMap)){
+          const t = turnosMap[k];
+          if(t.id === data[0].id){ turnosMap[k]={...t,estado:'Disponible',cliente:null,numero:null}; break; }
+        }
+      }
+    } else {
+      // Find available slot for that date+horario+cancha
+      const { data: slots } = await db.from('turnos').select('id,numero_cancha')
+        .eq('fecha', fecha).eq('horario', horarioFull)
+        .eq('cancha', tf.cancha).eq('estado','Disponible')
+        .order('numero_cancha').limit(1);
+
+      if(slots && slots.length > 0){
+        await db.from('turnos').update({estado:'Pendiente',cliente:tf.cliente,numero:tf.numero}).eq('id',slots[0].id);
+        // Update local turnosMap
+        const mapKey = tKey(fecha, horario, tf.cancha, slots[0].numero_cancha);
+        if(turnosMap[mapKey]) turnosMap[mapKey]={...turnosMap[mapKey],estado:'Pendiente',cliente:tf.cliente,numero:tf.numero};
+      } else {
+        // Week not generated yet — insert directly
+        await db.from('turnos').insert({
+          fecha, horario:horarioFull, cancha:tf.cancha, numero_cancha:1,
+          estado:'Pendiente', cliente:tf.cliente, numero:tf.numero, evento:'Fútbol'
+        });
+      }
+    }
+    // Re-render agenda if affected date is visible
+    const w = WEEKS[aWeek];
+    if(fecha >= dk(w.s) && fecha <= dk(w.e)) renderAgenda();
+  } catch(e){
+    console.warn('tfSyncToAgenda error:', e.message);
+  }
+}
+// ═══════════════════════════════════════════════
 const TF_DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 let allTF = [];
 let tfLoaded = false;
@@ -1616,6 +1676,7 @@ async function saveTF(){
       if(error) throw error;
       const idx = allTF.findIndex(t => t.id === tfEditingId);
       if(idx > -1) allTF[idx] = { ...allTF[idx], ...payload };
+      await tfSyncToAgenda({...allTF.find(t=>t.id===tfEditingId),...payload});
       showToast('Turno fijo actualizado ✓');
     } else {
       const { data, error } = await db.from('turnos_fijos').insert(payload).select().single();
@@ -1623,6 +1684,7 @@ async function saveTF(){
       allTF.push(data);
       allTF.sort((a,b) => TF_DIAS.indexOf(a.dia_semana) - TF_DIAS.indexOf(b.dia_semana) || (a.horario||'').localeCompare(b.horario||''));
       tfOpenGroups.add(payload.dia_semana);
+      await tfSyncToAgenda(data);
       showToast('Turno fijo creado ✓');
     }
     closeTFModal();
@@ -1637,6 +1699,8 @@ async function saveTF(){
 async function deleteTF(){
   if(!tfEditingId || !confirm('¿Eliminar este turno fijo?')) return;
   try {
+    const tfRecord = allTF.find(t => t.id === tfEditingId);
+    if(tfRecord) await tfSyncToAgenda(tfRecord, true); // remove from agenda first
     const { error } = await db.from('turnos_fijos').delete().eq('id', tfEditingId);
     if(error) throw error;
     allTF = allTF.filter(t => t.id !== tfEditingId);
