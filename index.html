@@ -1999,60 +1999,40 @@ function renderEvCards(){
 async function toggleEvento(evId, isOn){
   const evDef = EVENTOS_DEF.find(e => e.id === evId);
   if(!evDef) return;
-
-  // Disable UI while processing
   const card = document.getElementById('evc-'+evId);
-  if(card) card.style.opacity = '0.6';
+  if(card) card.style.opacity='0.6';
   setSyncing();
-
   try {
-    // 1. Update config in Supabase
     await db.from('eventos_config').upsert({id:evId, activo:isOn, updated_at:new Date().toISOString()});
     evConfig[evId] = isOn;
-
-    // 2. Apply slots to next week (WEEKS[1])
     const nextMon = WEEKS[1].s;
-    const promises = evDef.slots.map(async slot => {
-      const dayOffset = EV_DAY_INDEX[slot.dia];
-      const fecha = dk(add(nextMon, dayOffset));
-      const horario = slot.horario + ':00';
-
-      if(isOn){
-        // Activate: find slot and mark as evento
-        await db.from('turnos').update({
-          estado: 'Reservado',
-          evento: evDef.name === 'Torneo' ? 'Torneo' : 'Escuelita de Fútbol',
-          cliente: null,
-          numero: null,
-        }).eq('fecha', fecha).eq('horario', horario)
-          .eq('cancha', slot.cancha).eq('numero_cancha', slot.num);
-      } else {
-        // Deactivate: reset to Disponible only if it was this event
-        await db.from('turnos').update({
-          estado: 'Disponible',
-          evento: 'Fútbol',
-          cliente: null,
-          numero: null,
-        }).eq('fecha', fecha).eq('horario', horario)
-          .eq('cancha', slot.cancha).eq('numero_cancha', slot.num)
-          .eq('evento', evDef.name === 'Torneo' ? 'Torneo' : 'Escuelita de Fútbol');
-      }
-    });
-
-    await Promise.all(promises);
-
-    // 3. Refresh turnosMap if next week is visible
-    if(aWeek === 1) await loadBisemana();
-
+    const eventoName = evId==='torneo'?'Torneo':'Escuelita de Fútbol';
+    let ok=0, fail=0;
+    for(const slot of evDef.slots){
+      const fecha = dk(add(nextMon, EV_DAY_INDEX[slot.dia]));
+      const horario = slot.horario+':00';
+      try {
+        let q = isOn
+          ? db.from('turnos').update({estado:'Reservado',evento:eventoName,cliente:null,numero:null})
+              .eq('fecha',fecha).eq('horario',horario).eq('cancha',slot.cancha).eq('numero_cancha',slot.num).select()
+          : db.from('turnos').update({estado:'Disponible',evento:'Fútbol',cliente:null,numero:null})
+              .eq('fecha',fecha).eq('horario',horario).eq('cancha',slot.cancha).eq('numero_cancha',slot.num).eq('evento',eventoName).select();
+        const {data,error} = await q;
+        if(error){fail++;continue;}
+        if(data&&data.length>0) turnosMap[tKey(fecha,horario,slot.cancha,slot.num)]=data[0];
+        ok++;
+      } catch(e2){fail++;}
+    }
     setSynced();
-    showToast(`${evDef.name} ${isOn?'activado ✓':'desactivado'}`);
+    renderAgenda();
+    showToast(`${evDef.name} ${isOn?'activado':'desactivado'} · ${ok} turnos`);
+    if(fail>0) showToast(`${fail} slots no actualizados`,'err');
   } catch(e){
-    evConfig[evId] = !isOn; // revert
-    showToast('Error: ' + e.message, 'err');
+    evConfig[evId]=!isOn;
+    showToast('Error: '+e.message,'err');
     setSyncErr();
   }
-
-  if(card) card.style.opacity = '1';
+  if(card) card.style.opacity='1';
   renderEvCards();
 }
 
