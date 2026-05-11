@@ -849,15 +849,13 @@ async function loadBisemana(){
       return loadBisemana();
     }
 
-    // Chequear si falta la semana siguiente y generarla
-    const hasSiguiente = data.some(t => t.fecha >= dk(WEEKS[1].s));
-    if (!hasSiguiente) {
-      await db.rpc('generar_semana', {
-        fecha_inicio: dk(WEEKS[1].s),
-        fecha_fin:    dk(WEEKS[1].e)
-      });
-      return loadBisemana();
-    }
+    // Generar semanas si faltan slots (ON CONFLICT DO NOTHING — idempotente)
+    const cAct = data.filter(t=>t.fecha>=dk(WEEKS[0].s)&&t.fecha<=dk(WEEKS[0].e)).length;
+    const cSig = data.filter(t=>t.fecha>=dk(WEEKS[1].s)&&t.fecha<=dk(WEEKS[1].e)).length;
+    let reload = false;
+    if(cAct < 100){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[0].s),fecha_fin:dk(WEEKS[0].e)}); reload=true; }
+    if(cSig < 100){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)}); reload=true; }
+    if(reload) return loadBisemana();
 
     // Poblar lookup map
     turnosMap = {};
@@ -2003,14 +2001,20 @@ async function toggleEvento(evId, isOn){
   if(card)card.style.opacity='0.6';
   setSyncing();
   try{
+    // 1. Guardar config
     await db.from('eventos_config').upsert({id:evId,activo:isOn,updated_at:new Date().toISOString()});
     evConfig[evId]=isOn;
+
     const nextMon=WEEKS[1].s;
     const evName=evId==='torneo'?'Torneo':'Escuelita de Fútbol';
     const dias=evId==='torneo'?['Lunes','Martes','Miércoles','Jueves','Viernes']:['Lunes','Miércoles','Viernes'];
     const fechas=dias.map(d=>dk(add(nextMon,EV_DAY_INDEX[d])));
     const horas=evId==='torneo'?['22:00:00','23:00:00']:['18:00:00','19:00:00'];
 
+    // 2. PRIMERO: asegurar que la semana siguiente tiene slots generados
+    await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)});
+
+    // 3. Hacer updates masivos con IN()
     if(isOn){
       if(evId==='torneo'){
         await db.from('turnos').update({estado:'Reservado',evento:'Torneo',cliente:null,numero:null})
@@ -2031,11 +2035,13 @@ async function toggleEvento(evId, isOn){
       }
     }
 
-    // Recargar solo semana siguiente en turnosMap
-    const {data:ref}=await db.from('turnos')
+    // 4. Recargar semana siguiente en turnosMap
+    const {data:ref,error:rErr}=await db.from('turnos')
       .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero')
       .gte('fecha',dk(WEEKS[1].s)).lte('fecha',dk(WEEKS[1].e));
-    if(ref){for(const t of ref){turnosMap[tKey(t.fecha,t.horario,t.cancha,t.numero_cancha)]=t;}}
+    if(!rErr&&ref){
+      for(const t of ref) turnosMap[tKey(t.fecha,t.horario,t.cancha,t.numero_cancha)]=t;
+    }
 
     setSynced();
     renderAgenda();
@@ -2044,6 +2050,7 @@ async function toggleEvento(evId, isOn){
     evConfig[evId]=!isOn;
     showToast('Error: '+e.message,'err');
     setSyncErr();
+    console.error(e);
   }
   if(card)card.style.opacity='1';
   renderEvCards();
