@@ -152,7 +152,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hcontent{flex:1;overflow-y:auto;padding:24px 28px;background:transparent}
 .hm-ttl{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--negro);margin-bottom:4px}
 .hm-sub{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:20px}
-.wcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.wcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .wcard{background:rgba(18,26,42,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);transition:all .15s}
 .wch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .wcdates{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:var(--negro)}
@@ -421,6 +421,51 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   .tf-modal-inner{width:calc(100vw - 32px)}
 }
 
+
+/* ─── EVENTOS ─── */
+.ev-wrap{flex:1;overflow-y:auto;padding:28px}
+.ev-header{margin-bottom:28px}
+.ev-title-txt{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--negro)}
+.ev-subtitle{font-size:12px;font-weight:500;color:var(--muted);margin-top:4px}
+.ev-subtitle strong{color:var(--verde)}
+.ev-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+
+.ev-card{border-radius:18px;overflow:hidden;border:1.5px solid var(--border);transition:all .3s;box-shadow:var(--shadow)}
+.ev-card.ev-on{border-color:var(--ev-color)}
+.ev-card-top{padding:24px;display:flex;align-items:center;gap:16px}
+.ev-card-top.ev-on-bg{background:color-mix(in srgb, var(--ev-color) 12%, transparent)}
+.ev-icon{font-size:36px;flex-shrink:0}
+.ev-info{flex:1}
+.ev-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--negro);line-height:1}
+.ev-card.ev-on .ev-name{color:var(--ev-color)}
+.ev-desc{font-size:11px;font-weight:500;color:var(--muted);margin-top:4px;line-height:1.5}
+.ev-toggle-wrap{flex-shrink:0}
+.ev-toggle{position:relative;width:52px;height:28px;cursor:pointer}
+.ev-toggle input{opacity:0;width:0;height:0;position:absolute}
+.ev-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:28px;transition:.3s;border:1.5px solid rgba(255,255,255,.15)}
+.ev-slider::before{content:'';position:absolute;width:22px;height:22px;left:2px;bottom:2px;background:rgba(255,255,255,.4);border-radius:50%;transition:.3s}
+.ev-toggle input:checked + .ev-slider{background:var(--ev-color);border-color:var(--ev-color)}
+.ev-toggle input:checked + .ev-slider::before{transform:translateX(24px);background:#fff}
+
+.ev-slots{padding:16px 24px;background:rgba(0,0,0,.15);border-top:1px solid var(--border)}
+.ev-slots-title{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ev-slot-group{margin-bottom:8px}
+.ev-slot-day{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+.ev-slot-pills{display:flex;flex-wrap:wrap;gap:4px}
+.ev-slot-pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.07);color:var(--muted)}
+.ev-card.ev-on .ev-slot-pill{background:color-mix(in srgb, var(--ev-color) 20%, transparent);color:var(--ev-color)}
+
+.ev-status{padding:12px 24px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-top:1px solid var(--border)}
+.ev-status-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2)}
+.ev-card.ev-on .ev-status-dot{background:var(--ev-color);box-shadow:0 0 6px var(--ev-color)}
+.ev-status-txt{color:var(--muted)}
+.ev-card.ev-on .ev-status-txt{color:var(--ev-color)}
+
+@media(max-width:768px){
+  .ev-wrap{padding:16px}
+  .ev-cards{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -510,6 +555,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   <div class="ntab" onclick="showPage('resumenes')">📊 Resúmenes</div>
   <div class="ntab" onclick="showPage('contactos')">👥 Contactos</div>
   <div class="ntab" onclick="showPage('turnos-fijos')">📌 Turnos Fijos</div>
+  <div class="ntab" onclick="showPage('eventos')">⚡ Eventos</div>
 </nav>
 
 <!-- AGENDA -->
@@ -530,9 +576,8 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 <!-- HISTORIAL -->
 <div class="page" id="page-historial">
-  <div class="hlayout">
-    <aside class="mside" id="mside"></aside>
-    <div class="hcontent" id="hcontent"><div class="empty-state"><span class="empty-icon">🗂</span>Seleccioná un mes</div></div>
+  <div class="hist-wrap" id="histWrap">
+    <div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando historial...</div>
   </div>
 </div>
 
@@ -677,6 +722,20 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
       <button class="bsave" id="tfSaveBtn" onclick="saveTF()">Guardar</button>
     </div>
     <button class="mdel" id="tfDelBtn" onclick="deleteTF()" style="display:none">Eliminar turno fijo</button>
+  </div>
+</div>
+
+
+<!-- EVENTOS -->
+<div class="page" id="page-eventos">
+  <div class="ev-wrap">
+    <div class="ev-header">
+      <div class="ev-title-txt">Activación de Eventos</div>
+      <div class="ev-subtitle">Los eventos activos se generan en la <strong>Semana Siguiente</strong></div>
+    </div>
+    <div class="ev-cards" id="evCards">
+      <div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span></div>
+    </div>
   </div>
 </div>
 
@@ -998,53 +1057,112 @@ function renderSBar(){
 // ═══════════════════════════════════════════════
 // RENDER: HISTORIAL
 // ═══════════════════════════════════════════════
+let histMonthsData = {}; // key: "YYYY-MM" → {year, month, reservados, total}
+let histOpenMonths = new Set();
+
 async function initHistorial(){
-  document.getElementById('hcontent').innerHTML='<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando historial...</div>';
+  const wrap = document.getElementById('histWrap');
+  wrap.innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando historial...</div>';
   try {
     const allData = await loadHistorialMonths();
-    // Group by year-month
-    const months={};
+    // Group summary by month
+    histMonthsData = {};
     for(const t of allData){
       const [y,m] = t.fecha.split('-');
-      const k=`${y}-${m}`;
-      if(!months[k]) months[k]={year:parseInt(y),month:parseInt(m)-1,total:0,reservados:0};
-      months[k].total++;
-      if(t.estado==='Reservado') months[k].reservados++;
+      const k = `${y}-${m}`;
+      if(!histMonthsData[k]) histMonthsData[k]={year:parseInt(y),month:parseInt(m)-1,total:0,reservados:0};
+      histMonthsData[k].total++;
+      if(t.estado==='Reservado') histMonthsData[k].reservados++;
     }
-    const monthList = Object.values(months).sort((a,b)=>b.year-a.year||b.month-a.month);
-    renderMonthSidebar(monthList);
-    if(monthList.length>0 && !aMon){
-      aMon={y:monthList[0].year,mo:monthList[0].month};
-      await loadAndRenderMonth(aMon.y, aMon.mo);
+    const monthList = Object.values(histMonthsData).sort((a,b)=>b.year-a.year||b.month-a.month);
+    if(!monthList.length){
+      wrap.innerHTML='<div class="empty-state"><span class="empty-icon">🗂</span>Sin registros anteriores</div>';
+      return;
+    }
+    // Render month cards (collapsed)
+    wrap.innerHTML = monthList.map(m => {
+      const k = `${m.year}-${String(m.month+1).padStart(2,'0')}`;
+      return `<div class="hist-month-card" id="hmc-${k}">
+        <div class="hist-month-header" id="hmh-${k}" onclick="toggleHistMonth('${k}',${m.year},${m.month})">
+          <div class="hist-month-left">
+            <span class="hist-month-name">${MESES[m.month]}</span>
+            <span class="hist-month-year">${m.year}</span>
+          </div>
+          <div class="hist-month-right">
+            <span class="hist-month-badge">${m.reservados}r</span>
+            <span class="hist-month-arrow">▼</span>
+          </div>
+        </div>
+        <div class="hist-month-body" id="hmb-${k}" style="display:none"></div>
+      </div>`;
+    }).join('');
+
+    // Auto-open the most recent month
+    if(monthList.length){
+      const first = monthList[0];
+      const k = `${first.year}-${String(first.month+1).padStart(2,'0')}`;
+      await toggleHistMonth(k, first.year, first.month);
     }
   } catch(e){
-    document.getElementById('hcontent').innerHTML=`<div class="empty-state">Error al cargar historial.<br>${e.message}</div>`;
+    wrap.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
   }
 }
 
-function renderMonthSidebar(months){
-  if(!months.length){
-    document.getElementById('mside').innerHTML='<div class="mside-ttl">Meses</div><div style="padding:20px;font-size:12px;color:var(--muted)">Sin registros anteriores</div>';
+async function toggleHistMonth(k, year, month){
+  const header = document.getElementById('hmh-'+k);
+  const body   = document.getElementById('hmb-'+k);
+  if(!header || !body) return;
+
+  const isOpen = histOpenMonths.has(k);
+  if(isOpen){
+    histOpenMonths.delete(k);
+    header.classList.remove('open');
+    body.style.display = 'none';
     return;
   }
-  document.getElementById('mside').innerHTML=`<div class="mside-ttl">Meses</div>${months.map(m=>{
-    const on=aMon&&m.year===aMon.y&&m.month===aMon.mo;
-    const semanas=Math.ceil(new Date(m.year,m.month+1,0).getDate()/7);
-    return `<div class="mitem ${on?'on':''}" onclick="selMon(${m.year},${m.month})">
-      <div><div class="mname">${MESES[m.month]}</div><span class="myr">${m.year}</span></div>
-      <span class="mbadge">${m.reservados}r</span>
-    </div>`;
-  }).join('')}`;
+
+  histOpenMonths.add(k);
+  header.classList.add('open');
+  body.style.display = 'flex';
+
+  // Load data if not cached
+  if(!historialData[k]){
+    body.innerHTML = '<div class="loader-spin" style="margin:16px auto"></div>';
+    try {
+      await loadHistorialMonth(year, month);
+    } catch(e){ body.innerHTML=`<div style="color:var(--muted);font-size:12px;padding:12px">Error: ${e.message}</div>`; return; }
+  }
+  renderHistMonthBody(k, year, month, historialData[k]);
 }
 
-async function loadAndRenderMonth(year, month){
-  document.getElementById('hcontent').innerHTML='<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span></div>';
-  try {
-    const data = await loadHistorialMonth(year, month);
-    renderHistorialMonth(year, month, data);
-  } catch(e){
-    document.getElementById('hcontent').innerHTML=`<div class="empty-state">Error: ${e.message}</div>`;
+function renderHistMonthBody(k, year, month, data){
+  const body = document.getElementById('hmb-'+k);
+  if(!body) return;
+  if(!data || !data.length){
+    body.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px;text-align:center">Sin turnos este mes</div>';
+    return;
   }
+  const weeks = groupByWeek(data);
+  const totalR = data.filter(t=>t.estado==='Reservado').length;
+  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:4px">${weeks.length} semanas · ${totalR} reservados</div>
+    <div class="wcards">${weeks.map(w=>{
+      const wRes=w.turnos.filter(t=>t.estado==='Reservado').length;
+      const wPen=w.turnos.filter(t=>t.estado==='Pendiente'||t.estado==='Pendiente de seña').length;
+      const pct=w.turnos.length>0?Math.round(wRes/w.turnos.length*100):0;
+      return `<div class="wcard">
+        <div class="wch">
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Semana</div>
+          <div class="wcdates">${ff(w.start)} — ${ff(w.end)}</div></div>
+          <div style="text-align:right"><div class="wcpct">${pct}%</div><div class="wcpctlb">Ocupación</div></div>
+        </div>
+        <div class="wcbar"><div class="wcbarfill" style="width:${pct}%"></div></div>
+        <div class="wcstats">
+          <div class="wcstat"><div class="wcsv" style="color:var(--d-tx)">${wRes}</div><div class="wcsl">Reservados</div></div>
+          <div class="wcstat"><div class="wcsv" style="color:var(--p-tx)">${wPen}</div><div class="wcsl">Pendientes</div></div>
+          <div class="wcstat"><div class="wcsv" style="color:var(--muted)">${w.turnos.length-wRes-wPen}</div><div class="wcsl">Libres</div></div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
 }
 
 function groupByWeek(data){
@@ -1194,11 +1312,12 @@ function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
   document.getElementById('page-'+n).classList.add('on');
-  document.querySelectorAll('.ntab')[['agenda','historial','resumenes','contactos','turnos-fijos'].indexOf(n)].classList.add('on');
+  document.querySelectorAll('.ntab')[['agenda','historial','resumenes','contactos','turnos-fijos','eventos'].indexOf(n)].classList.add('on');
   if(n==='historial' && !aMon) initHistorial();
   if(n==='resumenes') initResumenes();
   if(n==='contactos') initContactos();
   if(n==='turnos-fijos') initTurnosFijos();
+  if(n==='eventos') initEventos();
 }
 
 function setWeek(i){
@@ -1218,21 +1337,7 @@ function goToday(){
   renderAgenda();
 }
 
-async function selMon(y,mo){
-  aMon={y,mo};
-  // refresh sidebar
-  const allData=await loadHistorialMonths();
-  const months={};
-  for(const t of allData){
-    const [yr,m]=t.fecha.split('-');
-    const k=`${yr}-${m}`;
-    if(!months[k]) months[k]={year:parseInt(yr),month:parseInt(m)-1,total:0,reservados:0};
-    months[k].total++;
-    if(t.estado==='Reservado') months[k].reservados++;
-  }
-  renderMonthSidebar(Object.values(months).sort((a,b)=>b.year-a.year||b.month-a.month));
-  await loadAndRenderMonth(y,mo);
-}
+
 
 // ═══════════════════════════════════════════════
 // MODAL
@@ -1800,6 +1905,156 @@ async function deleteTF(){
 document.getElementById('tfModal').addEventListener('click', e => {
   if(e.target === document.getElementById('tfModal')) closeTFModal();
 });
+
+
+// ═══════════════════════════════════════════════
+// EVENTOS — ON/OFF
+// ═══════════════════════════════════════════════
+const EV_DAY_INDEX = {'Lunes':0,'Martes':1,'Miércoles':2,'Jueves':3,'Viernes':4,'Sábado':5,'Domingo':6};
+
+// Slots hardcoded desde los CSVs de Airtable
+const TORNEO_SLOTS = [
+  // Lunes-Viernes, 22:00 y 23:00, Cancha de 5 (num 1 y 2)
+  ...['Lunes','Martes','Miércoles','Jueves','Viernes'].flatMap(dia =>
+    ['22:00','23:00'].flatMap(h =>
+      [1,2].map(num => ({dia, horario:h, cancha:'Cancha de 5', num}))
+    )
+  )
+];
+
+const ESCUELITA_SLOTS = [
+  // Lunes, Miércoles, Viernes — 18:00 y 19:00 — C5 (1,2) + C6 (1)
+  ...['Lunes','Miércoles','Viernes'].flatMap(dia =>
+    ['18:00','19:00'].flatMap(h => [
+      {dia, horario:h, cancha:'Cancha de 5', num:1},
+      {dia, horario:h, cancha:'Cancha de 5', num:2},
+      {dia, horario:h, cancha:'Cancha de 6', num:1},
+    ])
+  )
+];
+
+const EVENTOS_DEF = [
+  {
+    id: 'torneo',
+    name: 'Torneo',
+    icon: '🏆',
+    color: '#06b6d4',
+    slots: TORNEO_SLOTS,
+    desc: 'Lunes a Viernes · 22:00 y 23:00 · Cancha de 5',
+    slotGroups: ['Lun-Vie 22:00','Lun-Vie 23:00'],
+  },
+  {
+    id: 'escuelita',
+    name: 'Escuelita de Fútbol',
+    icon: '👦',
+    color: '#eab308',
+    slots: ESCUELITA_SLOTS,
+    desc: 'Lunes, Miércoles y Viernes · 18:00 y 19:00 · Canchas 5 y 6',
+    slotGroups: ['Lun/Mié/Vie 18:00','Lun/Mié/Vie 19:00'],
+  },
+];
+
+let evConfig = {}; // { torneo: false, escuelita: false }
+
+async function initEventos(){
+  document.getElementById('evCards').innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span></div>';
+  try {
+    const { data, error } = await db.from('eventos_config').select('*');
+    if(error) throw error;
+    evConfig = {};
+    for(const row of (data||[])) evConfig[row.id] = row.activo;
+    renderEvCards();
+  } catch(e){
+    document.getElementById('evCards').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+}
+
+function renderEvCards(){
+  document.getElementById('evCards').innerHTML = EVENTOS_DEF.map(ev => {
+    const isOn = !!evConfig[ev.id];
+    return `<div class="ev-card ${isOn?'ev-on':''}" id="evc-${ev.id}" style="--ev-color:${ev.color}">
+      <div class="ev-card-top ${isOn?'ev-on-bg':''}">
+        <span class="ev-icon">${ev.icon}</span>
+        <div class="ev-info">
+          <div class="ev-name">${ev.name}</div>
+          <div class="ev-desc">${ev.desc}</div>
+        </div>
+        <label class="ev-toggle">
+          <input type="checkbox" ${isOn?'checked':''} onchange="toggleEvento('${ev.id}', this.checked)"/>
+          <span class="ev-slider"></span>
+        </label>
+      </div>
+      <div class="ev-slots">
+        <div class="ev-slots-title">Horarios que ocupa en la semana siguiente</div>
+        <div class="ev-slot-pills">${ev.slotGroups.map(g=>`<span class="ev-slot-pill">${g}</span>`).join('')}</div>
+      </div>
+      <div class="ev-status">
+        <div class="ev-status-dot"></div>
+        <span class="ev-status-txt">${isOn?'ACTIVO — Se cargará en la semana siguiente':'INACTIVO'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleEvento(evId, isOn){
+  const evDef = EVENTOS_DEF.find(e => e.id === evId);
+  if(!evDef) return;
+
+  // Disable UI while processing
+  const card = document.getElementById('evc-'+evId);
+  if(card) card.style.opacity = '0.6';
+  setSyncing();
+
+  try {
+    // 1. Update config in Supabase
+    await db.from('eventos_config').upsert({id:evId, activo:isOn, updated_at:new Date().toISOString()});
+    evConfig[evId] = isOn;
+
+    // 2. Apply slots to next week (WEEKS[1])
+    const nextMon = WEEKS[1].s;
+    const promises = evDef.slots.map(async slot => {
+      const dayOffset = EV_DAY_INDEX[slot.dia];
+      const fecha = dk(add(nextMon, dayOffset));
+      const horario = slot.horario + ':00';
+
+      if(isOn){
+        // Activate: find slot and mark as evento
+        await db.from('turnos').update({
+          estado: 'Reservado',
+          evento: evDef.name === 'Torneo' ? 'Torneo' : 'Escuelita de Fútbol',
+          cliente: null,
+          numero: null,
+        }).eq('fecha', fecha).eq('horario', horario)
+          .eq('cancha', slot.cancha).eq('numero_cancha', slot.num);
+      } else {
+        // Deactivate: reset to Disponible only if it was this event
+        await db.from('turnos').update({
+          estado: 'Disponible',
+          evento: 'Fútbol',
+          cliente: null,
+          numero: null,
+        }).eq('fecha', fecha).eq('horario', horario)
+          .eq('cancha', slot.cancha).eq('numero_cancha', slot.num)
+          .eq('evento', evDef.name === 'Torneo' ? 'Torneo' : 'Escuelita de Fútbol');
+      }
+    });
+
+    await Promise.all(promises);
+
+    // 3. Refresh turnosMap if next week is visible
+    if(aWeek === 1) await loadBisemana();
+
+    setSynced();
+    showToast(`${evDef.name} ${isOn?'activado ✓':'desactivado'}`);
+  } catch(e){
+    evConfig[evId] = !isOn; // revert
+    showToast('Error: ' + e.message, 'err');
+    setSyncErr();
+  }
+
+  if(card) card.style.opacity = '1';
+  renderEvCards();
+}
 
 // ═══════════════════════════════════════════════
 // REALTIME — Supabase WebSocket subscription
