@@ -221,10 +221,91 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .mdel:hover{background:#fef2f2}
 
 @media(max-width:768px){
-  .hdr,.nav,.wbar,.dstrip,.gwrap,.sbar,.hcontent,.rcontent{padding-left:16px;padding-right:16px}
+  /* Header */
+  .hdr{padding:0 12px;height:52px}
+  .logo-main{font-size:20px}
+  .logo-sub-txt{display:none}
+
+  /* Nav — scrollable horizontal, no overflow */
+  .nav{
+    justify-content:flex-start;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    padding:0 12px;
+    scrollbar-width:none;
+  }
+  .nav::-webkit-scrollbar{display:none}
+  .ntab{
+    font-size:9px;
+    padding:10px 12px;
+    letter-spacing:.8px;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+
+  /* Week selector */
+  .wbar{
+    padding:0 12px;
+    justify-content:flex-start;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .wbar::-webkit-scrollbar{display:none}
+  .wtab{padding:10px 16px;white-space:nowrap;flex-shrink:0}
+  .wrange{font-size:9px}
+
+  /* Day strip */
+  .dstrip{padding:10px 12px;justify-content:flex-start}
+  .dpill{min-width:52px;padding:6px 10px}
+  .dpnum{font-size:20px}
+
+  /* Grid — horizontal scroll */
+  .gwrap{padding:12px 0 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .ginner{min-width:520px;padding-right:12px}
+  .ghead{grid-template-columns:52px repeat(4,1fr);gap:4px;margin-bottom:4px}
+  .grow{grid-template-columns:52px repeat(4,1fr);gap:4px;margin-bottom:4px}
+  .tlbl{font-size:16px}
+  .tc{min-height:60px;padding:8px 8px}
+  .chd{padding:8px 4px}
+  .chlb{font-size:11px}
+  .tname{font-size:11px}
+  .tphone{font-size:9px}
+  .tbadge{font-size:7px;padding:2px 4px}
+  .evbadge{font-size:7px;padding:2px 4px}
+
+  /* Stats bar */
+  .sbar{padding:8px 12px;flex-wrap:wrap}
+  .si{min-width:33%;padding:4px 0}
+  .sv{font-size:20px}
+  .sl{font-size:8px}
+
+  /* Live section */
+  .live-board{grid-template-columns:repeat(2,1fr);padding:8px 12px 14px;gap:8px}
+  .live-clock{font-size:20px;letter-spacing:4px}
+
+  /* Historial */
   .hlayout{flex-direction:column}
   .mside{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:140px;padding:12px 0}
-  .modal{width:calc(100vw - 32px);margin:16px}
+  .hcontent,.rcontent{padding:16px 12px}
+  .wcards{grid-template-columns:1fr}
+  .rgrid{grid-template-columns:1fr}
+
+  /* Contactos */
+  .con-topbar{padding:12px;flex-wrap:wrap;gap:8px}
+  .con-list{padding:12px}
+  .con-cols,.con-row{grid-template-columns:1fr 1fr}
+
+  /* Turnos Fijos */
+  .tf-topbar{padding:12px;flex-direction:column;align-items:flex-start;gap:8px}
+  .btn-nuevo-tf{width:100%;text-align:center}
+  .tf-list{padding:12px}
+  .tf-cols,.tf-row{grid-template-columns:1fr 1fr 90px 70px}
+  .tf-day-name{font-size:16px;width:80px}
+
+  /* Modals */
+  .modal,.tf-modal-inner{width:calc(100vw - 24px);margin:12px;padding:20px}
 }
 
 /* ─── CONTACTOS ─── */
