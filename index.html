@@ -219,11 +219,11 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .bsave:disabled{background:var(--muted);cursor:wait}
 .fact-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;align-items:end}
 .fact-field{display:flex;flex-direction:column}
-.fact-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;min-height:26px;display:flex;align-items:flex-end}
-.fact-prefix-wrap{position:relative;display:flex;align-items:center}
-.fact-prefix{position:absolute;left:12px;color:var(--verde);font-weight:700;font-size:14px;pointer-events:none;z-index:1}
-.fact-input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px 10px 26px;color:var(--negro);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;outline:none;transition:border-color .15s;margin-bottom:14px}
-.fact-input:focus{border-color:var(--verde)}
+.fact-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;min-height:26px;display:flex;align-items:flex-end}
+.fact-wrap{display:flex;align-items:center;background:rgba(255,255,255,.06);border:1.5px solid var(--border);border-radius:8px;padding:0 12px;margin-bottom:14px;transition:border-color .15s}
+.fact-wrap:focus-within{border-color:var(--verde)}
+.fact-sym{color:var(--verde);font-weight:700;font-size:14px;margin-right:4px;flex-shrink:0}
+.fact-input{background:transparent;border:none;color:var(--negro);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;outline:none;width:100%;padding:10px 0;min-width:0}
 .mdel{width:100%;margin-top:8px;padding:10px;border-radius:8px;background:transparent;border:1.5px solid #fca5a5;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ef4444;cursor:pointer;transition:all .15s}
 .mdel:hover{background:#fef2f2}
 
@@ -624,18 +624,16 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
     <div class="fact-row">
       <div class="fact-field">
         <span class="fact-label">💵 Efectivo</span>
-        <div class="fact-prefix-wrap">
-          <span class="fact-prefix">$</span>
-          <input class="fact-input" id="mefectivo" type="text" inputmode="numeric" placeholder="0"
-            oninput="fmtFact(this)" onfocus="fmtFactFocus(this)" onblur="fmtFactBlur(this)"/>
+        <div class="fact-wrap">
+          <span class="fact-sym">$</span>
+          <input class="fact-input" id="mefectivo" type="text" inputmode="numeric" placeholder="0" oninput="fmtFact(this)"/>
         </div>
       </div>
       <div class="fact-field">
         <span class="fact-label">🏦 Transferencia</span>
-        <div class="fact-prefix-wrap">
-          <span class="fact-prefix">$</span>
-          <input class="fact-input" id="mtransferencia" type="text" inputmode="numeric" placeholder="0"
-            oninput="fmtFact(this)" onfocus="fmtFactFocus(this)" onblur="fmtFactBlur(this)"/>
+        <div class="fact-wrap">
+          <span class="fact-sym">$</span>
+          <input class="fact-input" id="mtransferencia" type="text" inputmode="numeric" placeholder="0" oninput="fmtFact(this)"/>
         </div>
       </div>
     </div>
@@ -2091,20 +2089,19 @@ async function toggleEvento(evId, isOn){
 
 // Formateo de campos de facturación
 function fmtFact(input){
-  // Allow only digits while typing
-  input.value = input.value.replace(/[^0-9]/g,'');
-}
-function fmtFactFocus(input){
-  // Strip formatting when focused
-  input.value = input.value.replace(/\./g,'').replace(/[^0-9]/g,'');
-}
-function fmtFactBlur(input){
-  // Add thousand separators on blur
-  const num = parseInt(input.value)||0;
-  input.value = num > 0 ? num.toLocaleString('es-AR') : '';
+  const pos = input.selectionStart;
+  const oldLen = input.value.length;
+  const digits = input.value.replace(/\D/g,'');
+  const num = parseInt(digits)||0;
+  const formatted = num > 0 ? num.toLocaleString('es-AR') : '';
+  input.value = formatted;
+  // Ajustar cursor
+  const diff = formatted.length - oldLen;
+  const newPos = Math.max(0, pos + diff);
+  input.setSelectionRange(newPos, newPos);
 }
 function parseFact(id){
-  const val = document.getElementById(id).value.replace(/\./g,'').replace(/,/g,'');
+  const val = document.getElementById(id).value.replace(/\./g,'').replace(/,/g,'').replace(/\s/g,'');
   return parseInt(val)||0;
 }
 
