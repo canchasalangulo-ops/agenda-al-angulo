@@ -217,8 +217,13 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .bsave{flex:1;padding:11px;border-radius:8px;background:var(--verde);border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;transition:all .15s}
 .bsave:hover{background:var(--verde-dk)}
 .bsave:disabled{background:var(--muted);cursor:wait}
-.fact-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
+.fact-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;align-items:end}
 .fact-field{display:flex;flex-direction:column}
+.fact-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;min-height:26px;display:flex;align-items:flex-end}
+.fact-prefix-wrap{position:relative;display:flex;align-items:center}
+.fact-prefix{position:absolute;left:12px;color:var(--verde);font-weight:700;font-size:14px;pointer-events:none;z-index:1}
+.fact-input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px 10px 26px;color:var(--negro);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;outline:none;transition:border-color .15s;margin-bottom:14px}
+.fact-input:focus{border-color:var(--verde)}
 .mdel{width:100%;margin-top:8px;padding:10px;border-radius:8px;background:transparent;border:1.5px solid #fca5a5;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ef4444;cursor:pointer;transition:all .15s}
 .mdel:hover{background:#fef2f2}
 
@@ -618,12 +623,20 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
     <input class="fctl" id="mphone" type="text" placeholder="5492604xxxxxxx"/>
     <div class="fact-row">
       <div class="fact-field">
-        <label class="flbl">💵 Efectivo recibido</label>
-        <input class="fctl" id="mefectivo" type="number" min="0" step="1000" placeholder="0"/>
+        <span class="fact-label">💵 Efectivo</span>
+        <div class="fact-prefix-wrap">
+          <span class="fact-prefix">$</span>
+          <input class="fact-input" id="mefectivo" type="text" inputmode="numeric" placeholder="0"
+            oninput="fmtFact(this)" onfocus="fmtFactFocus(this)" onblur="fmtFactBlur(this)"/>
+        </div>
       </div>
       <div class="fact-field">
-        <label class="flbl">🏦 Transferencia recibida</label>
-        <input class="fctl" id="mtransferencia" type="number" min="0" step="1000" placeholder="0"/>
+        <span class="fact-label">🏦 Transferencia</span>
+        <div class="fact-prefix-wrap">
+          <span class="fact-prefix">$</span>
+          <input class="fact-input" id="mtransferencia" type="text" inputmode="numeric" placeholder="0"
+            oninput="fmtFact(this)" onfocus="fmtFactFocus(this)" onblur="fmtFactBlur(this)"/>
+        </div>
       </div>
     </div>
     <div class="mbtns">
@@ -1365,8 +1378,8 @@ function openMod(t){
   document.getElementById('mestado').value=t.estado;
   document.getElementById('mevento').value=t.evento||'Fútbol';
   document.getElementById('mcliente').value=t.cliente||'';
-  document.getElementById('mefectivo').value=t.facturacion_efectivo||'';
-  document.getElementById('mtransferencia').value=t.facturacion_transferencia||'';
+  const ef=parseInt(t.facturacion_efectivo)||0; document.getElementById('mefectivo').value=ef>0?ef.toLocaleString('es-AR'):'';
+  const tr=parseInt(t.facturacion_transferencia)||0; document.getElementById('mtransferencia').value=tr>0?tr.toLocaleString('es-AR'):'';
   document.getElementById('mphone').value=t.numero||'';
   document.getElementById('mdel').style.display=t.estado==='Disponible'?'none':'block';
   document.getElementById('mbg').classList.add('on');
@@ -1386,8 +1399,8 @@ async function saveMod(){
     const evento=document.getElementById('mevento').value||'Fútbol';
     const cliente=document.getElementById('mcliente').value.trim()||null;
     const numero=document.getElementById('mphone').value.trim()||null;
-    const facturacion_efectivo=parseInt(document.getElementById('mefectivo').value)||0;
-    const facturacion_transferencia=parseInt(document.getElementById('mtransferencia').value)||0;
+    const facturacion_efectivo=parseFact('mefectivo');
+    const facturacion_transferencia=parseFact('mtransferencia');
     await updateTurno(modalTurno.id, {estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia});
     // Update local map
     const key=tKey(modalTurno.fecha,modalTurno.horario,modalTurno.cancha,modalTurno.numero_cancha);
@@ -2073,6 +2086,26 @@ async function toggleEvento(evId, isOn){
   }
   if(card)card.style.opacity='1';
   renderEvCards();
+}
+
+
+// Formateo de campos de facturación
+function fmtFact(input){
+  // Allow only digits while typing
+  input.value = input.value.replace(/[^0-9]/g,'');
+}
+function fmtFactFocus(input){
+  // Strip formatting when focused
+  input.value = input.value.replace(/\./g,'').replace(/[^0-9]/g,'');
+}
+function fmtFactBlur(input){
+  // Add thousand separators on blur
+  const num = parseInt(input.value)||0;
+  input.value = num > 0 ? num.toLocaleString('es-AR') : '';
+}
+function parseFact(id){
+  const val = document.getElementById(id).value.replace(/\./g,'').replace(/,/g,'');
+  return parseInt(val)||0;
 }
 
 // ═══════════════════════════════════════════════
