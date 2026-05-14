@@ -682,6 +682,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
       <button class="bcancel" onclick="closeConModal()">Cancelar</button>
       <button class="bsave" id="conSaveBtn" onclick="saveContact()">Guardar</button>
     </div>
+    <button class="mdel" id="conDelBtn" onclick="deleteContact()" style="display:none">Eliminar contacto</button>
   </div>
 </div>
 
@@ -1550,6 +1551,7 @@ function openNewContact() {
   document.getElementById('conNombre').value = '';
   document.getElementById('conNumero').value = '';
   document.getElementById('conSuscriber').value = '';
+  document.getElementById('conDelBtn').style.display = 'none';
   document.getElementById('conModal').classList.add('on');
 }
 
@@ -1559,12 +1561,27 @@ function openEditContact(c) {
   document.getElementById('conNombre').value = c.nombre_completo || '';
   document.getElementById('conNumero').value = c.numero || '';
   document.getElementById('conSuscriber').value = c.suscriber_id || '';
+  document.getElementById('conDelBtn').style.display = 'block';
   document.getElementById('conModal').classList.add('on');
 }
 
 function closeConModal() {
   document.getElementById('conModal').classList.remove('on');
   editingContactId = null;
+}
+
+async function deleteContact() {
+  if(!editingContactId || !confirm('¿Eliminar este contacto? Esta acción no se puede deshacer.')) return;
+  try {
+    const { error } = await db.from('contactos').delete().eq('id', editingContactId);
+    if(error) throw error;
+    allContacts = allContacts.filter(c => c.id !== editingContactId);
+    closeConModal();
+    renderContacts();
+    showToast('Contacto eliminado');
+  } catch(e) {
+    showToast('Error: ' + e.message, 'err');
+  }
 }
 
 async function saveContact() {
