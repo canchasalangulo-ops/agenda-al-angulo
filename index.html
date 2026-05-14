@@ -217,6 +217,8 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .bsave{flex:1;padding:11px;border-radius:8px;background:var(--verde);border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;cursor:pointer;transition:all .15s}
 .bsave:hover{background:var(--verde-dk)}
 .bsave:disabled{background:var(--muted);cursor:wait}
+.fact-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
+.fact-field{display:flex;flex-direction:column}
 .mdel{width:100%;margin-top:8px;padding:10px;border-radius:8px;background:transparent;border:1.5px solid #fca5a5;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ef4444;cursor:pointer;transition:all .15s}
 .mdel:hover{background:#fef2f2}
 
@@ -614,6 +616,16 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
     <input class="fctl" id="mcliente" type="text" placeholder="Nombre del cliente"/>
     <label class="flbl">Teléfono WhatsApp</label>
     <input class="fctl" id="mphone" type="text" placeholder="5492604xxxxxxx"/>
+    <div class="fact-row">
+      <div class="fact-field">
+        <label class="flbl">💵 Efectivo recibido</label>
+        <input class="fctl" id="mefectivo" type="number" min="0" step="1000" placeholder="0"/>
+      </div>
+      <div class="fact-field">
+        <label class="flbl">🏦 Transferencia recibida</label>
+        <input class="fctl" id="mtransferencia" type="number" min="0" step="1000" placeholder="0"/>
+      </div>
+    </div>
     <div class="mbtns">
       <button class="bcancel" onclick="closeMod()">Cancelar</button>
       <button class="bsave" id="bsave" onclick="saveMod()">Guardar</button>
@@ -837,7 +849,7 @@ async function loadBisemana(){
 
     const { data, error } = await db
       .from('turnos')
-      .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero')
+      .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia')
       .gte('fecha', start)
       .lte('fecha', end);
 
@@ -1030,26 +1042,29 @@ function renderGrid(){
 }
 
 function renderSBar(){
-  // Stats del día seleccionado
-  let r=0,p=0,s=0,facturacion=0,dayTotal=0;
+  let r=0,p=0,s=0,efectivo=0,transferencia=0,dayTotal=0;
   for(const c of CANCHAS) for(const h of HRS){
     const t=getT(aDay,h,c); dayTotal++;
     if(!t) continue;
     if(t.estado==='Reservado'){
       r++;
-      if(!t.evento||t.evento==='Fútbol') facturacion+=35000;
+      efectivo      += parseInt(t.facturacion_efectivo)||0;
+      transferencia += parseInt(t.facturacion_transferencia)||0;
     } else if(t.estado==='Pendiente') p++;
     else if(t.estado==='Pendiente de seña') s++;
   }
-  const pct = dayTotal>0?Math.round(r/dayTotal*100):0;
-  const facStr = '$'+facturacion.toLocaleString('es-AR');
-  const [dy,dm,dd]=aDay.split('-');
+  const pct   = dayTotal>0?Math.round(r/dayTotal*100):0;
+  const total = efectivo + transferencia;
+  const fmt   = n => '$'+n.toLocaleString('es-AR');
+  const [dy,dm,dd] = aDay.split('-');
   document.getElementById('sbar').innerHTML=`
     <div class="si"><div class="sv" style="color:var(--d-tx)">${r}</div><div class="sl">Reservados</div></div>
     <div class="si"><div class="sv" style="color:var(--p-tx)">${p}</div><div class="sl">Pendientes</div></div>
     <div class="si"><div class="sv" style="color:var(--s-tx)">${s}</div><div class="sl">Pdte. Seña</div></div>
     <div class="si"><div class="sv" style="color:var(--verde)">${pct}%</div><div class="sl">Ocupación</div></div>
-    <div class="si"><div class="sv" style="color:var(--naranja);font-size:18px">${facStr}</div><div class="sl">Facturación del ${dd}/${dm}</div></div>`;
+    <div class="si"><div class="sv" style="color:#4ade80;font-size:16px">${fmt(efectivo)}</div><div class="sl">💵 Efectivo</div></div>
+    <div class="si"><div class="sv" style="color:#60a5fa;font-size:16px">${fmt(transferencia)}</div><div class="sl">🏦 Transfer.</div></div>
+    <div class="si"><div class="sv" style="color:var(--naranja);font-size:16px">${fmt(total)}</div><div class="sl">Total ${dd}/${dm}</div></div>`;
 }
 
 // ═══════════════════════════════════════════════
@@ -1350,6 +1365,8 @@ function openMod(t){
   document.getElementById('mestado').value=t.estado;
   document.getElementById('mevento').value=t.evento||'Fútbol';
   document.getElementById('mcliente').value=t.cliente||'';
+  document.getElementById('mefectivo').value=t.facturacion_efectivo||'';
+  document.getElementById('mtransferencia').value=t.facturacion_transferencia||'';
   document.getElementById('mphone').value=t.numero||'';
   document.getElementById('mdel').style.display=t.estado==='Disponible'?'none':'block';
   document.getElementById('mbg').classList.add('on');
@@ -1369,10 +1386,12 @@ async function saveMod(){
     const evento=document.getElementById('mevento').value||'Fútbol';
     const cliente=document.getElementById('mcliente').value.trim()||null;
     const numero=document.getElementById('mphone').value.trim()||null;
-    await updateTurno(modalTurno.id, {estado, evento, cliente, numero});
+    const facturacion_efectivo=parseInt(document.getElementById('mefectivo').value)||0;
+    const facturacion_transferencia=parseInt(document.getElementById('mtransferencia').value)||0;
+    await updateTurno(modalTurno.id, {estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia});
     // Update local map
     const key=tKey(modalTurno.fecha,modalTurno.horario,modalTurno.cancha,modalTurno.numero_cancha);
-    turnosMap[key]={...modalTurno, estado, evento, cliente, numero};
+    turnosMap[key]={...modalTurno, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia};
     closeMod();
     renderAgenda();
     showToast('Turno actualizado ✓');
