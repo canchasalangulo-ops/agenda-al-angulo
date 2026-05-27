@@ -2264,6 +2264,7 @@ async function checkAuth() {
 }
 
 function showLoginOverlay() {
+  hideLoader(); // ocultar page loader para que el video sea visible
   document.getElementById('loginOverlay').classList.remove('hidden');
 }
 
