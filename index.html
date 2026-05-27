@@ -2292,6 +2292,11 @@ function showLoginOverlay() {
   lv.addEventListener('ended', nextLoginVid);
   lv.addEventListener('error', nextLoginVid);
   nextLoginVid();
+  // Resetear estado del botón
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = false;
+  btn.textContent = 'Ingresar';
+  document.getElementById('loginError').textContent = '';
   document.getElementById('loginOverlay').classList.remove('hidden');
 }
 
