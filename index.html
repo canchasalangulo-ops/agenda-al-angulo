@@ -490,6 +490,9 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .login-input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);padding:8px 0 10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:400;outline:none;transition:border-color .2s;width:100%}
 .login-input:focus{border-bottom-color:var(--naranja)}
 .login-input::placeholder{color:rgba(255,255,255,.2)}
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:focus{-webkit-text-fill-color:#fff;-webkit-box-shadow:0 0 0px 1000px transparent inset;transition:background-color 5000s ease-in-out 0s;caret-color:#fff}
 .btn-login{background:var(--naranja);color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 0;border-radius:40px;border:none;cursor:pointer;transition:all .2s;width:100%;margin-top:8px;box-shadow:0 4px 20px rgba(232,80,26,.35)}
 .btn-login:hover{background:var(--naranja-dk);box-shadow:0 4px 28px rgba(232,80,26,.5);transform:translateY(-1px)}
 .btn-login:active{transform:translateY(0)}
