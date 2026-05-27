@@ -962,6 +962,8 @@ async function loadBisemana(){
     }
 
     setSynced();
+    // Aplicar turnos fijos a slots Disponibles de la bisemana
+    await applyAllTurnosFijosToWeeks();
     renderAgenda();
     hideLoader();
   } catch(e) {
@@ -1839,6 +1841,48 @@ function tfNextOccurrence(diaSemana){
   const diff = (target - start.getDay() + 7) % 7;
   const next = new Date(start); next.setDate(start.getDate()+diff);
   return dk(next);
+}
+
+async function applyAllTurnosFijosToWeeks(){
+  try {
+    const { data: fijos, error } = await db.from('turnos_fijos').select('*');
+    if(error || !fijos || !fijos.length) return;
+
+    const start = WEEKS[0].s;
+    const end   = WEEKS[1].e;
+
+    for(const tf of fijos){
+      const targetDay  = TF_DAY_MAP[tf.dia_semana];
+      const horario    = (tf.horario||'').slice(0,5);
+      const horarioFull = horario + ':00';
+
+      // Recorrer todos los días de la bisemana buscando coincidencias de día
+      for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
+        if(d.getDay() !== targetDay) continue;
+        const fecha = dk(new Date(d));
+
+        // Buscar slot Disponible para esa fecha+horario+cancha en turnosMap
+        let applied = false;
+        for(const [key, t] of Object.entries(turnosMap)){
+          if(t.fecha === fecha && t.horario === horarioFull && t.cancha === tf.cancha && t.estado === 'Disponible'){
+            // Actualizar en Supabase
+            await db.from('turnos').update({
+              estado: 'Pendiente',
+              cliente: tf.cliente,
+              numero: tf.numero || null
+            }).eq('id', t.id);
+            // Actualizar localmente
+            turnosMap[key] = {...t, estado:'Pendiente', cliente:tf.cliente, numero:tf.numero||null};
+            applied = true;
+            break; // solo el primer Disponible de ese tipo de cancha
+          }
+        }
+      }
+    }
+    renderAgenda();
+  } catch(e){
+    console.warn('applyAllTurnosFijosToWeeks error:', e.message);
+  }
 }
 
 async function tfSyncToAgenda(tf, isDelete=false){
