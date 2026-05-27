@@ -139,12 +139,12 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 /* ─── HISTORIAL ─── */
 .hist-wrap{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:10px}
-.hist-month-card{background:rgba(18,26,42,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.hist-month-card{background:rgba(0,0,0,0.40);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06)}
 .hist-month-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;cursor:pointer;transition:background .15s;user-select:none}
 .hist-month-header:hover{background:rgba(255,255,255,.04)}
 .hist-month-header.open{border-bottom:1px solid var(--border)}
 .hist-month-left{display:flex;align-items:baseline;gap:10px}
-.hist-month-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--negro)}
+.hist-month-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#fff}
 .hist-month-year{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px}
 .hist-month-right{display:flex;align-items:center;gap:12px}
 .hist-month-badge{font-size:11px;font-weight:700;color:var(--verde);background:var(--verde-pale);border:1px solid var(--verde-mid);padding:3px 12px;border-radius:20px;letter-spacing:.5px}
@@ -152,34 +152,34 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hist-month-header.open .hist-month-arrow{transform:rotate(180deg)}
 .hist-month-body{flex-direction:column;padding:20px 24px;gap:10px}
 /* Week cards — ancho completo */
-.wcards{display:flex;flex-direction:column;gap:8px}
-.wcard{background:rgba(12,20,34,0.65);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:border-color .15s}
-.wcard:hover{border-color:rgba(255,255,255,.2)}
-.wcard-top{padding:18px 24px 14px;display:flex;justify-content:space-between;align-items:flex-start}
+.wcards{display:flex;flex-direction:column;gap:10px}
+.wcard{background:rgba(0,0,0,0.45);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);transition:border-color .2s,box-shadow .2s}
+.wcard:hover{border-color:rgba(255,255,255,.14);box-shadow:0 8px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.1)}
+.wcard-top{padding:20px 26px 14px;display:flex;justify-content:space-between;align-items:flex-start}
 .wcard-left{display:flex;flex-direction:column;gap:3px}
-.wcard-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-.wcdates{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--negro)}
+.wcard-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.wcdates{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#fff}
 .wcard-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
-.wcpct{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;line-height:1}
-.wcpctlb{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.6;text-align:right}
-.wcbar{height:3px;background:rgba(255,255,255,.07);overflow:hidden}
-.wcbarfill{height:100%;border-radius:0;transition:width .4s ease}
-.wcard-stats{padding:14px 24px;display:flex;gap:0;border-top:1px solid rgba(255,255,255,.05)}
-.wcstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
-.wcstat+.wcstat::before{content:'';position:absolute;left:0;top:20%;height:60%;width:1px;background:rgba(255,255,255,.07)}
-.wcsv{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;line-height:1}
-.wcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);text-align:center}
-.wcard-fact{padding:12px 24px;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05);display:flex;gap:0}
-.wfstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.wfstat+.wfstat{border-left:1px solid rgba(255,255,255,.07)}
-.wfv{font-size:14px;font-weight:700;color:var(--negro);letter-spacing:.5px}
-.wfl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
-.wcard-canchas{padding:10px 24px 14px;display:flex;gap:12px}
-.wcbar-mini{flex:1;display:flex;flex-direction:column;gap:4px}
+.wcpct{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:1px;line-height:1;filter:brightness(1.2)}
+.wcpctlb{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;text-align:right}
+.wcbar{height:2px;background:rgba(255,255,255,.06);overflow:hidden}
+.wcbarfill{height:100%;transition:width .5s ease}
+.wcard-stats{padding:16px 26px;display:flex;gap:0;border-top:1px solid rgba(255,255,255,.05)}
+.wcstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}
+.wcstat+.wcstat::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:rgba(255,255,255,.06)}
+.wcsv{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;line-height:1;filter:brightness(1.1)}
+.wcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.3);text-align:center}
+.wcard-fact{padding:12px 26px;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05);display:flex;gap:0}
+.wfstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.wfstat+.wfstat{border-left:1px solid rgba(255,255,255,.06)}
+.wfv{font-size:15px;font-weight:800;letter-spacing:.3px}
+.wfl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.wcard-canchas{padding:10px 26px 16px;display:flex;gap:16px}
+.wcbar-mini{flex:1;display:flex;flex-direction:column;gap:5px}
 .wcbar-mini-label{display:flex;justify-content:space-between;align-items:center}
-.wcbar-mini-name{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.wcbar-mini-pct{font-size:9px;font-weight:700;color:var(--negro)}
-.wcbar-mini-track{height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.wcbar-mini-name{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.wcbar-mini-pct{font-size:9px;font-weight:800}
+.wcbar-mini-track{height:2px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
 .wcbar-mini-fill{height:100%;border-radius:2px}
 
 /* ─── RESÚMENES ─── */
@@ -1174,6 +1174,13 @@ function buildWeekCard(w){
   const ef     = w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
   const tr     = w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
   const total  = ef+tr;
+  // Neon colors
+  const neonGreen  = '#39ff6e';
+  const neonYellow = '#ffe44d';
+  const neonOrange = '#ff7b2e';
+  const neonGray   = 'rgba(255,255,255,0.35)';
+  const neonBlue   = '#4dc8ff';
+  const neonWhite  = '#ffffff';
   // Ocupación por cancha
   const f5all  = w.turnos.filter(t=>t.cancha==='Cancha de 5');
   const f6all  = w.turnos.filter(t=>t.cancha==='Cancha de 6');
@@ -1193,15 +1200,15 @@ function buildWeekCard(w){
     </div>
     <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:${color}"></div></div>
     <div class="wcard-stats">
-      <div class="wcstat"><div class="wcsv" style="color:var(--d-tx)">${wRes}</div><div class="wcsl">Reservados</div></div>
-      <div class="wcstat"><div class="wcsv" style="color:var(--p-tx)">${wPen}</div><div class="wcsl">Pendientes</div></div>
-      <div class="wcstat"><div class="wcsv" style="color:var(--naranja)">${wSena}</div><div class="wcsl">Pdte. Seña</div></div>
-      <div class="wcstat"><div class="wcsv" style="color:var(--muted)">${wLib}</div><div class="wcsl">Libres</div></div>
+      <div class="wcstat"><div class="wcsv" style="color:${neonGreen};text-shadow:0 0 14px ${neonGreen}99">${wRes}</div><div class="wcsl">Reservados</div></div>
+      <div class="wcstat"><div class="wcsv" style="color:${neonYellow};text-shadow:0 0 14px ${neonYellow}99">${wPen}</div><div class="wcsl">Pendientes</div></div>
+      <div class="wcstat"><div class="wcsv" style="color:${neonOrange};text-shadow:0 0 14px ${neonOrange}99">${wSena}</div><div class="wcsl">Pdte. Seña</div></div>
+      <div class="wcstat"><div class="wcsv" style="color:${neonGray}">${wLib}</div><div class="wcsl">Libres</div></div>
     </div>
     ${showFact?`<div class="wcard-fact">
-      <div class="wfstat"><div class="wfl">💵 Efectivo</div><div class="wfv" style="color:#4ade80">${formatPesos(ef)}</div></div>
-      <div class="wfstat"><div class="wfl">🏦 Transf.</div><div class="wfv" style="color:#60a5fa">${formatPesos(tr)}</div></div>
-      <div class="wfstat"><div class="wfl">📊 Total</div><div class="wfv" style="color:var(--negro)">${formatPesos(total)}</div></div>
+      <div class="wfstat"><div class="wfl">💵 Efectivo</div><div class="wfv" style="color:${neonGreen};text-shadow:0 0 10px ${neonGreen}66">${formatPesos(ef)}</div></div>
+      <div class="wfstat"><div class="wfl">🏦 Transf.</div><div class="wfv" style="color:${neonBlue};text-shadow:0 0 10px ${neonBlue}66">${formatPesos(tr)}</div></div>
+      <div class="wfstat"><div class="wfl">📊 Total</div><div class="wfv" style="color:${neonWhite};text-shadow:0 0 10px rgba(255,255,255,0.4)">${formatPesos(total)}</div></div>
     </div>`:''}
     <div class="wcard-canchas">
       <div class="wcbar-mini">
