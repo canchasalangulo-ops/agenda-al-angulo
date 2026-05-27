@@ -152,19 +152,35 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hist-month-header.open .hist-month-arrow{transform:rotate(180deg)}
 .hist-month-body{flex-direction:column;padding:20px 24px;gap:10px}
 /* Week cards — ancho completo */
-.wcards{display:flex;flex-direction:column;gap:10px}
-.wcard{background:rgba(12,20,34,0.6);border:1.5px solid var(--border);border-radius:12px;padding:18px 24px;box-shadow:var(--shadow);transition:all .15s;width:100%}
-.wcard:hover{border-color:rgba(255,255,255,.18)}
-.wch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-.wcdates{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--negro)}
-.wcpct{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--verde);line-height:1}
-.wcpctlb{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--verde);opacity:.7;text-align:right}
-.wcbar{height:4px;background:var(--bg);border-radius:3px;margin-bottom:16px;overflow:hidden}
-.wcbarfill{height:100%;background:linear-gradient(90deg,var(--verde) 0%,var(--verde-lt) 100%);border-radius:3px}
-.wcstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.wcstat{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.04);border-radius:10px;padding:10px 4px;border:1px solid var(--border)}
-.wcsv{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1}
-.wcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-top:3px;text-align:center}
+.wcards{display:flex;flex-direction:column;gap:8px}
+.wcard{background:rgba(12,20,34,0.65);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:border-color .15s}
+.wcard:hover{border-color:rgba(255,255,255,.2)}
+.wcard-top{padding:18px 24px 14px;display:flex;justify-content:space-between;align-items:flex-start}
+.wcard-left{display:flex;flex-direction:column;gap:3px}
+.wcard-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.wcdates{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--negro)}
+.wcard-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.wcpct{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;line-height:1}
+.wcpctlb{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.6;text-align:right}
+.wcbar{height:3px;background:rgba(255,255,255,.07);overflow:hidden}
+.wcbarfill{height:100%;border-radius:0;transition:width .4s ease}
+.wcard-stats{padding:14px 24px;display:flex;gap:0;border-top:1px solid rgba(255,255,255,.05)}
+.wcstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.wcstat+.wcstat::before{content:'';position:absolute;left:0;top:20%;height:60%;width:1px;background:rgba(255,255,255,.07)}
+.wcsv{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;line-height:1}
+.wcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);text-align:center}
+.wcard-fact{padding:12px 24px;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05);display:flex;gap:0}
+.wfstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.wfstat+.wfstat{border-left:1px solid rgba(255,255,255,.07)}
+.wfv{font-size:14px;font-weight:700;color:var(--negro);letter-spacing:.5px}
+.wfl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.wcard-canchas{padding:10px 24px 14px;display:flex;gap:12px}
+.wcbar-mini{flex:1;display:flex;flex-direction:column;gap:4px}
+.wcbar-mini-label{display:flex;justify-content:space-between;align-items:center}
+.wcbar-mini-name{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.wcbar-mini-pct{font-size:9px;font-weight:700;color:var(--negro)}
+.wcbar-mini-track{height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.wcbar-mini-fill{height:100%;border-radius:2px}
 
 /* ─── RESÚMENES ─── */
 .rcontent{flex:1;overflow-y:auto;padding:24px 28px;background:transparent}
@@ -1139,6 +1155,67 @@ function renderSBar(){
 // ═══════════════════════════════════════════════
 // RENDER: HISTORIAL
 // ═══════════════════════════════════════════════
+function pctColor(pct){
+  if(pct>=60) return 'var(--verde)';
+  if(pct>=30) return '#f59e0b';
+  return '#f87171';
+}
+function formatPesos(n){
+  if(!n||n===0) return '—';
+  return '$'+n.toLocaleString('es-AR');
+}
+function buildWeekCard(w){
+  const wRes   = w.turnos.filter(t=>t.estado==='Reservado').length;
+  const wPen   = w.turnos.filter(t=>t.estado==='Pendiente').length;
+  const wSena  = w.turnos.filter(t=>t.estado==='Pendiente de seña').length;
+  const wLib   = w.turnos.filter(t=>t.estado==='Disponible').length;
+  const pct    = w.turnos.length>0?Math.round(wRes/w.turnos.length*100):0;
+  const color  = pctColor(pct);
+  const ef     = w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
+  const tr     = w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
+  const total  = ef+tr;
+  // Ocupación por cancha
+  const f5all  = w.turnos.filter(t=>t.cancha==='Cancha de 5');
+  const f6all  = w.turnos.filter(t=>t.cancha==='Cancha de 6');
+  const f5pct  = f5all.length?Math.round(f5all.filter(t=>t.estado==='Reservado').length/f5all.length*100):0;
+  const f6pct  = f6all.length?Math.round(f6all.filter(t=>t.estado==='Reservado').length/f6all.length*100):0;
+  const showFact = (ef+tr)>0;
+  return `<div class="wcard">
+    <div class="wcard-top">
+      <div class="wcard-left">
+        <div class="wcard-label">Semana</div>
+        <div class="wcdates">${ff(w.start)} — ${ff(w.end)}</div>
+      </div>
+      <div class="wcard-right">
+        <div class="wcpct" style="color:${color}">${pct}%</div>
+        <div class="wcpctlb" style="color:${color}">Ocupación</div>
+      </div>
+    </div>
+    <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:${color}"></div></div>
+    <div class="wcard-stats">
+      <div class="wcstat"><div class="wcsv" style="color:var(--d-tx)">${wRes}</div><div class="wcsl">Reservados</div></div>
+      <div class="wcstat"><div class="wcsv" style="color:var(--p-tx)">${wPen}</div><div class="wcsl">Pendientes</div></div>
+      <div class="wcstat"><div class="wcsv" style="color:var(--naranja)">${wSena}</div><div class="wcsl">Pdte. Seña</div></div>
+      <div class="wcstat"><div class="wcsv" style="color:var(--muted)">${wLib}</div><div class="wcsl">Libres</div></div>
+    </div>
+    ${showFact?`<div class="wcard-fact">
+      <div class="wfstat"><div class="wfl">💵 Efectivo</div><div class="wfv" style="color:#4ade80">${formatPesos(ef)}</div></div>
+      <div class="wfstat"><div class="wfl">🏦 Transf.</div><div class="wfv" style="color:#60a5fa">${formatPesos(tr)}</div></div>
+      <div class="wfstat"><div class="wfl">📊 Total</div><div class="wfv" style="color:var(--negro)">${formatPesos(total)}</div></div>
+    </div>`:''}
+    <div class="wcard-canchas">
+      <div class="wcbar-mini">
+        <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 6</span><span class="wcbar-mini-pct" style="color:${pctColor(f6pct)}">${f6pct}%</span></div>
+        <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${f6pct}%;background:${pctColor(f6pct)}"></div></div>
+      </div>
+      <div class="wcbar-mini">
+        <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 5</span><span class="wcbar-mini-pct" style="color:${pctColor(f5pct)}">${f5pct}%</span></div>
+        <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${f5pct}%;background:${pctColor(f5pct)}"></div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
 let histMonthsData = {}; // key: "YYYY-MM" → {year, month, reservados, total}
 let histOpenMonths = new Set();
 
@@ -1227,24 +1304,7 @@ function renderHistMonthBody(k, year, month, data){
   const weeks = groupByWeek(data);
   const totalR = data.filter(t=>t.estado==='Reservado').length;
   body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:4px">${weeks.length} semanas · ${totalR} reservados</div>
-    <div class="wcards">${weeks.map(w=>{
-      const wRes=w.turnos.filter(t=>t.estado==='Reservado').length;
-      const wPen=w.turnos.filter(t=>t.estado==='Pendiente'||t.estado==='Pendiente de seña').length;
-      const pct=w.turnos.length>0?Math.round(wRes/w.turnos.length*100):0;
-      return `<div class="wcard">
-        <div class="wch">
-          <div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Semana</div>
-          <div class="wcdates">${ff(w.start)} — ${ff(w.end)}</div></div>
-          <div style="text-align:right"><div class="wcpct">${pct}%</div><div class="wcpctlb">Ocupación</div></div>
-        </div>
-        <div class="wcbar"><div class="wcbarfill" style="width:${pct}%"></div></div>
-        <div class="wcstats">
-          <div class="wcstat"><div class="wcsv" style="color:var(--d-tx)">${wRes}</div><div class="wcsl">Reservados</div></div>
-          <div class="wcstat"><div class="wcsv" style="color:var(--p-tx)">${wPen}</div><div class="wcsl">Pendientes</div></div>
-          <div class="wcstat"><div class="wcsv" style="color:var(--muted)">${w.turnos.length-wRes-wPen}</div><div class="wcsl">Libres</div></div>
-        </div>
-      </div>`;
-    }).join('')}</div>`;
+    <div class="wcards">${weeks.map(w=>buildWeekCard(w)).join('')}</div>`;
 }
 
 function groupByWeek(data){
@@ -1272,25 +1332,7 @@ function renderHistorialMonth(year, month, data){
   document.getElementById('hcontent').innerHTML=`
     <div class="hm-ttl">${MESES[month]} ${year}</div>
     <div class="hm-sub">${weeks.length} semanas · ${totalR} reservados · ${avgPct}% ocupación</div>
-    <div class="wcards">${weeks.map(w=>{
-      const wTotal=w.turnos.length;
-      const wRes=w.turnos.filter(t=>t.estado==='Reservado').length;
-      const wPen=w.turnos.filter(t=>t.estado==='Pendiente'||t.estado==='Pendiente de seña').length;
-      const pct=wTotal>0?Math.round(wRes/wTotal*100):0;
-      return `<div class="wcard">
-        <div class="wch">
-          <div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Semana</div>
-          <div class="wcdates">${ff(w.start)} — ${ff(w.end)}</div></div>
-          <div style="text-align:right"><div class="wcpct">${pct}%</div><div class="wcpctlb">Ocupación</div></div>
-        </div>
-        <div class="wcbar"><div class="wcbarfill" style="width:${pct}%"></div></div>
-        <div class="wcstats">
-          <div class="wcstat"><div class="wcsv" style="color:var(--d-tx)">${wRes}</div><div class="wcsl">Reservados</div></div>
-          <div class="wcstat"><div class="wcsv" style="color:var(--p-tx)">${wPen}</div><div class="wcsl">Pendientes</div></div>
-          <div class="wcstat"><div class="wcsv" style="color:var(--muted)">${wTotal-wRes-wPen}</div><div class="wcsl">Libres</div></div>
-        </div>
-      </div>`;
-    }).join('')}</div>`;
+    <div class="wcards">${weeks.map(w=>buildWeekCard(w)).join('')}</div>`;
 }
 
 // ═══════════════════════════════════════════════
