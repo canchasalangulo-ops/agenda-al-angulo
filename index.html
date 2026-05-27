@@ -479,7 +479,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .login-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:#0f1420;overflow:hidden}
 .login-overlay.hidden{display:none}
 .login-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
-.login-bg-dim{position:absolute;inset:0;background:rgba(5,9,18,0.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:1}
+.login-bg-dim{position:absolute;inset:0;background:rgba(5,9,18,0.60);z-index:1}
 .login-card{position:relative;z-index:2;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:32px}
 .login-logo{display:flex;flex-direction:column;align-items:center;gap:8px}
 .login-logo-title{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.6)}
@@ -542,7 +542,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- PAGE LOADER -->
 <!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="loginOverlay">
-  <video class="login-bg-video" id="loginBgVideo" autoplay muted playsinline></video>
+  <video class="login-bg-video" id="loginBgVideo" autoplay muted playsinline crossorigin="anonymous"></video>
   <div class="login-bg-dim"></div>
   <div class="login-card">
     <div class="login-logo">
@@ -2281,18 +2281,25 @@ function showLoginOverlay() {
   ];
   let loginVidUsed = [];
   const lv = document.getElementById('loginBgVideo');
-  function nextLoginVid(){
-    if(loginVidUsed.length >= VIDEOS.length) loginVidUsed = [];
-    const remaining = VIDEOS.filter((_,i) => !loginVidUsed.includes(i));
-    const idx = VIDEOS.indexOf(remaining[Math.floor(Math.random()*remaining.length)]);
-    loginVidUsed.push(idx);
-    lv.src = VIDEOS[idx];
-    lv.load();
-    lv.play().catch(()=>{});
+  // Evitar listeners duplicados en logout/login
+  if(!lv._loginReady){
+    lv._loginReady = true;
+    function nextLoginVid(){
+      if(loginVidUsed.length >= VIDEOS.length) loginVidUsed = [];
+      const remaining = VIDEOS.filter((_,i) => !loginVidUsed.includes(i));
+      const pick = remaining[Math.floor(Math.random()*remaining.length)];
+      loginVidUsed.push(VIDEOS.indexOf(pick));
+      lv.src = pick;
+      lv.muted = true;
+      lv.load();
+      const p = lv.play();
+      if(p) p.catch(()=>{ lv.muted=true; lv.play().catch(()=>{}); });
+    }
+    lv.addEventListener('ended', nextLoginVid);
+    lv.addEventListener('error', nextLoginVid);
+    lv._nextVid = nextLoginVid;
   }
-  lv.addEventListener('ended', nextLoginVid);
-  lv.addEventListener('error', nextLoginVid);
-  nextLoginVid();
+  lv._nextVid();
   // Resetear estado del botón
   const btn = document.getElementById('btnLogin');
   btn.disabled = false;
