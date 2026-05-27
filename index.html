@@ -1310,7 +1310,10 @@ function renderHistMonthBody(k, year, month, data){
   }
   const weeks = groupByWeek(data);
   const totalR = data.filter(t=>t.estado==='Reservado').length;
-  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:4px">${weeks.length} semanas · ${totalR} reservados</div>
+  // Sincronizar el badge del header con el conteo real del mes completo
+  const badge = document.querySelector(`#hmh-${k} .hist-month-badge`);
+  if(badge) badge.textContent = totalR + ' reservados';
+  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:12px">${weeks.length} semanas · ${totalR} reservados</div>
     <div class="wcards">${weeks.map(w=>buildWeekCard(w)).join('')}</div>`;
 }
 
