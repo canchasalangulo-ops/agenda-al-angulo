@@ -475,11 +475,11 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 
 /* LOGIN OVERLAY */
-.login-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:#0f1420;overflow:hidden}
 .login-overlay.hidden{display:none}
-/* oscurecer un poco más el video cuando se muestra el login */
-.login-overlay::before{content:'';position:fixed;inset:0;background:rgba(5,9,18,0.55);z-index:-1}
-.login-card{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:32px}
+.login-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
+.login-bg-dim{position:absolute;inset:0;background:rgba(5,9,18,0.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:1}
+.login-card{position:relative;z-index:2;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:32px}
 .login-logo{display:flex;flex-direction:column;align-items:center;gap:8px}
 .login-logo-title{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.6)}
 .login-logo-sub{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4)}
@@ -538,6 +538,8 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- PAGE LOADER -->
 <!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="loginOverlay">
+  <video class="login-bg-video" id="loginBgVideo" autoplay muted playsinline></video>
+  <div class="login-bg-dim"></div>
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-title">Al Ángulo</div>
@@ -2264,7 +2266,29 @@ async function checkAuth() {
 }
 
 function showLoginOverlay() {
-  hideLoader(); // ocultar page loader para que el video sea visible
+  hideLoader();
+  // Iniciar video del login
+  const VIDEOS = [
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/bg_alangulo.comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid1_cartel%20comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid2_entrada.comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid3_entreno.comprimido.mp4",
+    "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid4_primer_plano.comprimido.mp4"
+  ];
+  let loginVidUsed = [];
+  const lv = document.getElementById('loginBgVideo');
+  function nextLoginVid(){
+    if(loginVidUsed.length >= VIDEOS.length) loginVidUsed = [];
+    const remaining = VIDEOS.filter((_,i) => !loginVidUsed.includes(i));
+    const idx = VIDEOS.indexOf(remaining[Math.floor(Math.random()*remaining.length)]);
+    loginVidUsed.push(idx);
+    lv.src = VIDEOS[idx];
+    lv.load();
+    lv.play().catch(()=>{});
+  }
+  lv.addEventListener('ended', nextLoginVid);
+  lv.addEventListener('error', nextLoginVid);
+  nextLoginVid();
   document.getElementById('loginOverlay').classList.remove('hidden');
 }
 
