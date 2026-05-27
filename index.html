@@ -147,7 +147,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hist-month-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#fff}
 .hist-month-year{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px}
 .hist-month-right{display:flex;align-items:center;gap:12px}
-.hist-month-badge{font-size:11px;font-weight:700;color:var(--verde);background:var(--verde-pale);border:1px solid var(--verde-mid);padding:3px 12px;border-radius:20px;letter-spacing:.5px}
+.hist-month-badge{font-size:11px;font-weight:700;color:#39ff6e;background:rgba(57,255,110,0.08);border:1px solid rgba(57,255,110,0.3);padding:4px 14px;border-radius:20px;letter-spacing:.5px;text-shadow:0 0 10px #39ff6e99;box-shadow:0 0 10px rgba(57,255,110,0.15)}
 .hist-month-arrow{font-size:11px;color:var(--muted);transition:transform .2s}
 .hist-month-header.open .hist-month-arrow{transform:rotate(180deg)}
 .hist-month-body{flex-direction:column;padding:20px 24px;gap:10px}
@@ -1255,7 +1255,7 @@ async function initHistorial(){
             <span class="hist-month-year">${m.year}</span>
           </div>
           <div class="hist-month-right">
-            <span class="hist-month-badge">${m.reservados}r</span>
+            <span class="hist-month-badge">${m.reservados} reservados</span>
             <span class="hist-month-arrow">▼</span>
           </div>
         </div>
