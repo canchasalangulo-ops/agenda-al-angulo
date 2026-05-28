@@ -149,6 +149,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hist-month-right{display:flex;align-items:center;gap:12px}
 .hist-month-badges{display:flex;align-items:center;gap:6px}
 .hmb{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
+.hmb{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
 .hmb-res{color:#39ff6e;background:rgba(57,255,110,0.08);border:1px solid rgba(57,255,110,0.3);text-shadow:0 0 8px #39ff6e88}
 .hmb-ef{color:#39ff6e;background:rgba(57,255,110,0.06);border:1px solid rgba(57,255,110,0.2);text-shadow:0 0 8px #39ff6e66}
 .hmb-tr{color:#4dc8ff;background:rgba(77,200,255,0.06);border:1px solid rgba(77,200,255,0.2);text-shadow:0 0 8px #4dc8ff66}
@@ -1261,7 +1262,7 @@ async function initHistorial(){
             <span class="hist-month-year">${m.year}</span>
           </div>
           <div class="hist-month-right">
-            <span class="hist-month-badge">${m.reservados} turnos reservados en el mes</span>
+            <div class="hist-month-badges" id="hmb-${k}"><span class="hmb hmb-res">⚽ ${m.reservados} reservados</span></div>
             <span class="hist-month-arrow">▼</span>
           </div>
         </div>
