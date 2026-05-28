@@ -1323,8 +1323,8 @@ function renderHistMonthBody(k, year, month, data){
   const badgeWrap = document.getElementById(`hmg-${k}`);
   if(badgeWrap){
     let pills = `<span class="hmb hmb-res">⚽ ${totalR} reservados</span>`;
-    if(totalEf > 0) pills += `<span class="hmb hmb-ef">💵 $${totalEf.toLocaleString('es-AR')}</span>`;
-    if(totalTr > 0) pills += `<span class="hmb hmb-tr">🏦 $${totalTr.toLocaleString('es-AR')}</span>`;
+    pills += `<span class="hmb hmb-ef">💵 $${totalEf.toLocaleString('es-AR')}</span>`;
+    pills += `<span class="hmb hmb-tr">🏦 $${totalTr.toLocaleString('es-AR')}</span>`;
     badgeWrap.innerHTML = pills;
   }
   const mEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
