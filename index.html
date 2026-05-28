@@ -558,7 +558,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- PAGE LOADER -->
 <!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="loginOverlay">
-  <video class="login-bg-video" id="loginBgVideo" autoplay muted playsinline crossorigin="anonymous"></video>
+  <video class="login-bg-video" id="loginBgVideo" autoplay muted playsinline></video>
   <div class="login-bg-dim"></div>
   <div class="login-card">
     <div class="login-logo">
@@ -1016,7 +1016,7 @@ async function loadHistorialMonth(year, month){
 
   const { data, error } = await db
     .from('turnos')
-    .select('fecha, horario, cancha, numero_cancha, estado, cliente')
+    .select('fecha, horario, cancha, numero_cancha, estado, cliente, facturacion_efectivo, facturacion_transferencia')
     .gte('fecha', start)
     .lte('fecha', end)
     .lt('fecha', dk(WEEKS[0].s)) // only past weeks
@@ -1034,7 +1034,7 @@ async function loadHistorialMonths(){
   setSyncing();
   const { data, error } = await db
     .from('turnos')
-    .select('fecha, estado')
+    .select('fecha, estado, facturacion_efectivo, facturacion_transferencia')
     .gte('fecha', dk(threeMonthsAgo))
     .lt('fecha', dk(WEEKS[0].s))
     .order('fecha', { ascending: false });
@@ -1257,7 +1257,7 @@ async function initHistorial(){
             <span class="hist-month-year">${m.year}</span>
           </div>
           <div class="hist-month-right">
-            <span class="hist-month-badge">${m.reservados} reservados</span>
+            <span class="hist-month-badge">${m.reservados} turnos reservados en el mes</span>
             <span class="hist-month-arrow">▼</span>
           </div>
         </div>
@@ -1314,8 +1314,22 @@ function renderHistMonthBody(k, year, month, data){
   const totalR = data.filter(t=>t.estado==='Reservado').length;
   // Sincronizar el badge del header con el conteo real del mes completo
   const badge = document.querySelector(`#hmh-${k} .hist-month-badge`);
-  if(badge) badge.textContent = totalR + ' reservados';
-  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:12px">${weeks.length} semanas · ${totalR} reservados</div>
+  const totalEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
+  const totalTr = data.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
+  const totalFact = totalEf + totalTr;
+  if(badge){
+    const factStr = totalFact > 0
+      ? ` · 💵 $${totalEf.toLocaleString('es-AR')} · 🏦 $${totalTr.toLocaleString('es-AR')}`
+      : '';
+    badge.textContent = totalR + ' turnos reservados en el mes' + factStr;
+  }
+  const mEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
+  const mTr = data.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
+  const mTot = mEf + mTr;
+  const mFactStr = mTot > 0
+    ? ` · 💵 <span style="color:#39ff6e">$${mEf.toLocaleString('es-AR')}</span> · 🏦 <span style="color:#4dc8ff">$${mTr.toLocaleString('es-AR')}</span> · Total <span style="color:#fff">$${mTot.toLocaleString('es-AR')}</span>`
+    : '';
+  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:14px">${weeks.length} semanas · ${totalR} reservados${mFactStr}</div>
     <div class="wcards">${weeks.map(w=>buildWeekCard(w)).join('')}</div>`;
 }
 
@@ -1854,17 +1868,16 @@ async function applyAllTurnosFijosToWeeks(){
     for(const tf of fijos){
       const targetDay  = TF_DAY_MAP[tf.dia_semana];
       const horario    = (tf.horario||'').slice(0,5);
-      const horarioFull = horario + ':00';
-
       // Recorrer todos los días de la bisemana buscando coincidencias de día
       for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
         if(d.getDay() !== targetDay) continue;
         const fecha = dk(new Date(d));
 
         // Buscar slot Disponible para esa fecha+horario+cancha en turnosMap
+        // horario ya es "20:00" (varchar 5) después del ALTER TABLE
         let applied = false;
         for(const [key, t] of Object.entries(turnosMap)){
-          if(t.fecha === fecha && t.horario === horarioFull && t.cancha === tf.cancha && t.estado === 'Disponible'){
+          if(t.fecha === fecha && t.horario === horario && t.cancha === tf.cancha && t.estado === 'Disponible'){
             // Actualizar en Supabase
             await db.from('turnos').update({
               estado: 'Pendiente',
