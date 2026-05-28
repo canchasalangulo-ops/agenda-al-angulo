@@ -149,13 +149,12 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hist-month-right{display:flex;align-items:center;gap:12px}
 .hist-month-badges{display:flex;align-items:center;gap:6px}
 .hmb{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
-.hmb{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
 .hmb-res{color:#39ff6e;background:rgba(57,255,110,0.08);border:1px solid rgba(57,255,110,0.3);text-shadow:0 0 8px #39ff6e88}
 .hmb-ef{color:#39ff6e;background:rgba(57,255,110,0.06);border:1px solid rgba(57,255,110,0.2);text-shadow:0 0 8px #39ff6e66}
 .hmb-tr{color:#4dc8ff;background:rgba(77,200,255,0.06);border:1px solid rgba(77,200,255,0.2);text-shadow:0 0 8px #4dc8ff66}
 .hist-month-arrow{font-size:11px;color:var(--muted);transition:transform .2s}
 .hist-month-header.open .hist-month-arrow{transform:rotate(180deg)}
-.hist-month-body{flex-direction:column;padding:20px 24px;gap:10px}
+.hist-month-body{display:none;flex-direction:column;padding:20px 24px;gap:10px;width:100%;box-sizing:border-box}
 /* Week cards — ancho completo */
 .wcards{display:flex;flex-direction:column;gap:10px}
 .wcard{background:rgba(0,0,0,0.45);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);transition:border-color .2s,box-shadow .2s}
@@ -1262,7 +1261,7 @@ async function initHistorial(){
             <span class="hist-month-year">${m.year}</span>
           </div>
           <div class="hist-month-right">
-            <div class="hist-month-badges" id="hmb-${k}"><span class="hmb hmb-res">⚽ ${m.reservados} reservados</span></div>
+            <div class="hist-month-badges" id="hmg-${k}"><span class="hmb hmb-res">⚽ ${m.reservados} reservados</span></div>
             <span class="hist-month-arrow">▼</span>
           </div>
         </div>
@@ -1318,11 +1317,10 @@ function renderHistMonthBody(k, year, month, data){
   const weeks = groupByWeek(data);
   const totalR = data.filter(t=>t.estado==='Reservado').length;
   // Sincronizar el badge del header con el conteo real del mes completo
-  const badge = document.querySelector(`#hmh-${k} .hist-month-badge`);
   const totalEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
   const totalTr = data.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
   const totalFact = totalEf + totalTr;
-  const badgeWrap = document.getElementById(`hmb-${k}`);
+  const badgeWrap = document.getElementById(`hmg-${k}`);
   if(badgeWrap){
     let pills = `<span class="hmb hmb-res">⚽ ${totalR} reservados</span>`;
     if(totalEf > 0) pills += `<span class="hmb hmb-ef">💵 $${totalEf.toLocaleString('es-AR')}</span>`;
@@ -2328,7 +2326,7 @@ function initRealtime(){
         if(activePage && activePage.id === 'page-historial' && t.fecha){
           const monthKey = t.fecha.slice(0,7);
           const openBody = document.getElementById(`hmb-${monthKey}`);
-          if(openBody && openBody.style.display !== 'none'){
+          if(openBody && openBody.style.display === 'flex'){
             const [yr, mo] = monthKey.split('-').map(Number);
             toggleHistMonth(monthKey, yr, mo-1);
           }
