@@ -147,7 +147,11 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hist-month-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#fff}
 .hist-month-year{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px}
 .hist-month-right{display:flex;align-items:center;gap:12px}
-.hist-month-badge{font-size:11px;font-weight:700;color:#39ff6e;background:rgba(57,255,110,0.08);border:1px solid rgba(57,255,110,0.3);padding:4px 14px;border-radius:20px;letter-spacing:.5px;text-shadow:0 0 10px #39ff6e99;box-shadow:0 0 10px rgba(57,255,110,0.15)}
+.hist-month-badges{display:flex;align-items:center;gap:6px}
+.hmb{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
+.hmb-res{color:#39ff6e;background:rgba(57,255,110,0.08);border:1px solid rgba(57,255,110,0.3);text-shadow:0 0 8px #39ff6e88}
+.hmb-ef{color:#39ff6e;background:rgba(57,255,110,0.06);border:1px solid rgba(57,255,110,0.2);text-shadow:0 0 8px #39ff6e66}
+.hmb-tr{color:#4dc8ff;background:rgba(77,200,255,0.06);border:1px solid rgba(77,200,255,0.2);text-shadow:0 0 8px #4dc8ff66}
 .hist-month-arrow{font-size:11px;color:var(--muted);transition:transform .2s}
 .hist-month-header.open .hist-month-arrow{transform:rotate(180deg)}
 .hist-month-body{flex-direction:column;padding:20px 24px;gap:10px}
@@ -1317,11 +1321,12 @@ function renderHistMonthBody(k, year, month, data){
   const totalEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
   const totalTr = data.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
   const totalFact = totalEf + totalTr;
-  if(badge){
-    const factStr = totalFact > 0
-      ? ` · 💵 $${totalEf.toLocaleString('es-AR')} · 🏦 $${totalTr.toLocaleString('es-AR')}`
-      : '';
-    badge.textContent = totalR + ' turnos reservados en el mes' + factStr;
+  const badgeWrap = document.getElementById(`hmb-${k}`);
+  if(badgeWrap){
+    let pills = `<span class="hmb hmb-res">⚽ ${totalR} reservados</span>`;
+    if(totalEf > 0) pills += `<span class="hmb hmb-ef">💵 $${totalEf.toLocaleString('es-AR')}</span>`;
+    if(totalTr > 0) pills += `<span class="hmb hmb-tr">🏦 $${totalTr.toLocaleString('es-AR')}</span>`;
+    badgeWrap.innerHTML = pills;
   }
   const mEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
   const mTr = data.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
@@ -2305,12 +2310,27 @@ function initRealtime(){
       if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
         const key = tKey(t.fecha, t.horario, t.cancha, t.numero_cancha);
         turnosMap[key] = t;
+        // Limpiar cache del historial para ese mes (para que recargue con datos frescos)
+        if(t.fecha){
+          const monthKey = t.fecha.slice(0,7); // "2026-05"
+          if(historialData[monthKey]) delete historialData[monthKey];
+        }
         // Solo re-renderizar si el turno es de la semana visible
         const w = WEEKS[aWeek];
         if (t.fecha >= dk(w.s) && t.fecha <= dk(w.e)) {
           renderGrid();
           renderDStrip();
           renderSBar();
+        }
+        // Si historial está abierto y el mes afectado está expandido, recargarlo
+        const activePage = document.querySelector('.page.on');
+        if(activePage && activePage.id === 'page-historial' && t.fecha){
+          const monthKey = t.fecha.slice(0,7);
+          const openBody = document.getElementById(`hmb-${monthKey}`);
+          if(openBody && openBody.style.display !== 'none'){
+            const [yr, mo] = monthKey.split('-').map(Number);
+            toggleHistMonth(monthKey, yr, mo-1);
+          }
         }
       } else if (payload.eventType === 'DELETE') {
         const o = payload.old;
