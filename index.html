@@ -519,7 +519,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .login-error{font-size:11px;font-weight:600;color:#f87171;min-height:16px;margin-top:12px;letter-spacing:.5px}
 .login-right{flex:1;position:relative;overflow:hidden}
-.login-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease;z-index:0}
+.login-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.4s ease;z-index:0;will-change:opacity}
 .login-img.active{opacity:1;z-index:1}
 .login-right::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(8,12,18,1) 0%,rgba(8,12,18,0.55) 20%,transparent 50%);z-index:2;pointer-events:none}
 .login-right::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,12,18,0.45) 0%,transparent 20%,transparent 75%,rgba(8,12,18,0.55) 100%);z-index:2;pointer-events:none}
@@ -569,7 +569,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   <!-- Panel izquierdo -->
   <div class="login-left">
     <div class="login-logo-row">
-      <img class="login-logo-img" src="https://raw.githubusercontent.com/canchasalangulo-ops/agenda-al-angulo/main/assets/logo.png" alt="Al Ángulo" />
+      <img class="login-logo-img" src="https://raw.githubusercontent.com/canchasalangulo-ops/agenda-al-angulo/main/assets/logo.png?v=2" alt="Al Ángulo" />
       <div class="login-logo-text">
         <div class="login-logo-title">Al Ángulo</div>
         <div class="login-logo-sub">Canchas de Fútbol · San Rafael</div>
@@ -2417,9 +2417,11 @@ let loginImgTimer = null;
 function rotateLoginImages() {
   const imgs = document.querySelectorAll('.login-img');
   if (!imgs.length) return;
-  imgs[loginImgIdx % imgs.length].classList.remove('active');
+  const prev = loginImgIdx % imgs.length;
   loginImgIdx = (loginImgIdx + 1) % imgs.length;
+  // Activar la nueva primero para overlap suave, luego quitar la anterior
   imgs[loginImgIdx].classList.add('active');
+  setTimeout(() => imgs[prev].classList.remove('active'), 100);
 }
 
 function showLoginOverlay() {
