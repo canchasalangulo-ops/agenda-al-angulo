@@ -1902,8 +1902,14 @@ async function applyAllTurnosFijosToWeeks(){
         if(d.getDay() !== targetDay) continue;
         const fecha = dk(new Date(d));
 
-        // Buscar slot Disponible para esa fecha+horario+cancha en turnosMap
-        // horario ya es "20:00" (varchar 5) después del ALTER TABLE
+        // Si ya existe un Pendiente/Reservado de este cliente en esa fecha+horario+cancha, no duplicar
+        const yaAplicado = Object.values(turnosMap).some(t =>
+          t.fecha === fecha && t.horario === horario && t.cancha === tf.cancha &&
+          (t.estado === 'Pendiente' || t.estado === 'Reservado' || t.estado === 'Pendiente de seña') &&
+          t.cliente === tf.cliente
+        );
+        if(yaAplicado) continue;
+
         let applied = false;
         for(const [key, t] of Object.entries(turnosMap)){
           if(t.fecha === fecha && t.horario === horario && t.cancha === tf.cancha && t.estado === 'Disponible'){
