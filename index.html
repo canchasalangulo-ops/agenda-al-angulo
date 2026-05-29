@@ -605,10 +605,19 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
     <polygon points="258,268 300,296 298,332 282,338 250,312 254,272"/>
   </g>
 
-  <!-- Líneas blancas del campo (arco/velocidad) -->
-  <g fill="white" opacity="0.95">
-    <rect x="168" y="426" width="220" height="13" rx="5" transform="rotate(-14 278 432)"/>
-    <rect x="172" y="456" width="195" height="10" rx="4" transform="rotate(-14 270 461)"/>
+  <!-- Arco de fútbol (portería) — detrás de la pelota -->
+  <g stroke="white" stroke-linecap="round" fill="none" opacity="0.92">
+    <!-- Travesaño (crossbar) -->
+    <line x1="248" y1="282" x2="470" y2="282" stroke-width="11"/>
+    <!-- Palo izquierdo -->
+    <line x1="248" y1="282" x2="248" y2="450" stroke-width="11"/>
+    <!-- Palo derecho -->
+    <line x1="470" y1="282" x2="470" y2="450" stroke-width="11"/>
+    <!-- Red diagonal (líneas de red) -->
+    <line x1="265" y1="295" x2="338" y2="450" stroke-width="5" opacity="0.55"/>
+    <line x1="320" y1="285" x2="370" y2="450" stroke-width="5" opacity="0.55"/>
+    <line x1="380" y1="285" x2="400" y2="450" stroke-width="5" opacity="0.45"/>
+    <line x1="440" y1="285" x2="450" y2="420" stroke-width="5" opacity="0.35"/>
   </g>
 </svg>
       <div class="login-logo-text">
