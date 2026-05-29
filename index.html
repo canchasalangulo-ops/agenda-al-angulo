@@ -496,29 +496,33 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 
 /* LOGIN OVERLAY */
-.login-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:#0f1420;overflow:hidden}
+.login-overlay{position:fixed;inset:0;z-index:10000;display:flex;background:#0a0e14;overflow:hidden}
 .login-overlay.hidden{display:none}
-.login-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
-.login-bg-dim{position:absolute;inset:0;background:rgba(5,9,18,0.60);z-index:1}
-.login-card{position:relative;z-index:2;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:32px}
-.login-logo{display:flex;flex-direction:column;align-items:center;gap:8px}
-.login-logo-title{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.6)}
-.login-logo-sub{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4)}
-.login-divider{width:32px;height:2px;background:var(--naranja);border-radius:2px}
-.login-form{width:100%;display:flex;flex-direction:column;gap:0}
-.login-field{display:flex;flex-direction:column;gap:0;position:relative;margin-bottom:28px}
-.login-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px}
-.login-input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);padding:8px 0 10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:400;outline:none;transition:border-color .2s;width:100%}
+.login-left{width:420px;min-width:320px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:48px 52px;background:rgba(8,12,18,0.97);position:relative;z-index:2}
+.login-logo-row{display:flex;align-items:center;gap:14px;margin-bottom:40px}
+.login-logo-img{width:52px;height:52px;object-fit:contain}
+.login-logo-text{display:flex;flex-direction:column;gap:2px}
+.login-logo-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:#fff;line-height:1}
+.login-logo-sub{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.login-heading{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;margin-bottom:6px}
+.login-divider{width:28px;height:2px;background:var(--naranja);border-radius:2px;margin-bottom:36px}
+.login-form{display:flex;flex-direction:column;gap:0;width:100%}
+.login-field{display:flex;flex-direction:column;gap:0;margin-bottom:28px}
+.login-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:10px}
+.login-input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.18);padding:8px 0 10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:400;outline:none;transition:border-color .2s;width:100%}
 .login-input:focus{border-bottom-color:var(--naranja)}
-.login-input::placeholder{color:rgba(255,255,255,.2)}
-.login-input:-webkit-autofill,
-.login-input:-webkit-autofill:hover,
-.login-input:-webkit-autofill:focus{-webkit-text-fill-color:#fff;-webkit-box-shadow:0 0 0px 1000px transparent inset;transition:background-color 5000s ease-in-out 0s;caret-color:#fff}
-.btn-login{background:var(--naranja);color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 0;border-radius:40px;border:none;cursor:pointer;transition:all .2s;width:100%;margin-top:8px;box-shadow:0 4px 20px rgba(232,80,26,.35)}
+.login-input::placeholder{color:rgba(255,255,255,.18)}
+.login-input:-webkit-autofill,.login-input:-webkit-autofill:hover,.login-input:-webkit-autofill:focus{-webkit-text-fill-color:#fff;-webkit-box-shadow:0 0 0px 1000px transparent inset;transition:background-color 5000s ease-in-out 0s;caret-color:#fff}
+.btn-login{background:var(--naranja);color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:15px 0;border-radius:40px;border:none;cursor:pointer;transition:all .2s;width:100%;margin-top:8px;box-shadow:0 4px 20px rgba(232,80,26,.3)}
 .btn-login:hover{background:var(--naranja-dk);box-shadow:0 4px 28px rgba(232,80,26,.5);transform:translateY(-1px)}
 .btn-login:active{transform:translateY(0)}
 .btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.login-error{font-size:11px;font-weight:600;color:#f87171;text-align:center;min-height:16px;margin-top:12px;letter-spacing:.5px}
+.login-error{font-size:11px;font-weight:600;color:#f87171;min-height:16px;margin-top:12px;letter-spacing:.5px}
+.login-right{flex:1;position:relative;overflow:hidden}
+.login-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease;z-index:0}
+.login-img.active{opacity:1;z-index:1}
+.login-right::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(8,12,18,1) 0%,rgba(8,12,18,0.55) 20%,transparent 50%);z-index:2;pointer-events:none}
+.login-right::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,12,18,0.45) 0%,transparent 20%,transparent 75%,rgba(8,12,18,0.55) 100%);z-index:2;pointer-events:none}
 /* USER INFO EN HEADER */
 .hdr-user{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.55);text-transform:uppercase}
 .btn-logout{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:all .15s}
@@ -562,13 +566,16 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- PAGE LOADER -->
 <!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="loginOverlay">
-  <video class="login-bg-video" id="loginBgVideo" autoplay muted playsinline></video>
-  <div class="login-bg-dim"></div>
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-title">Al Ángulo</div>
-      <div class="login-logo-sub">Canchas de Fútbol · San Rafael</div>
+  <!-- Panel izquierdo -->
+  <div class="login-left">
+    <div class="login-logo-row">
+      <img class="login-logo-img" src="https://raw.githubusercontent.com/canchasalangulo-ops/agenda-al-angulo/main/assets/logo.png" alt="Al Ángulo" />
+      <div class="login-logo-text">
+        <div class="login-logo-title">Al Ángulo</div>
+        <div class="login-logo-sub">Canchas de Fútbol · San Rafael</div>
+      </div>
     </div>
+    <div class="login-heading">Bienvenido</div>
     <div class="login-divider"></div>
     <div class="login-form">
       <div class="login-field">
@@ -582,6 +589,13 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
       <div class="login-error" id="loginError"></div>
       <button class="btn-login" id="btnLogin" onclick="handleLogin()">Ingresar</button>
     </div>
+  </div>
+  <!-- Panel derecho — fotos rotantes -->
+  <div class="login-right" id="loginRight">
+    <img class="login-img active" id="limg0" src="https://raw.githubusercontent.com/canchasalangulo-ops/agenda-al-angulo/main/assets/court1.jpg" />
+    <img class="login-img" id="limg1" src="https://raw.githubusercontent.com/canchasalangulo-ops/agenda-al-angulo/main/assets/court2.jpg" />
+    <img class="login-img" id="limg2" src="https://raw.githubusercontent.com/canchasalangulo-ops/agenda-al-angulo/main/assets/court3.jpg" />
+    <img class="login-img" id="limg3" src="https://raw.githubusercontent.com/canchasalangulo-ops/agenda-al-angulo/main/assets/court4.jpg" />
   </div>
 </div>
 
@@ -2397,36 +2411,30 @@ async function checkAuth() {
   }
 }
 
-const LOGIN_VIDEOS = [
-  "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/bg_alangulo.comprimido.mp4",
-  "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid1_cartel%20comprimido.mp4",
-  "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid2_entrada.comprimido.mp4",
-  "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid3_entreno.comprimido.mp4",
-  "https://iguhqeolivzhsishdddg.supabase.co/storage/v1/object/public/assets/vid4_primer_plano.comprimido.mp4"
-];
-let loginVidIdx = Math.floor(Math.random() * LOGIN_VIDEOS.length);
+let loginImgIdx = 0;
+let loginImgTimer = null;
 
-function playLoginVideo() {
-  const lv = document.getElementById('loginBgVideo');
-  if (!lv) return;
-  lv.src = LOGIN_VIDEOS[loginVidIdx % LOGIN_VIDEOS.length];
-  lv.muted = true;
-  lv.load();
-  lv.play().catch(() => {});
-  loginVidIdx++;
+function rotateLoginImages() {
+  const imgs = document.querySelectorAll('.login-img');
+  if (!imgs.length) return;
+  imgs[loginImgIdx % imgs.length].classList.remove('active');
+  loginImgIdx = (loginImgIdx + 1) % imgs.length;
+  imgs[loginImgIdx].classList.add('active');
 }
 
 function showLoginOverlay() {
   hideLoader();
-  // Mostrar overlay PRIMERO para que el video sea visible antes de reproducir
   document.getElementById('loginOverlay').classList.remove('hidden');
   // Resetear botón
   const btn = document.getElementById('btnLogin');
   btn.disabled = false;
   btn.textContent = 'Ingresar';
   document.getElementById('loginError').textContent = '';
-  // Iniciar video después de que el overlay sea visible
-  setTimeout(playLoginVideo, 50);
+  // Iniciar rotación de imágenes
+  if (loginImgTimer) clearInterval(loginImgTimer);
+  loginImgIdx = Math.floor(Math.random() * 4);
+  document.querySelectorAll('.login-img').forEach((img, i) => img.classList.toggle('active', i === loginImgIdx));
+  loginImgTimer = setInterval(rotateLoginImages, 4000);
 }
 
 function hideLoginOverlay() {
@@ -2515,12 +2523,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginUser').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
-  // Avanzar al siguiente video cuando termina
-  const lv = document.getElementById('loginBgVideo');
-  if (lv) {
-    lv.addEventListener('ended', playLoginVideo);
-    lv.addEventListener('error', playLoginVideo);
-  }
+
 });
 
 // ═══════════════════════════════════════════════
