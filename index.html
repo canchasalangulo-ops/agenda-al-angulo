@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Al Ángulo — Agenda</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lobster&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --verde:#1A6B55;--verde-dk:#124a3b;--verde-lt:#2a8a6e;
@@ -139,6 +139,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 /* ─── HISTORIAL ─── */
 .hist-wrap{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:10px}
+.hist-header{margin-bottom:8px}
 .hist-month-card{background:rgba(0,0,0,0.40);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06)}
 .hist-month-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;cursor:pointer;transition:background .15s;user-select:none}
 .hist-month-header:hover{background:rgba(255,255,255,.04)}
@@ -188,31 +189,45 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 /* ─── RESÚMENES ─── */
 .rcontent{flex:1;overflow-y:auto;padding:24px 28px;background:transparent}
-.rttl{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--negro);margin-bottom:4px}
-.rsub{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:20px}
-.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-.rcard{background:rgba(18,26,42,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:all .15s}
-.rcard:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
-.rchdr{background:var(--verde);padding:18px 20px;display:flex;justify-content:space-between;align-items:center}
-.rcwlbl{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,.65)}
-.rcdates{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#fff;margin-top:2px}
-.rcbig{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:2px;color:#fff;line-height:1}
-.rcbiglb{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.55);text-align:right}
-.rcbody{padding:16px 20px}
-.rcsr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.rcst{display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:10px;background:#111827}
-.rcsv{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1}
-.rcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-top:3px;text-align:center}
-.rcbtitle{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.cbrow{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.cblbl{font-size:10px;font-weight:600;color:var(--text);width:70px;flex-shrink:0}
-.cbtrack{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
-.cbfill{height:100%;border-radius:3px}
+.rsem-ttl-label{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px}
+.rsem-ttl{font-family:'Lobster',cursive;font-size:36px;color:#fff;margin-bottom:24px;font-weight:400}
+.rgrid{display:flex;flex-direction:column;gap:14px}
+.rcard{background:rgba(0,0,0,0.45);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);transition:border-color .2s}
+.rcard:hover{border-color:rgba(255,255,255,.16)}
+.rchdr{padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06)}
+.rcwlbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.rcdates{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#fff;margin-top:3px;display:flex;align-items:center;gap:10px}
+.lbadge{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#39ff6e;background:rgba(57,255,110,.1);border:1px solid rgba(57,255,110,.3);padding:3px 10px;border-radius:20px}
+.rcbig{font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:1px;line-height:1}
+.rcbiglb{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.6;text-align:right}
+.rcmid{display:grid;grid-template-columns:1fr 1px 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,.06)}
+.rcdiv{background:rgba(255,255,255,.06)}
+.rcingresos{padding:18px 24px}
+.rcingr-ttl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:12px}
+.rcingr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rcingr-label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:rgba(255,255,255,.6)}
+.rcingr-icon{font-size:14px}
+.rcingr-val{font-size:14px;font-weight:700}
+.rcingr-total{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center}
+.rcingr-total-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.rcingr-total-val{font-size:16px;font-weight:800;color:#fff}
+.rcturnos{padding:18px 24px;display:flex;flex-direction:column;gap:12px}
+.rcturno-ttl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.rcsr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rcst{display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.rcsv{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1}
+.rcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px;text-align:center}
+.rctags{display:flex;gap:8px;flex-wrap:wrap}
+.rctag-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff}
+.rcbtitle{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:10px;padding:16px 24px 0}
+.rcocc{padding:0 24px 18px;display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}
+.cbrow{display:flex;align-items:center;gap:8px}
+.cblbl{font-size:10px;font-weight:600;color:rgba(255,255,255,.5);width:68px;flex-shrink:0}
+.cbtrack{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.cbfill{height:100%;border-radius:3px;transition:width .4s}
 .cbfill.c5{background:var(--verde)}
 .cbfill.c6{background:var(--naranja)}
-.cbpct{font-size:10px;font-weight:700;color:var(--muted);width:32px;text-align:right;flex-shrink:0}
-.rctr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.rctb{background:#111827;border-radius:8px;padding:8px 12px}
+.cbpct{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);width:30px;text-align:right;flex-shrink:0}
 .rctblb{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .rctbv{font-size:12px;font-weight:700;color:var(--negro)}
 .rctag{font-size:9px;font-weight:700;color:var(--naranja);background:var(--naranja-pale);padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px}
@@ -543,7 +558,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 @media (max-width:700px){
   /* Login mobile: panel único con imagen de fondo */
   .login-overlay{flex-direction:column}
-  .login-left{width:100%;min-width:unset;padding:48px 28px 40px;background:rgba(8,12,18,0.82);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+  .login-left{width:100%;min-width:unset;min-height:100dvh;min-height:100vh;padding:48px 28px 56px;background:rgba(8,12,18,0.82);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);justify-content:center;box-sizing:border-box}
   .login-right{position:fixed;inset:0;z-index:0;display:block}
   .login-logo-title{font-size:20px}
   .login-heading{font-size:28px}
@@ -574,10 +589,10 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   .ginner{min-width:600px}
   .gcol-hdr{font-size:10px;padding:8px 4px}
   .gtime{width:44px;font-size:9px;padding-right:4px}
-  .gcell{min-height:54px;padding:5px 6px}
+  .gcell{height:68px;min-height:68px;max-height:68px;padding:5px 6px;overflow:hidden}
   .gcell-status{font-size:7px;letter-spacing:1px}
   .gcell-evt{font-size:7px}
-  .gcell-name{font-size:10px}
+  .gcell-name{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .gcell-tel{font-size:9px}
   /* Stats bar mobile */
   .sbar{flex-wrap:wrap;gap:6px;padding:6px 10px}
@@ -779,6 +794,10 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- HISTORIAL -->
 <div class="page" id="page-historial">
   <div class="hist-wrap" id="histWrap">
+    <div class="hist-header">
+      <div class="rsem-ttl-label">Semanas pasadas por mes</div>
+      <div class="rsem-ttl">Historial</div>
+    </div>
     <div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando historial...</div>
   </div>
 </div>
@@ -1507,7 +1526,7 @@ async function initResumenes(){
     const eightWeeksAgo = add(WEEKS[0].s, -56);
     const { data, error } = await db
       .from('turnos')
-      .select('fecha, horario, cancha, estado, cliente, numero')
+      .select('fecha, horario, cancha, numero_cancha, estado, cliente, numero, facturacion_efectivo, facturacion_transferencia')
       .gte('fecha', dk(eightWeeksAgo))
       .lt('fecha', dk(WEEKS[0].s));
     if(error) throw error;
@@ -1551,41 +1570,68 @@ function renderResumenes(data){
     for(const t of w.turnos) if(t.estado==='Reservado'&&t.horario) horarios[t.horario.slice(0,5)]=(horarios[t.horario.slice(0,5)]||0)+1;
     const topH=Object.entries(horarios).sort((a,b)=>b[1]-a[1])[0];
 
+    // Ocupación real por sub-cancha
+    const c5a=w.turnos.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===1);
+    const c5b=w.turnos.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===2);
+    const c6a=w.turnos.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===1);
+    const c6b=w.turnos.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===2);
+    const pct5a=c5a.length?Math.round(c5a.filter(t=>t.estado==='Reservado').length/c5a.length*100):0;
+    const pct5b=c5b.length?Math.round(c5b.filter(t=>t.estado==='Reservado').length/c5b.length*100):0;
+    const pct6a=c6a.length?Math.round(c6a.filter(t=>t.estado==='Reservado').length/c6a.length*100):0;
+    const pct6b=c6b.length?Math.round(c6b.filter(t=>t.estado==='Reservado').length/c6b.length*100):0;
+    // Facturación
+    const ef=w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
+    const tr=w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
+    const tot=ef+tr;
+    const fmtP=n=>n>0?'$'+n.toLocaleString('es-AR'):'$0';
+    const pctColor=p=>p>=60?'#39ff6e':p>=30?'#ffe44d':'#f87171';
     return `<div class="rcard">
       <div class="rchdr">
         <div>
           <div class="rcwlbl">${i===0?'Última semana':'Semana cerrada'}</div>
-          <div class="rcdates">${ff(w.start)} — ${ff(w.end)}</div>
-          ${i===0?'<span class="lbadge">Reciente</span>':''}
+          <div class="rcdates">${ff(w.start)} — ${ff(w.end)} ${i===0?'<span class="lbadge">Reciente</span>':''}</div>
         </div>
         <div style="text-align:right">
-          <div class="rcbig">${pct}%</div>
-          <div class="rcbiglb">Ocupación</div>
+          <div class="rcbig" style="color:${pctColor(pct)}">${pct}%</div>
+          <div class="rcbiglb" style="color:${pctColor(pct)}">Ocupación</div>
         </div>
       </div>
-      <div class="rcbody">
-        <div class="rcsr">
-          <div class="rcst"><div class="rcsv" style="color:var(--d-tx)">${res}</div><div class="rcsl">Reservados</div></div>
-          <div class="rcst"><div class="rcsv" style="color:var(--p-tx)">${pen}</div><div class="rcsl">Pendientes</div></div>
-          <div class="rcst"><div class="rcsv" style="color:var(--muted)">${can}</div><div class="rcsl">Libres</div></div>
-        </div>
-        <div class="rcbtitle">Ocupación por cancha</div>
-        <div class="cbrow"><span class="cblbl">Cancha 5-A</span><div class="cbtrack"><div class="cbfill c5" style="width:${p5}%"></div></div><span class="cbpct">${p5}%</span></div>
-        <div class="cbrow"><span class="cblbl">Cancha 5-B</span><div class="cbtrack"><div class="cbfill c5" style="width:${Math.max(0,p5-5)}%"></div></div><span class="cbpct">${Math.max(0,p5-5)}%</span></div>
-        <div class="cbrow"><span class="cblbl">Cancha 6-A</span><div class="cbtrack"><div class="cbfill c6" style="width:${p6}%"></div></div><span class="cbpct">${p6}%</span></div>
-        <div class="cbrow"><span class="cblbl">Cancha 6-B</span><div class="cbtrack"><div class="cbfill c6" style="width:${Math.max(0,p6-5)}%"></div></div><span class="cbpct">${Math.max(0,p6-5)}%</span></div>
-        <div class="rctr">
-          <div class="rctb">
-            <div class="rctblb">Cliente frecuente</div>
-            <div class="rctbv">${topC?topC[0].split(' ')[0]:'—'}</div>
-            ${topC?'<span class="rctag">⭐ Top</span>':''}
+      <div class="rcmid">
+        <div class="rcingresos">
+          <div class="rcingr-ttl">Ingresos</div>
+          <div class="rcingr-row">
+            <span class="rcingr-label"><span class="rcingr-icon">📷</span>Efectivo</span>
+            <span class="rcingr-val" style="color:#39ff6e">${fmtP(ef)}</span>
           </div>
-          <div class="rctb">
-            <div class="rctblb">Horario pico</div>
-            <div class="rctbv" style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;letter-spacing:1px">${topH?topH[0]:'—'}</div>
-            ${topH?'<span class="rctag">🔥 Más pedido</span>':''}
+          <div class="rcingr-row">
+            <span class="rcingr-label"><span class="rcingr-icon">🏦</span>Transferencia</span>
+            <span class="rcingr-val" style="color:#4dc8ff">${fmtP(tr)}</span>
+          </div>
+          <div class="rcingr-total">
+            <span class="rcingr-total-label">Total semana</span>
+            <span class="rcingr-total-val">${fmtP(tot)}</span>
           </div>
         </div>
+        <div class="rcdiv"></div>
+        <div class="rcturnos">
+          <div class="rcturno-ttl">Turnos</div>
+          <div class="rcsr">
+            <div class="rcst"><div class="rcsv" style="color:#39ff6e">${res}</div><div class="rcsl">Reservados</div></div>
+            <div class="rcst"><div class="rcsv" style="color:#ffe44d">${pen}</div><div class="rcsl">Pendientes</div></div>
+            <div class="rcst"><div class="rcsv" style="color:rgba(255,255,255,.35)">${can}</div><div class="rcsl">Libres</div></div>
+          </div>
+          <div class="rctags">
+            ${topC?`<span class="rctag-pill">⭐ ${topC[0].split(' ')[0]}</span>`:''}
+            ${topH?`<span class="rctag-pill">🕐 ${topH[0]}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="rcbtitle">Ocupación por cancha</div>
+      <div class="rcocc">
+        <div class="cbrow"><span class="cblbl">Cancha 5-A</span><div class="cbtrack"><div class="cbfill c5" style="width:${pct5a}%"></div></div><span class="cbpct">${pct5a}%</span></div>
+        <div class="cbrow"><span class="cblbl">Cancha 5-B</span><div class="cbtrack"><div class="cbfill c5" style="width:${pct5b}%"></div></div><span class="cbpct">${pct5b}%</span></div>
+        <div class="cbrow"><span class="cblbl">Cancha 6-A</span><div class="cbtrack"><div class="cbfill c6" style="width:${pct6a}%"></div></div><span class="cbpct">${pct6a}%</span></div>
+        <div class="cbrow"><span class="cblbl">Cancha 6-B</span><div class="cbtrack"><div class="cbfill c6" style="width:${pct6b}%"></div></div><span class="cbpct">${pct6b}%</span></div>
       </div>
     </div>`;
   }).join('');
@@ -1779,7 +1825,7 @@ function renderContacts() {
     const isOpen = expandedGroups.has(letter);
     return `<div class="alpha-group">
       <div class="alpha-header" onclick="toggleGroup('${letter}')">
-        <span class="alpha-arrow ${isOpen?'open':''}">▶</span>
+        
         <span class="alpha-letter">${letter}</span>
         <span class="alpha-count">${contacts.length}</span>
       </div>
@@ -2137,7 +2183,7 @@ function renderTF(){
     const isOpen = tfOpenGroups.has(dia);
     return `<div class="tf-group">
       <div class="tf-group-header" onclick="toggleTFGroup('${dia}')">
-        <span class="tf-arrow ${isOpen?'open':''}">▶</span>
+        
         <span class="tf-day-name">${dia}</span>
         <span class="tf-day-count">${items.length}</span>
       </div>
