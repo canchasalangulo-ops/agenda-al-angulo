@@ -1075,12 +1075,20 @@ async function loadBisemana(retries=0){
       return loadBisemana(retries + 1);
     }
 
-    // Generar semanas si faltan slots — máximo 252 por semana (4 canchas × 9hs × 7 días)
+    // Generar semanas si faltan slots — máximo 252 (4 canchas × 9hs × 7 días)
     const cAct = data.filter(t=>t.fecha>=dk(WEEKS[0].s)&&t.fecha<=dk(WEEKS[0].e)).length;
     const cSig = data.filter(t=>t.fecha>=dk(WEEKS[1].s)&&t.fecha<=dk(WEEKS[1].e)).length;
     let reload = false;
-    if(cAct < 200){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[0].s),fecha_fin:dk(WEEKS[0].e)}); reload=true; }
-    if(cSig < 200){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)}); reload=true; }
+    if(cAct < 100){
+      const r1 = await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[0].s),fecha_fin:dk(WEEKS[0].e)});
+      if(r1.error) console.warn('generar_semana semana actual:', r1.error.message);
+      else reload = true;
+    }
+    if(cSig < 100){
+      const r2 = await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)});
+      if(r2.error) console.warn('generar_semana semana siguiente:', r2.error.message);
+      else reload = true;
+    }
     if(reload) return loadBisemana(retries + 1);
 
     // Poblar lookup map
