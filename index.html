@@ -310,7 +310,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   .ghead{grid-template-columns:52px repeat(4,1fr);gap:4px;margin-bottom:4px}
   .grow{grid-template-columns:52px repeat(4,1fr);gap:4px;margin-bottom:4px}
   .tlbl{font-size:16px}
-  .tc{min-height:60px;padding:8px 8px}
+  .tc{height:80px;min-height:80px;max-height:80px;padding:7px 8px;overflow:hidden}
   .chd{padding:8px 4px}
   .chlb{font-size:11px}
   .tname{font-size:11px}
@@ -589,17 +589,35 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   .ginner{min-width:600px}
   .gcol-hdr{font-size:10px;padding:8px 4px}
   .gtime{width:44px;font-size:9px;padding-right:4px}
-  .gcell{height:68px;min-height:68px;max-height:68px;padding:5px 6px;overflow:hidden}
-  .gcell-status{font-size:7px;letter-spacing:1px}
-  .gcell-evt{font-size:7px}
-  .gcell-name{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-  .gcell-tel{font-size:9px}
+  /* tc = celdas de la agenda */
+  .tc-name{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tc-tel{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* Stats bar mobile */
   .sbar{flex-wrap:wrap;gap:6px;padding:6px 10px}
   .sbar-item{font-size:9px}
   /* Live board mobile */
   .live-wrap{grid-template-columns:1fr 1fr}
   .live-clock{font-size:28px}
+
+  .hist-month-badges{display:none !important}
+  .rcmid{grid-template-columns:1fr !important}
+  .rcdiv{display:none}
+  .rcingresos,.rcturnos{padding:14px 16px}
+  .rctag-pill{font-size:10px;padding:4px 10px}
+  .rcocc{grid-template-columns:1fr !important;padding:0 16px 14px}
+
+  /* Historial mobile: ocultar badges */
+  .hist-month-badges{display:none}
+  /* Resúmenes mobile: stack vertical */
+  .rcmid{grid-template-columns:1fr;border-bottom:1px solid rgba(255,255,255,.06)}
+  .rcdiv{display:none}
+  .rcingresos,.rcturnos{padding:14px 18px}
+  .rcsr{grid-template-columns:repeat(2,1fr)}
+  .rctags{gap:6px}
+  .rctag-pill{font-size:10px;padding:4px 8px;max-width:none}
+  .rcocc{grid-template-columns:1fr;padding:0 18px 14px}
+  .rcbig{font-size:36px}
+  .rcdates{font-size:18px}
 }
 </style>
 </head>
