@@ -1582,7 +1582,7 @@ function renderResumenes(data){
     // Facturación
     const ef=w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
     const tr=w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
-    const tot=ef+tr;
+    const totFact=ef+tr;
     const fmtP=n=>n>0?'$'+n.toLocaleString('es-AR'):'$0';
     const pctColor=p=>p>=60?'#39ff6e':p>=30?'#ffe44d':'#f87171';
     return `<div class="rcard">
@@ -1609,7 +1609,7 @@ function renderResumenes(data){
           </div>
           <div class="rcingr-total">
             <span class="rcingr-total-label">Total semana</span>
-            <span class="rcingr-total-val">${fmtP(tot)}</span>
+            <span class="rcingr-total-val">${fmtP(totFact)}</span>
           </div>
         </div>
         <div class="rcdiv"></div>
