@@ -1048,7 +1048,14 @@ function getT(fecha, horario, cancha_obj){
 // ═══════════════════════════════════════════════
 // SUPABASE: LOAD BISEMANA
 // ═══════════════════════════════════════════════
-async function loadBisemana(){
+async function loadBisemana(retries=0){
+  if(retries > 3){
+    // Seguridad: nunca quedar en loop infinito
+    setSyncErr();
+    showToast('Error al cargar la agenda. Recargá la página.', 'err');
+    hideLoader();
+    return;
+  }
   setSyncing();
   try {
     const start = dk(WEEKS[0].s);
@@ -1062,19 +1069,19 @@ async function loadBisemana(){
 
     if (error) throw error;
 
-    // Si está vacío, generar semanas
+    // Si está vacío, generar semanas (solo 1 reintento)
     if (!data || data.length === 0) {
       await ensureWeeksExist();
-      return loadBisemana();
+      return loadBisemana(retries + 1);
     }
 
-    // Generar semanas si faltan slots (ON CONFLICT DO NOTHING — idempotente)
+    // Generar semanas si faltan slots — máximo 252 por semana (4 canchas × 9hs × 7 días)
     const cAct = data.filter(t=>t.fecha>=dk(WEEKS[0].s)&&t.fecha<=dk(WEEKS[0].e)).length;
     const cSig = data.filter(t=>t.fecha>=dk(WEEKS[1].s)&&t.fecha<=dk(WEEKS[1].e)).length;
     let reload = false;
-    if(cAct < 100){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[0].s),fecha_fin:dk(WEEKS[0].e)}); reload=true; }
-    if(cSig < 100){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)}); reload=true; }
-    if(reload) return loadBisemana();
+    if(cAct < 200){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[0].s),fecha_fin:dk(WEEKS[0].e)}); reload=true; }
+    if(cSig < 200){ await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)}); reload=true; }
+    if(reload) return loadBisemana(retries + 1);
 
     // Poblar lookup map
     turnosMap = {};
