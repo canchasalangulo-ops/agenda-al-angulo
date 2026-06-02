@@ -618,6 +618,18 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   .rcocc{grid-template-columns:1fr;padding:0 18px 14px}
   .rcbig{font-size:36px}
   .rcdates{font-size:18px}
+
+  /* Historial mobile: facturación menos apretada */
+  .wfv{font-size:11px}
+  .wfl{font-size:7px}
+  .wcard-fact{padding:10px 14px}
+  .wcstat{padding:0 2px}
+  .wcsv{font-size:22px}
+  .wcdates{font-size:18px}
+
+  /* Fondo video agenda en mobile */
+  #bgVideo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;display:block}
+  .page{background:transparent}
 }
 </style>
 </head>
@@ -1375,8 +1387,6 @@ function buildWeekCard(w){
     <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:${color}"></div></div>
     <div class="wcard-stats">
       <div class="wcstat"><div class="wcsv" style="color:${neonGreen};text-shadow:0 0 14px ${neonGreen}99">${wRes}</div><div class="wcsl">Reservados</div></div>
-      <div class="wcstat"><div class="wcsv" style="color:${neonYellow};text-shadow:0 0 14px ${neonYellow}99">${wPen}</div><div class="wcsl">Pendientes</div></div>
-      <div class="wcstat"><div class="wcsv" style="color:${neonOrange};text-shadow:0 0 14px ${neonOrange}99">${wSena}</div><div class="wcsl">Pdte. Seña</div></div>
       <div class="wcstat"><div class="wcsv" style="color:${neonGray}">${wLib}</div><div class="wcsl">Libres</div></div>
     </div>
     ${showFact?`<div class="wcard-fact">
@@ -1640,7 +1650,6 @@ function renderResumenes(data){
           <div class="rcturno-ttl">Turnos</div>
           <div class="rcsr">
             <div class="rcst"><div class="rcsv" style="color:#39ff6e">${res}</div><div class="rcsl">Reservados</div></div>
-            <div class="rcst"><div class="rcsv" style="color:#ffe44d">${pen}</div><div class="rcsl">Pendientes</div></div>
             <div class="rcst"><div class="rcsv" style="color:rgba(255,255,255,.35)">${can}</div><div class="rcsl">Libres</div></div>
           </div>
           <div class="rctags">
