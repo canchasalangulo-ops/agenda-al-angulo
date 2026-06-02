@@ -1204,14 +1204,15 @@ async function loadHistorialMonth(year, month){
 
 // Fetch last N months of past turnos for sidebar
 async function loadHistorialMonths(){
-  const threeMonthsAgo = add(WEEKS[0].s, -90);
+  const sixMonthsAgo = add(WEEKS[0].s, -180); // 6 meses atrás
   setSyncing();
   const { data, error } = await db
     .from('turnos')
     .select('fecha, estado, facturacion_efectivo, facturacion_transferencia')
-    .gte('fecha', dk(threeMonthsAgo))
+    .gte('fecha', dk(sixMonthsAgo))
     .lt('fecha', dk(WEEKS[0].s))
-    .order('fecha', { ascending: false });
+    .order('fecha', { ascending: false })
+    .limit(10000); // evitar el límite de 1000 filas de Supabase
 
   if (error){ setSyncErr(); throw error; }
   setSynced();
