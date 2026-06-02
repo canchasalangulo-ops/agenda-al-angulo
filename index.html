@@ -1204,17 +1204,13 @@ async function loadHistorialMonth(year, month){
 
 // Fetch last N months of past turnos for sidebar
 async function loadHistorialMonths(){
-  // Traer todos los turnos pasados desde el inicio del año anterior
+  // Usar RPC de agregación — devuelve 1 fila por mes, sin límite de rows
   const yearStart = new Date(WEEKS[0].s.getFullYear() - 1, 0, 1);
   setSyncing();
-  const { data, error } = await db
-    .from('turnos')
-    .select('fecha, estado, facturacion_efectivo, facturacion_transferencia')
-    .gte('fecha', dk(yearStart))
-    .lt('fecha', dk(WEEKS[0].s))
-    .order('fecha', { ascending: false })
-    .limit(50000);
-
+  const { data, error } = await db.rpc('historial_mensual', {
+    fecha_desde: dk(yearStart),
+    fecha_hasta: dk(add(WEEKS[0].s, -1)) // hasta ayer
+  });
   if (error){ setSyncErr(); throw error; }
   setSynced();
   return data || [];
@@ -1409,14 +1405,18 @@ async function initHistorial(){
   wrap.innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando historial...</div>';
   try {
     const allData = await loadHistorialMonths();
-    // Group summary by month
+    // El RPC ya devuelve datos agregados por mes
     histMonthsData = {};
-    for(const t of allData){
-      const [y,m] = t.fecha.split('-');
-      const k = `${y}-${m}`;
-      if(!histMonthsData[k]) histMonthsData[k]={year:parseInt(y),month:parseInt(m)-1,total:0,reservados:0};
-      histMonthsData[k].total++;
-      if(t.estado==='Reservado') histMonthsData[k].reservados++;
+    for(const row of allData){
+      const k = `${row.anio}-${String(row.mes).padStart(2,'0')}`;
+      histMonthsData[k] = {
+        year: row.anio,
+        month: row.mes - 1,       // JS months son 0-indexed
+        total: row.reservados,
+        reservados: parseInt(row.reservados) || 0,
+        efectivo: parseInt(row.efectivo) || 0,
+        transferencia: parseInt(row.transferencia) || 0
+      };
     }
     const monthList = Object.values(histMonthsData).sort((a,b)=>b.year-a.year||b.month-a.month);
     if(!monthList.length){
@@ -1433,7 +1433,10 @@ async function initHistorial(){
             <span class="hist-month-year">${m.year}</span>
           </div>
           <div class="hist-month-right">
-            <div class="hist-month-badges" id="hmg-${k}"><span class="hmb hmb-res">⚽ ${m.reservados} reservados</span></div>
+            <div class="hist-month-badges" id="hmg-${k}"><span class="hmb hmb-res">⚽ ${m.reservados} reservados</span>
+            ${m.efectivo>0?`<span class="hmb hmb-ef">💵 $${m.efectivo.toLocaleString('es-AR')}</span>`:''}
+            ${m.transferencia>0?`<span class="hmb hmb-tr">🏦 $${m.transferencia.toLocaleString('es-AR')}</span>`:''}
+          </div>
             <span class="hist-month-arrow">▼</span>
           </div>
         </div>
