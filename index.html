@@ -1209,7 +1209,17 @@ async function loadHistorialMonth(year, month){
 
   if (error){ setSyncErr(); throw error; }
   setSynced();
-  historialData[key] = data || [];
+  // Transformar: calcular f5pct/f6pct y normalizar nombres de campos
+  historialData[key] = (data || []).map(row => ({
+    semana_inicio: row.semana_inicio,
+    semana_fin:    row.semana_fin,
+    reservados:    parseInt(row.reservados)    || 0,
+    libres:        parseInt(row.libres)        || 0,
+    efectivo:      parseInt(row.efectivo)      || 0,
+    transferencia: parseInt(row.transferencia) || 0,
+    f5pct: (parseInt(row.f5_total)||0) > 0 ? Math.round((parseInt(row.f5_res)||0) / (parseInt(row.f5_total)||1) * 100) : 0,
+    f6pct: (parseInt(row.f6_total)||0) > 0 ? Math.round((parseInt(row.f6_res)||0) / (parseInt(row.f6_total)||1) * 100) : 0
+  }));
   return historialData[key];
 }
 
