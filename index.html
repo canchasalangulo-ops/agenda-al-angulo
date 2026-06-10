@@ -1198,15 +1198,13 @@ async function loadHistorialMonth(year, month){
   setSyncing();
   const start = `${year}-${String(month+1).padStart(2,'0')}-01`;
   const endDate = new Date(year, month+1, 0);
-  const end   = dk(endDate);
+  const end = dk(endDate);
 
-  const { data, error } = await db
-    .from('turnos')
-    .select('fecha, horario, cancha, numero_cancha, estado, cliente, facturacion_efectivo, facturacion_transferencia')
-    .gte('fecha', start)
-    .lte('fecha', end)
-    .lt('fecha', dk(WEEKS[0].s)) // only past weeks
-    .limit(10000)
+  // Usar RPC de agregación — devuelve 1 fila por semana sin límite de rows
+  const { data, error } = await db.rpc('historial_semanal', {
+    fecha_inicio: start,
+    fecha_fin: end
+  })
     .order('fecha');
 
   if (error){ setSyncErr(); throw error; }
@@ -1500,12 +1498,14 @@ function renderHistMonthBody(k, year, month, data){
     body.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px;text-align:center">Sin turnos este mes</div>';
     return;
   }
-  const weeks = groupByWeek(data);
-  const totalR = data.filter(t=>t.estado==='Reservado').length;
-  // Sincronizar el badge del header con el conteo real del mes completo
-  const totalEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
-  const totalTr = data.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
+
+  // Totales exactos del RPC
+  const totalR  = data.reduce((s,r)=>s+r.reservados, 0);
+  const totalEf = data.reduce((s,r)=>s+r.efectivo, 0);
+  const totalTr = data.reduce((s,r)=>s+r.transferencia, 0);
   const totalFact = totalEf + totalTr;
+
+  // Sincronizar badge del header con datos exactos del RPC
   const badgeWrap = document.getElementById(`hmg-${k}`);
   if(badgeWrap){
     let pills = `<span class="hmb hmb-res">⚽ ${totalR} reservados</span>`;
@@ -1513,14 +1513,63 @@ function renderHistMonthBody(k, year, month, data){
     pills += `<span class="hmb hmb-tr">🏦 $${totalTr.toLocaleString('es-AR')}</span>`;
     badgeWrap.innerHTML = pills;
   }
-  const mEf = data.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
-  const mTr = data.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
-  const mTot = mEf + mTr;
-  const mFactStr = mTot > 0
-    ? ` · 💵 <span style="color:#39ff6e">$${mEf.toLocaleString('es-AR')}</span> · 🏦 <span style="color:#4dc8ff">$${mTr.toLocaleString('es-AR')}</span> · Total <span style="color:#fff">$${mTot.toLocaleString('es-AR')}</span>`
+
+  const mFactStr = totalFact > 0
+    ? ` · 💵 <span style="color:#39ff6e">$${totalEf.toLocaleString('es-AR')}</span> · 🏦 <span style="color:#4dc8ff">$${totalTr.toLocaleString('es-AR')}</span> · Total <span style="color:#fff">$${totalFact.toLocaleString('es-AR')}</span>`
     : '';
-  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:14px">${weeks.length} semanas · ${totalR} reservados${mFactStr}</div>
-    <div class="wcards">${weeks.map(w=>buildWeekCard(w)).join('')}</div>`;
+
+  // Renderizar tarjeta por semana usando datos del RPC
+  const weekCards = data.map(row => {
+    const pct   = (row.reservados + row.libres) > 0
+      ? Math.round(row.reservados / (row.reservados + row.libres) * 100) : 0;
+    const color = pctColor(pct);
+    const ef    = row.efectivo;
+    const tr    = row.transferencia;
+    const tot   = ef + tr;
+    const fmtP  = n => n > 0 ? '$' + n.toLocaleString('es-AR') : '$0';
+    const neonGreen = '#39ff6e';
+    const neonBlue  = '#4dc8ff';
+    const neonWhite = '#ffffff';
+    const neonGray  = 'rgba(255,255,255,0.35)';
+    const f5pct = row.f5pct;
+    const f6pct = row.f6pct;
+    const showFact = tot > 0;
+    return `<div class="wcard">
+      <div class="wcard-top">
+        <div class="wcard-left">
+          <div class="wcard-label">Semana</div>
+          <div class="wcdates">${ff(row.semana_inicio)} — ${ff(row.semana_fin)}</div>
+        </div>
+        <div class="wcard-right">
+          <div class="wcpct" style="color:${color}">${pct}%</div>
+          <div class="wcpctlb" style="color:${color}">Ocupación</div>
+        </div>
+      </div>
+      <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="wcard-stats">
+        <div class="wcstat"><div class="wcsv" style="color:${neonGreen};text-shadow:0 0 14px ${neonGreen}99">${row.reservados}</div><div class="wcsl">Reservados</div></div>
+        <div class="wcstat"><div class="wcsv" style="color:${neonGray}">${row.libres}</div><div class="wcsl">Libres</div></div>
+      </div>
+      ${showFact ? `<div class="wcard-fact">
+        <div class="wfstat"><div class="wfl">💵 Efectivo</div><div class="wfv" style="color:${neonGreen};text-shadow:0 0 10px ${neonGreen}66">${fmtP(ef)}</div></div>
+        <div class="wfstat"><div class="wfl">🏦 Transf.</div><div class="wfv" style="color:${neonBlue};text-shadow:0 0 10px ${neonBlue}66">${fmtP(tr)}</div></div>
+        <div class="wfstat"><div class="wfl">📊 Total</div><div class="wfv" style="color:${neonWhite};text-shadow:0 0 10px rgba(255,255,255,0.4)">${fmtP(tot)}</div></div>
+      </div>` : ''}
+      <div class="wcard-canchas">
+        <div class="wcbar-mini">
+          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 6</span><span class="wcbar-mini-pct" style="color:${pctColor(f6pct)}">${f6pct}%</span></div>
+          <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${f6pct}%;background:${pctColor(f6pct)}"></div></div>
+        </div>
+        <div class="wcbar-mini">
+          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 5</span><span class="wcbar-mini-pct" style="color:${pctColor(f5pct)}">${f5pct}%</span></div>
+          <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${f5pct}%;background:${pctColor(f5pct)}"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:14px">${data.length} semanas · ${totalR} reservados${mFactStr}</div>
+    <div class="wcards">${weekCards}</div>`;
 }
 
 function groupByWeek(data){
