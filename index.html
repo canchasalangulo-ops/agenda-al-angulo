@@ -1206,6 +1206,7 @@ async function loadHistorialMonth(year, month){
     .gte('fecha', start)
     .lte('fecha', end)
     .lt('fecha', dk(WEEKS[0].s)) // only past weeks
+    .limit(10000)
     .order('fecha');
 
   if (error){ setSyncErr(); throw error; }
@@ -2443,7 +2444,7 @@ async function toggleEvento(evId, isOn){
     const evName=evId==='torneo'?'Torneo':'Escuelita de Fútbol';
     const dias=evId==='torneo'?['Lunes','Martes','Miércoles','Jueves','Viernes']:['Lunes','Miércoles','Viernes'];
     const fechas=dias.map(d=>dk(add(nextMon,EV_DAY_INDEX[d])));
-    const horas=evId==='torneo'?['22:00:00','23:00:00']:['18:00:00','19:00:00'];
+    const horas=evId==='torneo'?['22:00','23:00']:['18:00','19:00'];
 
     // 2. PRIMERO: asegurar que la semana siguiente tiene slots generados
     await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)});
