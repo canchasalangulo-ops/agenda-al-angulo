@@ -1205,7 +1205,7 @@ async function loadHistorialMonth(year, month){
     fecha_inicio: start,
     fecha_fin: end
   })
-    .order('fecha');
+    .order('semana_inicio', { ascending: false });
 
   if (error){ setSyncErr(); throw error; }
   setSynced();
