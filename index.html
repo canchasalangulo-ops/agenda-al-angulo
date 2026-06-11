@@ -1211,8 +1211,8 @@ async function loadHistorialMonth(year, month){
   // Transformar: calcular f5pct/f6pct y normalizar nombres de campos, ordenar desc por semana
   const sorted = (data || []).sort((a,b) => b.semana_inicio > a.semana_inicio ? 1 : -1);
   historialData[key] = sorted.map(row => ({
-    semana_inicio: row.semana_inicio,
-    semana_fin:    row.semana_fin,
+    semana_inicio: new Date(row.semana_inicio + 'T00:00:00'),
+    semana_fin:    new Date(row.semana_fin    + 'T00:00:00'),
     reservados:    parseInt(row.reservados)    || 0,
     libres:        parseInt(row.libres)        || 0,
     efectivo:      parseInt(row.efectivo)      || 0,
@@ -1227,13 +1227,10 @@ async function loadHistorialMonth(year, month){
 async function loadHistorialMonths(){
   // Usar RPC de agregación — devuelve 1 fila por mes, sin límite de rows
   const yearStart = new Date(WEEKS[0].s.getFullYear() - 1, 0, 1);
-  // Hasta el último día del mes anterior (para no mostrar meses incompletos)
-  const now = new Date();
-  const lastDayPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
   setSyncing();
   const { data, error } = await db.rpc('historial_mensual', {
     fecha_desde: dk(yearStart),
-    fecha_hasta: dk(lastDayPrevMonth) // último día del mes anterior
+    fecha_hasta: dk(add(WEEKS[0].s, -1)) // hasta ayer
   });
   if (error){ setSyncErr(); throw error; }
   setSynced();
