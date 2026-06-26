@@ -881,6 +881,8 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
         </div>
       </div>
     </div>
+    <label class="flbl">Detalles</label>
+    <textarea class="fctl" id="mdetalles" rows="3" placeholder="Notas, cuenta de transferencia, aclaraciones..." style="resize:vertical;min-height:60px;font-family:inherit"></textarea>
     <div class="mbtns">
       <button class="bcancel" onclick="closeMod()">Cancelar</button>
       <button class="bsave" id="bsave" onclick="saveMod()">Guardar</button>
@@ -1016,7 +1018,14 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 // ═══════════════════════════════════════════════
 const SUPABASE_URL  = 'https://iguhqeolivzhsishdddg.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlndWhxZW9saXZ6aHNpc2hkZGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MzAyMzUsImV4cCI6MjA5MzIwNjIzNX0.j2mXOR6InXzLJ1EiFTxo2nd3t6e1v0OUXzFMaNmTJnc';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage
+  }
+});
 
 // ═══════════════════════════════════════════════
 // CONFIG UI
@@ -1112,7 +1121,7 @@ async function loadBisemana(retries=0){
 
     const { data, error } = await db
       .from('turnos')
-      .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia')
+      .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles')
       .gte('fecha', start)
       .lte('fecha', end);
 
@@ -1182,7 +1191,7 @@ async function updateTurno(id, updates){
 async function clearTurno(id){
   setSyncing();
   const { error } = await db.from('turnos').update({
-    estado: 'Disponible', evento: 'Fútbol', cliente: null, numero: null
+    estado: 'Disponible', evento: 'Fútbol', cliente: null, numero: null, detalles: null
   }).eq('id', id);
   if (error) throw error;
   setSynced();
@@ -1780,7 +1789,17 @@ function openMod(t){
   const ef=parseInt(t.facturacion_efectivo)||0; document.getElementById('mefectivo').value=ef>0?ef.toLocaleString('es-AR'):'';
   const tr=parseInt(t.facturacion_transferencia)||0; document.getElementById('mtransferencia').value=tr>0?tr.toLocaleString('es-AR'):'';
   document.getElementById('mphone').value=t.numero||'';
-  document.getElementById('mdel').style.display=t.estado==='Disponible'?'none':'block';
+  document.getElementById('mdetalles').value=t.detalles||'';
+
+  // Rol "canchas": solo puede ver/editar Efectivo, Transferencia y Detalles.
+  // Estado/Evento/Cliente/Teléfono quedan visibles pero no editables, y no puede liberar el turno.
+  const isCanchasRole = currentRole === 'canchas';
+  document.getElementById('mestado').disabled = isCanchasRole;
+  document.getElementById('mevento').disabled = isCanchasRole;
+  document.getElementById('mcliente').disabled = isCanchasRole;
+  document.getElementById('mphone').disabled = isCanchasRole;
+  document.getElementById('mdel').style.display = (isCanchasRole || t.estado==='Disponible') ? 'none' : 'block';
+
   document.getElementById('mbg').classList.add('on');
 }
 
@@ -1794,16 +1813,29 @@ async function saveMod(){
   const btn=document.getElementById('bsave');
   btn.disabled=true; btn.textContent='Guardando...';
   try {
-    const estado=document.getElementById('mestado').value;
-    const evento=document.getElementById('mevento').value||'Fútbol';
-    const cliente=document.getElementById('mcliente').value.trim()||null;
-    const numero=document.getElementById('mphone').value.trim()||null;
     const facturacion_efectivo=parseFact('mefectivo');
     const facturacion_transferencia=parseFact('mtransferencia');
-    await updateTurno(modalTurno.id, {estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia});
+    const detalles=document.getElementById('mdetalles').value.trim()||null;
+
+    let updates, localUpdates;
+    if (currentRole === 'canchas') {
+      // Rol "canchas": solo puede tocar estos 3 campos, sin importar lo que
+      // tengan los inputs deshabilitados (refuerzo de seguridad además del disabled del DOM)
+      updates = { facturacion_efectivo, facturacion_transferencia, detalles };
+      localUpdates = { ...modalTurno, facturacion_efectivo, facturacion_transferencia, detalles };
+    } else {
+      const estado=document.getElementById('mestado').value;
+      const evento=document.getElementById('mevento').value||'Fútbol';
+      const cliente=document.getElementById('mcliente').value.trim()||null;
+      const numero=document.getElementById('mphone').value.trim()||null;
+      updates = {estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles};
+      localUpdates = {...modalTurno, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles};
+    }
+
+    await updateTurno(modalTurno.id, updates);
     // Update local map
     const key=tKey(modalTurno.fecha,modalTurno.horario,modalTurno.cancha,modalTurno.numero_cancha);
-    turnosMap[key]={...modalTurno, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia};
+    turnosMap[key]=localUpdates;
     closeMod();
     renderAgenda();
     showToast('Turno actualizado ✓');
@@ -1820,7 +1852,7 @@ async function clearMod(){
   try {
     await clearTurno(modalTurno.id);
     const key=tKey(modalTurno.fecha,modalTurno.horario,modalTurno.cancha,modalTurno.numero_cancha);
-    turnosMap[key]={...modalTurno, estado:'Disponible', evento:'Fútbol', cliente:null, numero:null};
+    turnosMap[key]={...modalTurno, estado:'Disponible', evento:'Fútbol', cliente:null, numero:null, detalles:null};
     closeMod();
     renderAgenda();
     showToast('Turno liberado ✓');
@@ -2531,7 +2563,7 @@ async function toggleEvento(evId, isOn){
 
     // 4. Recargar semana siguiente en turnosMap
     const {data:ref,error:rErr}=await db.from('turnos')
-      .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero')
+      .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero,detalles')
       .gte('fecha',dk(WEEKS[1].s)).lte('fecha',dk(WEEKS[1].e));
     if(!rErr&&ref){
       for(const t of ref) turnosMap[tKey(t.fecha,t.horario,t.cancha,t.numero_cancha)]=t;
@@ -2674,6 +2706,19 @@ async function checkAuth() {
   }
 }
 
+// Mantiene la sesión sincronizada ante refresh de token o cambios de auth
+// (no dispara showApp/showLoginOverlay de nuevo salvo SIGNED_OUT, para no
+// re-renderizar todo en cada TOKEN_REFRESHED)
+db.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    currentRole = null;
+  } else if (session && session.user) {
+    currentUser = session.user;
+    currentRole = session.user.user_metadata?.role || 'empleado';
+  }
+});
+
 let loginImgIdx = 0;
 // Rotación de imágenes manejada por CSS animation (loginImgCycle)
 
@@ -2742,22 +2787,22 @@ function applyRole(role) {
   const allTabs = document.querySelectorAll('.ntab');
   const tabNames = ['agenda','historial','resumenes','contactos','turnos-fijos','eventos'];
 
-  if (role === 'empleado') {
+  if (role === 'canchas') {
+    // Solo ve la tab Agenda (incluye la vista en vivo de canchas)
     allTabs.forEach((tab, i) => {
-      if (tabsEmpleado.includes(tabNames[i])) {
-        tab.style.display = 'none';
-      }
+      tab.style.display = (tabNames[i] === 'agenda') ? '' : 'none';
     });
-    // Mostrar nombre sin dominio
-    const username = currentUser.email.replace(DOMAIN_SUFFIX, '');
-    document.getElementById('hdrUser').textContent = username;
+  } else if (role === 'empleado') {
+    allTabs.forEach((tab, i) => {
+      tab.style.display = tabsEmpleado.includes(tabNames[i]) ? 'none' : '';
+    });
   } else {
-    // dueno: todo visible, mostrar usuario
+    // dueno: todo visible
     allTabs.forEach(tab => tab.style.display = '');
-    const username = currentUser.email.replace(DOMAIN_SUFFIX, '');
-    document.getElementById('hdrUser').textContent = username;
   }
 
+  const username = currentUser.email.replace(DOMAIN_SUFFIX, '');
+  document.getElementById('hdrUser').textContent = username;
   document.getElementById('hdrUser').style.display = '';
   document.getElementById('btnLogout').style.display = '';
 }
