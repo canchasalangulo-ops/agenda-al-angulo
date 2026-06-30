@@ -2703,16 +2703,12 @@ let currentUser = null;
 let currentRole = null;
 
 async function checkAuth() {
-  console.log('[DEBUG] checkAuth iniciado');
-  const { data: { session }, error } = await db.auth.getSession();
-  console.log('[DEBUG] getSession resultado:', session, error);
+  const { data: { session } } = await db.auth.getSession();
   if (session && session.user) {
     currentUser = session.user;
     currentRole = session.user.user_metadata?.role || 'empleado';
-    console.log('[DEBUG] Sesión válida, mostrando app. Rol:', currentRole);
     showApp();
   } else {
-    console.log('[DEBUG] No hay sesión, mostrando login');
     showLoginOverlay();
   }
 }
@@ -2819,6 +2815,7 @@ function applyRole(role) {
 }
 
 function showApp() {
+  hideLoginOverlay();
   applyRole(currentRole);
   loadBisemana().then(() => { initRealtime(); renderLiveBoard(); });
 }
