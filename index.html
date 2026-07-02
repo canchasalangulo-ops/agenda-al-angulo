@@ -1806,14 +1806,11 @@ function openMod(t){
   document.getElementById('mphone').value=t.numero||'';
   document.getElementById('mdetalles').value=t.detalles||'';
 
-  // Rol "canchas": solo puede ver/editar Efectivo, Transferencia y Detalles.
-  // Estado/Evento/Cliente/Teléfono quedan visibles pero no editables, y no puede liberar el turno.
-  const isCanchasRole = currentRole === 'canchas';
-  document.getElementById('mestado').disabled = isCanchasRole;
-  document.getElementById('mevento').disabled = isCanchasRole;
-  document.getElementById('mcliente').disabled = isCanchasRole;
-  document.getElementById('mphone').disabled = isCanchasRole;
-  document.getElementById('mdel').style.display = (isCanchasRole || t.estado==='Disponible') ? 'none' : 'block';
+  document.getElementById('mestado').disabled = false;
+  document.getElementById('mevento').disabled = false;
+  document.getElementById('mcliente').disabled = false;
+  document.getElementById('mphone').disabled = false;
+  document.getElementById('mdel').style.display = t.estado==='Disponible' ? 'none' : 'block';
 
   document.getElementById('mbg').classList.add('on');
 }
@@ -1831,21 +1828,12 @@ async function saveMod(){
     const facturacion_efectivo=parseFact('mefectivo');
     const facturacion_transferencia=parseFact('mtransferencia');
     const detalles=document.getElementById('mdetalles').value.trim()||null;
-
-    let updates, localUpdates;
-    if (currentRole === 'canchas') {
-      // Rol "canchas": solo puede tocar estos 3 campos, sin importar lo que
-      // tengan los inputs deshabilitados (refuerzo de seguridad además del disabled del DOM)
-      updates = { facturacion_efectivo, facturacion_transferencia, detalles };
-      localUpdates = { ...modalTurno, facturacion_efectivo, facturacion_transferencia, detalles };
-    } else {
-      const estado=document.getElementById('mestado').value;
-      const evento=document.getElementById('mevento').value||'Fútbol';
-      const cliente=document.getElementById('mcliente').value.trim()||null;
-      const numero=document.getElementById('mphone').value.trim()||null;
-      updates = {estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles};
-      localUpdates = {...modalTurno, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles};
-    }
+    const estado=document.getElementById('mestado').value;
+    const evento=document.getElementById('mevento').value||'Fútbol';
+    const cliente=document.getElementById('mcliente').value.trim()||null;
+    const numero=document.getElementById('mphone').value.trim()||null;
+    const updates = {estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles};
+    const localUpdates = {...modalTurno, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles};
 
     await updateTurno(modalTurno.id, updates);
     // Update local map
