@@ -1122,7 +1122,7 @@ async function loadBisemana(retries=0){
 
     const { data, error } = await db
       .from('turnos')
-      .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles')
+      .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, detalles, turno_fijo_id')
       .gte('fecha', start)
       .lte('fecha', end);
 
@@ -2200,25 +2200,35 @@ async function applyAllTurnosFijosToWeeks(){
         if(d.getDay() !== targetDay) continue;
         const fecha = dk(new Date(d));
 
-        // Si ya existe un Pendiente/Reservado de este cliente en esa fecha+horario+cancha, no duplicar
+        // Chequear si este turno fijo YA fue aplicado a esta fecha+horario+cancha
+        // (sin importar el estado actual — si fue cancelado, turno_fijo_id sigue ahí)
         const yaAplicado = Object.values(turnosMap).some(t =>
+          t.fecha === fecha && t.horario === horario && t.cancha === tf.cancha &&
+          t.turno_fijo_id === tf.id
+        );
+        if(yaAplicado) continue;
+
+        // También chequear por cliente activo (Pendiente/Reservado) para compatibilidad
+        // con turnos creados antes de agregar turno_fijo_id
+        const clienteActivo = Object.values(turnosMap).some(t =>
           t.fecha === fecha && t.horario === horario && t.cancha === tf.cancha &&
           (t.estado === 'Pendiente' || t.estado === 'Reservado' || t.estado === 'Pendiente de seña') &&
           t.cliente === tf.cliente
         );
-        if(yaAplicado) continue;
+        if(clienteActivo) continue;
 
         let applied = false;
         for(const [key, t] of Object.entries(turnosMap)){
           if(t.fecha === fecha && t.horario === horario && t.cancha === tf.cancha && t.estado === 'Disponible'){
-            // Actualizar en Supabase
+            // Actualizar en Supabase (incluye turno_fijo_id para marcar origen)
             await db.from('turnos').update({
               estado: 'Pendiente',
               cliente: tf.cliente,
-              numero: tf.numero || null
+              numero: tf.numero || null,
+              turno_fijo_id: tf.id
             }).eq('id', t.id);
             // Actualizar localmente
-            turnosMap[key] = {...t, estado:'Pendiente', cliente:tf.cliente, numero:tf.numero||null};
+            turnosMap[key] = {...t, estado:'Pendiente', cliente:tf.cliente, numero:tf.numero||null, turno_fijo_id:tf.id};
             applied = true;
             break; // solo el primer Disponible de ese tipo de cancha
           }
