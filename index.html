@@ -2127,9 +2127,8 @@ function renderLiveBoard(){
   if(!board) return;
 
   const now=new Date(), h=now.getHours();
-  const slotLabel=(h>=15&&h<=23)?`${String(h).padStart(2,'0')}:00 - ${String(h+1).padStart(2,'0')}:00`:'Fuera de horario';
   const clockEl=document.getElementById('liveClock');
-  if(clockEl) clockEl.textContent=slotLabel;
+  if(clockEl) clockEl.textContent=String(h).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
 
   const allClients=getClientsForCurrentSlot();
   const assignments={};
