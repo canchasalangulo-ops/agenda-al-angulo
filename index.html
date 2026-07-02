@@ -2833,11 +2833,48 @@ function applyRole(role) {
   document.getElementById('btnLogout').style.display = '';
 }
 
+// ═══════════════════════════════════════════════
+// AUTO-LIMPIEZA: Pendientes del día actual después de las 14hs
+// ═══════════════════════════════════════════════
+async function autoClearPendientes(){
+  const now = new Date();
+  if(now.getHours() < 14) return; // solo después de las 14hs
+  const hoy = dk(today);
+  // Buscar turnos Pendiente del día actual en turnosMap
+  const pendientes = Object.entries(turnosMap).filter(([k,t]) =>
+    t.fecha === hoy && t.estado === 'Pendiente'
+  );
+  if(!pendientes.length) return;
+  console.log(`[Auto-limpieza] Liberando ${pendientes.length} turno(s) pendiente(s) del día ${hoy}`);
+  for(const [key, t] of pendientes){
+    try {
+      await db.from('turnos').update({
+        estado: 'Disponible', evento: 'Fútbol', cliente: null, numero: null, detalles: null
+      }).eq('id', t.id);
+      turnosMap[key] = {...t, estado:'Disponible', evento:'Fútbol', cliente:null, numero:null, detalles:null};
+    } catch(e){
+      console.error('[Auto-limpieza] Error:', e);
+    }
+  }
+  renderGrid();
+  renderDStrip();
+  renderSBar();
+  renderLiveBoard();
+  showToast(`${pendientes.length} turno(s) pendiente(s) liberado(s) automáticamente`);
+}
+
 function showApp() {
   hideLoginOverlay();
   applyRole(currentRole);
-  loadBisemana().then(() => { initRealtime(); renderLiveBoard(); });
+  loadBisemana().then(() => {
+    initRealtime();
+    renderLiveBoard();
+    autoClearPendientes();
+  });
 }
+
+// Chequear cada minuto por si la página está abierta y pasan las 14hs
+setInterval(autoClearPendientes, 60000);
 
 // Enter en los inputs del login
 document.addEventListener('DOMContentLoaded', () => {
