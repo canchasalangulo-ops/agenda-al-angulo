@@ -2171,12 +2171,45 @@ function tfNextOccurrence(diaSemana){
   return dk(next);
 }
 
+// Devuelve el timestamp del último lunes a las 04:00 AM (hora local).
+// Se usa como cutoff: si applyAllTurnosFijosToWeeks ya corrió después de este
+// instante, no se vuelve a ejecutar hasta el próximo lunes 04:00.
+function lastMondayFourAM(){
+  const now = new Date();
+  const d = new Date(now);
+  const day = d.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+  const daysBack = day === 0 ? 6 : day - 1;
+  d.setDate(d.getDate() - daysBack);
+  d.setHours(4,0,0,0);
+  // Caso lunes antes de las 04:00 → el "último lunes 04:00" fue el lunes pasado
+  if(d > now) d.setDate(d.getDate() - 7);
+  return d;
+}
+
 async function applyAllTurnosFijosToWeeks(){
   try {
-    const { data: fijos, error } = await db.from('turnos_fijos').select('*');
-    if(error || !fijos || !fijos.length) return;
+    // Guard: solo aplicar una vez por semana, después del lunes 04:00 AM.
+    // El bot de WhatsApp (n8n) puede cancelar turnos durante la semana; si
+    // aplicáramos en cada carga, resucitarían al refrescar.
+    const cutoff = lastMondayFourAM();
+    const { data: cfg } = await db.from('eventos_config')
+      .select('updated_at').eq('id','last_tf_apply').maybeSingle();
+    if(cfg && cfg.updated_at && new Date(cfg.updated_at) >= cutoff){
+      return; // ya corrió esta semana
+    }
 
-    const start = WEEKS[0].s;
+    const { data: fijos, error } = await db.from('turnos_fijos').select('*');
+    if(error || !fijos || !fijos.length){
+      // Igual marcamos el run para no reintentar hasta el próximo lunes
+      await db.from('eventos_config').upsert({
+        id:'last_tf_apply', activo:true, updated_at:new Date().toISOString()
+      });
+      return;
+    }
+
+    // Solo semana siguiente: la semana actual ya fue generada el lunes pasado
+    // y sus cancelaciones deben respetarse.
+    const start = WEEKS[1].s;
     const end   = WEEKS[1].e;
 
     for(const tf of fijos){
@@ -2222,6 +2255,12 @@ async function applyAllTurnosFijosToWeeks(){
         }
       }
     }
+
+    // Marcar timestamp del run exitoso para bloquear hasta el próximo lunes 04:00
+    await db.from('eventos_config').upsert({
+      id:'last_tf_apply', activo:true, updated_at:new Date().toISOString()
+    });
+
     renderAgenda();
   } catch(e){
     console.warn('applyAllTurnosFijosToWeeks error:', e.message);
