@@ -2641,7 +2641,11 @@ function initRealtime(){
 
       if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
         const key = tKey(t.fecha, t.horario, t.cancha, t.numero_cancha);
-        turnosMap[key] = t;
+        // Merge con datos existentes para preservar campos que el realtime
+        // no incluye en el payload (ej: turno_fijo_id cuando solo se hizo
+        // PATCH de estado/cliente/numero)
+        const existing = turnosMap[key] || {};
+        turnosMap[key] = { ...existing, ...t };
         // Limpiar cache del historial para ese mes (para que recargue con datos frescos)
         if(t.fecha){
           const monthKey = t.fecha.slice(0,7); // "2026-05"
