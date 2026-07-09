@@ -2152,7 +2152,22 @@ function updateLiveClock(){
   const now=new Date();
   el.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
 }
-setInterval(updateLiveClock,10000);
+
+// Refrescar el live board cada minuto y limpiar asignaciones cuando cambia la hora
+let _lastLiveHour = new Date().getHours();
+setInterval(function(){
+  updateLiveClock();
+  const now = new Date();
+  const h = now.getHours();
+  if(h !== _lastLiveHour){
+    // La hora cambió — limpiar todas las asignaciones del localStorage de la hora anterior
+    for(const c of CANCHAS){
+      try{ localStorage.removeItem(`au_lv3_${dk(today)}_${String(_lastLiveHour).padStart(2,'0')}:00_${c.id}`); }catch{}
+    }
+    _lastLiveHour = h;
+    renderLiveBoard(); // re-renderizar con los turnos del nuevo horario
+  }
+}, 60000);
 
 // ═══════════════
 
