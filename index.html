@@ -505,6 +505,14 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .ev-status-txt{color:var(--muted)}
 .ev-card.ev-on .ev-status-txt{color:var(--ev-color)}
 
+.ev-edit-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--negro);font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;letter-spacing:.3px;transition:all .15s}
+.ev-edit-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+
+.evm-chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.evm-chip{padding:6px 12px;border-radius:8px;background:#111827;border:1.5px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none}
+.evm-chip:hover{border-color:rgba(255,255,255,.3);color:var(--negro)}
+.evm-chip.on{background:var(--verde);border-color:var(--verde);color:#fff}
+
 @media(max-width:768px){
   .ev-wrap{padding:16px}
   .ev-cards{grid-template-columns:1fr}
@@ -889,6 +897,36 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
       <button class="bsave" id="bsave" onclick="saveMod()">Guardar</button>
     </div>
     <button class="mdel" id="mdel" onclick="clearMod()">Liberar turno</button>
+  </div>
+</div>
+
+<!-- MODAL EVENTO (crear/editar) -->
+<div class="mbg" id="evModalBg">
+  <div class="modal">
+    <button class="mx" onclick="closeEventoModal()">✕</button>
+    <div class="mttl" id="evmTitle">Nuevo evento</div>
+    <label class="flbl">Nombre del evento</label>
+    <input class="fctl" id="evmNombre" type="text" placeholder="Ej: Escuelita de Fútbol"/>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1">
+        <label class="flbl">Ícono</label>
+        <input class="fctl" id="evmIcono" type="text" placeholder="⚡" maxlength="4"/>
+      </div>
+      <div style="flex:1">
+        <label class="flbl">Color</label>
+        <input class="fctl" id="evmColor" type="color" style="height:44px;padding:4px"/>
+      </div>
+    </div>
+    <label class="flbl">Días de la semana</label>
+    <div class="evm-chip-row" id="evmDias"></div>
+    <label class="flbl">Horarios</label>
+    <div class="evm-chip-row" id="evmHorarios"></div>
+    <label class="flbl">Canchas</label>
+    <div class="evm-chip-row" id="evmCanchas"></div>
+    <div class="mbtns">
+      <button class="bcancel" onclick="closeEventoModal()">Cancelar</button>
+      <button class="bsave" id="evmSaveBtn" onclick="saveEventoModal()">Guardar</button>
+    </div>
   </div>
 </div>
 
@@ -1799,7 +1837,17 @@ function openMod(t){
   document.getElementById('mttl').textContent=`${t.horario.slice(0,5)} — ${canchaLb}`;
   document.getElementById('msub').textContent=`${d}/${mo}/${y}`;
   document.getElementById('mestado').value=t.estado;
-  document.getElementById('mevento').value=t.evento||'Fútbol';
+
+  // Poblar el select de Evento con los eventos existentes en la BD + opciones fijas
+  const eventoSel = document.getElementById('mevento');
+  const opcionesFijas = ['Fútbol','Cumpleaños'];
+  const opcionesDinamicas = (evList||[]).map(e => e.nombre).filter(n => n && !opcionesFijas.includes(n));
+  const todasOpciones = [...opcionesFijas, ...opcionesDinamicas];
+  // Asegurar que el evento actual esté en la lista aunque no sea de los conocidos
+  if(t.evento && !todasOpciones.includes(t.evento)) todasOpciones.push(t.evento);
+  eventoSel.innerHTML = todasOpciones.map(op => `<option value="${op}">${op}</option>`).join('');
+  eventoSel.value = t.evento || 'Fútbol';
+
   document.getElementById('mcliente').value=t.cliente||'';
   const ef=parseInt(t.facturacion_efectivo)||0; document.getElementById('mefectivo').value=ef>0?ef.toLocaleString('es-AR'):'';
   const tr=parseInt(t.facturacion_transferencia)||0; document.getElementById('mtransferencia').value=tr>0?tr.toLocaleString('es-AR'):'';
@@ -2506,73 +2554,65 @@ document.getElementById('tfModal').addEventListener('click', e => {
 // EVENTOS — ON/OFF
 // ═══════════════════════════════════════════════
 const EV_DAY_INDEX = {'Lunes':0,'Martes':1,'Miércoles':2,'Jueves':3,'Viernes':4,'Sábado':5,'Domingo':6};
-
-// Slots hardcoded desde los CSVs de Airtable
-const TORNEO_SLOTS = [
-  // Lunes-Viernes, 22:00 y 23:00, Cancha de 5 (num 1 y 2)
-  ...['Lunes','Martes','Miércoles','Jueves','Viernes'].flatMap(dia =>
-    ['22:00','23:00'].flatMap(h =>
-      [1,2].map(num => ({dia, horario:h, cancha:'Cancha de 5', num}))
-    )
-  )
+const EV_DIAS_LIST = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const EV_HORARIOS_LIST = ['15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00'];
+const EV_CANCHAS_LIST = [
+  {label:'Cancha de 5 (ambas)', cancha:'Cancha de 5', numero_cancha:null},
+  {label:'Cancha de 5-A', cancha:'Cancha de 5', numero_cancha:1},
+  {label:'Cancha de 5-B', cancha:'Cancha de 5', numero_cancha:2},
+  {label:'Cancha de 6 (ambas)', cancha:'Cancha de 6', numero_cancha:null},
+  {label:'Cancha de 6-A', cancha:'Cancha de 6', numero_cancha:1},
+  {label:'Cancha de 6-B', cancha:'Cancha de 6', numero_cancha:2},
 ];
 
-const ESCUELITA_SLOTS = [
-  // Lunes, Miércoles, Viernes — 18:00 y 19:00 — C5 (1,2) + C6 (1)
-  ...['Lunes','Miércoles','Viernes'].flatMap(dia =>
-    ['18:00','19:00'].flatMap(h => [
-      {dia, horario:h, cancha:'Cancha de 5', num:1},
-      {dia, horario:h, cancha:'Cancha de 5', num:2},
-      {dia, horario:h, cancha:'Cancha de 6', num:1},
-    ])
-  )
-];
-
-const EVENTOS_DEF = [
-  {
-    id: 'torneo',
-    name: 'Torneo',
-    icon: '🏆',
-    color: '#06b6d4',
-    slots: TORNEO_SLOTS,
-    desc: 'Lunes a Viernes · 22:00 y 23:00 · Cancha de 5',
-    slotGroups: ['Lun-Vie 22:00','Lun-Vie 23:00'],
-  },
-  {
-    id: 'escuelita',
-    name: 'Escuelita de Fútbol',
-    icon: '👦',
-    color: '#eab308',
-    slots: ESCUELITA_SLOTS,
-    desc: 'Lunes, Miércoles y Viernes · 18:00 y 19:00 · Canchas 5 y 6',
-    slotGroups: ['Lun/Mié/Vie 18:00','Lun/Mié/Vie 19:00'],
-  },
-];
-
-let evConfig = {}; // { torneo: false, escuelita: false }
+// Eventos ahora vienen 100% de la base de datos
+let evList = []; // [{id, nombre, icono, color, activo, dias, horarios, canchas, es_predeterminado}]
 
 async function initEventos(){
   document.getElementById('evCards').innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span></div>';
   try {
-    const { data, error } = await db.from('eventos_config').select('*');
+    const { data, error } = await db.from('eventos_config').select('*').order('es_predeterminado', {ascending:false}).order('nombre');
     if(error) throw error;
-    evConfig = {};
-    for(const row of (data||[])) evConfig[row.id] = row.activo;
+    evList = (data||[]).map(e => ({
+      id: e.id,
+      nombre: e.nombre || e.id,
+      icono: e.icono || '⚡',
+      color: e.color || '#f97316',
+      activo: !!e.activo,
+      dias: Array.isArray(e.dias) ? e.dias : [],
+      horarios: Array.isArray(e.horarios) ? e.horarios : [],
+      canchas: Array.isArray(e.canchas) ? e.canchas : [],
+      es_predeterminado: !!e.es_predeterminado
+    }));
     renderEvCards();
   } catch(e){
     document.getElementById('evCards').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
   }
 }
 
+function evDescShort(ev){
+  if(!ev.dias.length || !ev.horarios.length || !ev.canchas.length) return 'Sin configurar';
+  const diasCortos = ev.dias.map(d => d.slice(0,3)).join(', ');
+  const horas = ev.horarios.join(' y ');
+  const canchas = ev.canchas.map(c => c.numero_cancha ? `${c.cancha.replace('Cancha de ','C')}-${c.numero_cancha===1?'A':'B'}` : c.cancha.replace('Cancha de ','C')).join(', ');
+  return `${diasCortos} · ${horas} · ${canchas}`;
+}
+
+function evSlotPills(ev){
+  if(!ev.dias.length || !ev.horarios.length) return '<span class="ev-slot-pill" style="opacity:.5">Sin horarios</span>';
+  const dias = ev.dias.map(d=>d.slice(0,3)).join('/');
+  return ev.horarios.map(h => `<span class="ev-slot-pill">${dias} ${h}</span>`).join('');
+}
+
 function renderEvCards(){
-  document.getElementById('evCards').innerHTML = EVENTOS_DEF.map(ev => {
-    const isOn = !!evConfig[ev.id];
+  const cards = evList.map(ev => {
+    const isOn = ev.activo;
     return `<div class="ev-card ${isOn?'ev-on':''}" id="evc-${ev.id}" style="--ev-color:${ev.color}">
       <div class="ev-card-top ${isOn?'ev-on-bg':''}">
-        <span class="ev-icon">${ev.icon}</span>
+        <span class="ev-icon">${ev.icono}</span>
         <div class="ev-info">
-          <div class="ev-name">${ev.name}</div>
-          <div class="ev-desc">${ev.desc}</div>
+          <div class="ev-name">${ev.nombre}</div>
+          <div class="ev-desc">${evDescShort(ev)}</div>
         </div>
         <label class="ev-toggle">
           <input type="checkbox" ${isOn?'checked':''} onchange="toggleEvento('${ev.id}', this.checked)"/>
@@ -2581,76 +2621,282 @@ function renderEvCards(){
       </div>
       <div class="ev-slots">
         <div class="ev-slots-title">Horarios que ocupa en la semana siguiente</div>
-        <div class="ev-slot-pills">${ev.slotGroups.map(g=>`<span class="ev-slot-pill">${g}</span>`).join('')}</div>
+        <div class="ev-slot-pills">${evSlotPills(ev)}</div>
       </div>
-      <div class="ev-status">
-        <div class="ev-status-dot"></div>
-        <span class="ev-status-txt">${isOn?'ACTIVO — Se cargará en la semana siguiente':'INACTIVO'}</span>
+      <div class="ev-status" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="ev-status-dot"></div>
+          <span class="ev-status-txt">${isOn?'ACTIVO — Se cargará en la semana siguiente':'INACTIVO'}</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="ev-edit-btn" onclick="openEventoModal('${ev.id}')">✏️ Editar</button>
+          ${!ev.es_predeterminado ? `<button class="ev-edit-btn" style="color:#ef4444" onclick="deleteEvento('${ev.id}')">🗑️</button>` : ''}
+        </div>
       </div>
     </div>`;
   }).join('');
+
+  // Tarjeta "+ Nuevo Evento"
+  const nuevaCard = `<div class="ev-card ev-card-new" onclick="openEventoModal(null)" style="cursor:pointer;border:2px dashed rgba(255,255,255,.15);background:transparent;display:flex;align-items:center;justify-content:center;min-height:220px">
+    <div style="text-align:center;color:rgba(255,255,255,.5)">
+      <div style="font-size:48px;line-height:1">+</div>
+      <div style="font-size:14px;font-weight:600;margin-top:8px;letter-spacing:1px">NUEVO EVENTO</div>
+    </div>
+  </div>`;
+
+  document.getElementById('evCards').innerHTML = cards + nuevaCard;
+}
+
+// Devuelve los slots (fecha+horario+cancha+num) que ocupa el evento en la semana dada
+function evExpandSlots(ev, weekStart){
+  const slots = [];
+  for(const dia of ev.dias){
+    const fecha = dk(add(weekStart, EV_DAY_INDEX[dia]));
+    for(const horario of ev.horarios){
+      for(const c of ev.canchas){
+        if(c.numero_cancha === null || c.numero_cancha === undefined){
+          slots.push({fecha, horario, cancha:c.cancha, numero_cancha:1});
+          slots.push({fecha, horario, cancha:c.cancha, numero_cancha:2});
+        } else {
+          slots.push({fecha, horario, cancha:c.cancha, numero_cancha:c.numero_cancha});
+        }
+      }
+    }
+  }
+  return slots;
+}
+
+// Libera turnos de un evento en semana siguiente. Solo libera los que NO tienen cliente
+// (los que tienen cliente los deja intactos para no perder reservas manuales)
+async function evLiberarTurnos(ev, weekStart){
+  const slots = evExpandSlots(ev, weekStart);
+  if(!slots.length) return;
+  const fechas = [...new Set(slots.map(s=>s.fecha))];
+  const horarios = [...new Set(slots.map(s=>s.horario))];
+  // Traer turnos que matcheen para liberar solo los que corresponden
+  const {data: existing} = await db.from('turnos')
+    .select('id,fecha,horario,cancha,numero_cancha,cliente,evento')
+    .in('fecha',fechas).in('horario',horarios).eq('evento', ev.nombre);
+  if(!existing || !existing.length) return;
+  const slotKey = s => `${s.fecha}_${s.horario}_${s.cancha}_${s.numero_cancha}`;
+  const evSet = new Set(slots.map(slotKey));
+  // Solo liberar los que son de este evento y no tienen cliente (no pisar reservas manuales)
+  const idsALiberar = existing
+    .filter(t => evSet.has(slotKey(t)) && !t.cliente)
+    .map(t => t.id);
+  if(idsALiberar.length){
+    await db.from('turnos').update({estado:'Disponible', evento:'Fútbol', cliente:null, numero:null})
+      .in('id', idsALiberar);
+  }
+}
+
+// Aplica turnos de un evento en semana siguiente
+async function evAplicarTurnos(ev, weekStart){
+  const slots = evExpandSlots(ev, weekStart);
+  if(!slots.length) return;
+  // Asegurar que la semana tiene slots generados
+  await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)});
+  // Aplicar en batch por cancha (para poder filtrar bien)
+  const canchasUsadas = [...new Set(ev.canchas.map(c=>c.cancha))];
+  for(const cancha of canchasUsadas){
+    const cSlots = slots.filter(s => s.cancha === cancha);
+    if(!cSlots.length) continue;
+    const fechas = [...new Set(cSlots.map(s=>s.fecha))];
+    const horarios = [...new Set(cSlots.map(s=>s.horario))];
+    const nums = [...new Set(cSlots.map(s=>s.numero_cancha))];
+    let q = db.from('turnos').update({estado:'Reservado', evento:ev.nombre, cliente:null, numero:null})
+      .in('fecha',fechas).in('horario',horarios).eq('cancha',cancha).in('numero_cancha', nums)
+      .eq('estado','Disponible'); // solo pisar los Disponibles, no tocar reservas activas
+    await q;
+  }
 }
 
 async function toggleEvento(evId, isOn){
-  const evDef=EVENTOS_DEF.find(e=>e.id===evId);
-  if(!evDef)return;
-  const card=document.getElementById('evc-'+evId);
-  if(card)card.style.opacity='0.6';
+  const ev = evList.find(e=>e.id===evId);
+  if(!ev) return;
+  const card = document.getElementById('evc-'+evId);
+  if(card) card.style.opacity='0.6';
   setSyncing();
   try{
-    // 1. Guardar config
-    await db.from('eventos_config').upsert({id:evId,activo:isOn,updated_at:new Date().toISOString()});
-    evConfig[evId]=isOn;
+    await db.from('eventos_config').update({activo:isOn, updated_at:new Date().toISOString()}).eq('id',evId);
+    ev.activo = isOn;
 
-    const nextMon=WEEKS[1].s;
-    const evName=evId==='torneo'?'Torneo':'Escuelita de Fútbol';
-    const dias=evId==='torneo'?['Lunes','Martes','Miércoles','Jueves','Viernes']:['Lunes','Miércoles','Viernes'];
-    const fechas=dias.map(d=>dk(add(nextMon,EV_DAY_INDEX[d])));
-    const horas=evId==='torneo'?['22:00','23:00']:['18:00','19:00'];
-
-    // 2. PRIMERO: asegurar que la semana siguiente tiene slots generados
-    await db.rpc('generar_semana',{fecha_inicio:dk(WEEKS[1].s),fecha_fin:dk(WEEKS[1].e)});
-
-    // 3. Hacer updates masivos con IN()
     if(isOn){
-      if(evId==='torneo'){
-        await db.from('turnos').update({estado:'Reservado',evento:'Torneo',cliente:null,numero:null})
-          .in('fecha',fechas).in('horario',horas).eq('cancha','Cancha de 5');
-      } else {
-        await db.from('turnos').update({estado:'Reservado',evento:'Escuelita de Fútbol',cliente:null,numero:null})
-          .in('fecha',fechas).in('horario',horas).eq('cancha','Cancha de 5');
-        await db.from('turnos').update({estado:'Reservado',evento:'Escuelita de Fútbol',cliente:null,numero:null})
-          .in('fecha',fechas).in('horario',horas).eq('cancha','Cancha de 6').eq('numero_cancha',1);
-      }
+      await evAplicarTurnos(ev, WEEKS[1].s);
     } else {
-      if(evId==='torneo'){
-        await db.from('turnos').update({estado:'Disponible',evento:'Fútbol',cliente:null,numero:null})
-          .in('fecha',fechas).in('horario',horas).eq('cancha','Cancha de 5').eq('evento','Torneo');
-      } else {
-        await db.from('turnos').update({estado:'Disponible',evento:'Fútbol',cliente:null,numero:null})
-          .in('fecha',fechas).in('horario',horas).eq('evento','Escuelita de Fútbol');
-      }
+      await evLiberarTurnos(ev, WEEKS[1].s);
     }
 
-    // 4. Recargar semana siguiente en turnosMap
-    const {data:ref,error:rErr}=await db.from('turnos')
-      .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero,detalles')
+    // Recargar semana siguiente en turnosMap
+    const {data:ref} = await db.from('turnos')
+      .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero,facturacion_efectivo,facturacion_transferencia,detalles,turno_fijo_id')
       .gte('fecha',dk(WEEKS[1].s)).lte('fecha',dk(WEEKS[1].e));
-    if(!rErr&&ref){
-      for(const t of ref) turnosMap[tKey(t.fecha,t.horario,t.cancha,t.numero_cancha)]=t;
-    }
+    if(ref) for(const t of ref) turnosMap[tKey(t.fecha,t.horario,t.cancha,t.numero_cancha)]=t;
 
     setSynced();
     renderAgenda();
-    showToast(evName+' '+(isOn?'activado ✓':'desactivado'));
+    showToast(ev.nombre+' '+(isOn?'activado ✓':'desactivado'));
   } catch(e){
-    evConfig[evId]=!isOn;
+    ev.activo = !isOn;
     showToast('Error: '+e.message,'err');
     setSyncErr();
     console.error(e);
   }
-  if(card)card.style.opacity='1';
+  if(card) card.style.opacity='1';
   renderEvCards();
+}
+
+// ═══════════ MODAL DE EVENTO (crear/editar) ═══════════
+let evModalId = null; // null = crear nuevo
+
+function openEventoModal(evId){
+  evModalId = evId;
+  const ev = evId ? evList.find(e=>e.id===evId) : {
+    nombre:'', icono:'⚡', color:'#f97316',
+    dias:[], horarios:[], canchas:[], activo:false, es_predeterminado:false
+  };
+  if(!ev) return;
+
+  const bg = document.getElementById('evModalBg');
+  document.getElementById('evmTitle').textContent = evId ? 'Editar evento' : 'Nuevo evento';
+  document.getElementById('evmNombre').value = ev.nombre;
+  document.getElementById('evmIcono').value = ev.icono;
+  document.getElementById('evmColor').value = ev.color;
+
+  // Days chips
+  document.getElementById('evmDias').innerHTML = EV_DIAS_LIST.map(d => {
+    const on = ev.dias.includes(d);
+    return `<span class="evm-chip ${on?'on':''}" data-val="${d}" onclick="this.classList.toggle('on')">${d.slice(0,3)}</span>`;
+  }).join('');
+
+  // Horarios chips
+  document.getElementById('evmHorarios').innerHTML = EV_HORARIOS_LIST.map(h => {
+    const on = ev.horarios.includes(h);
+    return `<span class="evm-chip ${on?'on':''}" data-val="${h}" onclick="this.classList.toggle('on')">${h}</span>`;
+  }).join('');
+
+  // Canchas chips
+  const canchasKey = c => `${c.cancha}|${c.numero_cancha||''}`;
+  const evCanchasKeys = ev.canchas.map(canchasKey);
+  document.getElementById('evmCanchas').innerHTML = EV_CANCHAS_LIST.map(c => {
+    const key = canchasKey(c);
+    const on = evCanchasKeys.includes(key);
+    return `<span class="evm-chip ${on?'on':''}" data-val="${key}" onclick="this.classList.toggle('on')">${c.label}</span>`;
+  }).join('');
+
+  bg.classList.add('on');
+}
+
+function closeEventoModal(){
+  document.getElementById('evModalBg').classList.remove('on');
+  evModalId = null;
+}
+
+async function saveEventoModal(){
+  const nombre = document.getElementById('evmNombre').value.trim();
+  const icono = document.getElementById('evmIcono').value.trim() || '⚡';
+  const color = document.getElementById('evmColor').value || '#f97316';
+  if(!nombre){ showToast('Falta el nombre del evento','err'); return; }
+
+  const dias = [...document.querySelectorAll('#evmDias .evm-chip.on')].map(el => el.dataset.val);
+  const horarios = [...document.querySelectorAll('#evmHorarios .evm-chip.on')].map(el => el.dataset.val);
+  const canchas = [...document.querySelectorAll('#evmCanchas .evm-chip.on')].map(el => {
+    const [cancha, num] = el.dataset.val.split('|');
+    return {cancha, numero_cancha: num ? parseInt(num) : null};
+  });
+
+  if(!dias.length || !horarios.length || !canchas.length){
+    showToast('Selecciona al menos un día, horario y cancha','err'); return;
+  }
+
+  const btn = document.getElementById('evmSaveBtn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  setSyncing();
+  try{
+    const oldEv = evModalId ? evList.find(e => e.id === evModalId) : null;
+    const wasActive = oldEv && oldEv.activo;
+
+    // Si estaba activo, primero liberar los turnos VIEJOS
+    if(wasActive){
+      await evLiberarTurnos(oldEv, WEEKS[1].s);
+    }
+
+    let evId = evModalId;
+    if(!evId){
+      // Crear nuevo — id auto-generado con slug del nombre
+      evId = 'ev_' + nombre.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'') + '_' + Date.now().toString(36);
+    }
+
+    const payload = {
+      id: evId,
+      nombre, icono, color,
+      dias, horarios, canchas,
+      activo: wasActive || false, // mantiene el estado, no lo cambia
+      updated_at: new Date().toISOString()
+    };
+    if(!evModalId) payload.es_predeterminado = false;
+
+    const {error} = await db.from('eventos_config').upsert(payload);
+    if(error) throw error;
+
+    // Actualizar local
+    if(evModalId){
+      Object.assign(oldEv, {nombre, icono, color, dias, horarios, canchas});
+    } else {
+      evList.push({id:evId, nombre, icono, color, dias, horarios, canchas, activo:false, es_predeterminado:false});
+    }
+
+    // Si estaba activo, re-aplicar con nueva config
+    if(wasActive){
+      await evAplicarTurnos(oldEv, WEEKS[1].s);
+      // Recargar turnos
+      const {data:ref} = await db.from('turnos')
+        .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero,facturacion_efectivo,facturacion_transferencia,detalles,turno_fijo_id')
+        .gte('fecha',dk(WEEKS[1].s)).lte('fecha',dk(WEEKS[1].e));
+      if(ref) for(const t of ref) turnosMap[tKey(t.fecha,t.horario,t.cancha,t.numero_cancha)]=t;
+      renderAgenda();
+    }
+
+    setSynced();
+    closeEventoModal();
+    renderEvCards();
+    showToast(evModalId ? 'Evento actualizado ✓' : 'Evento creado ✓');
+  } catch(e){
+    showToast('Error: '+e.message,'err');
+    setSyncErr();
+    console.error(e);
+  }
+  btn.disabled = false; btn.textContent = 'Guardar';
+}
+
+async function deleteEvento(evId){
+  const ev = evList.find(e=>e.id===evId);
+  if(!ev) return;
+  if(!confirm(`¿Eliminar el evento "${ev.nombre}"?\nSi está activo, se liberarán los turnos que ocupa.`)) return;
+  setSyncing();
+  try{
+    if(ev.activo){
+      await evLiberarTurnos(ev, WEEKS[1].s);
+    }
+    await db.from('eventos_config').delete().eq('id', evId);
+    evList = evList.filter(e => e.id !== evId);
+
+    if(ev.activo){
+      // Recargar semana siguiente
+      const {data:ref} = await db.from('turnos')
+        .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero,facturacion_efectivo,facturacion_transferencia,detalles,turno_fijo_id')
+        .gte('fecha',dk(WEEKS[1].s)).lte('fecha',dk(WEEKS[1].e));
+      if(ref) for(const t of ref) turnosMap[tKey(t.fecha,t.horario,t.cancha,t.numero_cancha)]=t;
+      renderAgenda();
+    }
+
+    setSynced();
+    renderEvCards();
+    showToast('Evento eliminado ✓');
+  } catch(e){
+    showToast('Error: '+e.message,'err');
+    setSyncErr();
+  }
 }
 
 
@@ -2924,6 +3170,17 @@ async function autoClearPendientes(){
 function showApp() {
   hideLoginOverlay();
   applyRole(currentRole);
+  // Precargar eventos en background para tenerlos disponibles en el modal de turno
+  db.from('eventos_config').select('*').then(({data}) => {
+    if(data) evList = data.map(e => ({
+      id: e.id, nombre: e.nombre || e.id, icono: e.icono || '⚡', color: e.color || '#f97316',
+      activo: !!e.activo,
+      dias: Array.isArray(e.dias) ? e.dias : [],
+      horarios: Array.isArray(e.horarios) ? e.horarios : [],
+      canchas: Array.isArray(e.canchas) ? e.canchas : [],
+      es_predeterminado: !!e.es_predeterminado
+    }));
+  }).catch(()=>{});
   loadBisemana().then(() => {
     initRealtime();
     renderLiveBoard();
