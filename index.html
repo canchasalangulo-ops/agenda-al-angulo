@@ -513,6 +513,11 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .evm-chip:hover{border-color:rgba(255,255,255,.3);color:var(--negro)}
 .evm-chip.on{background:var(--verde);border-color:var(--verde);color:#fff}
 
+.evm-color-wrap{display:flex;align-items:center;height:44px;margin-bottom:14px}
+.evm-color-input{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+.evm-color-circle{width:32px;height:32px;border-radius:50%;background:#f97316;cursor:pointer;border:2px solid rgba(255,255,255,.15);transition:all .15s;display:block;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.evm-color-circle:hover{transform:scale(1.1);border-color:rgba(255,255,255,.35)}
+
 @media(max-width:768px){
   .ev-wrap{padding:16px}
   .ev-cards{grid-template-columns:1fr}
@@ -914,7 +919,10 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
       </div>
       <div style="flex:1">
         <label class="flbl">Color</label>
-        <input class="fctl" id="evmColor" type="color" style="height:44px;padding:4px"/>
+        <div class="evm-color-wrap">
+          <input id="evmColor" type="color" class="evm-color-input"/>
+          <label for="evmColor" class="evm-color-circle" id="evmColorCircle"></label>
+        </div>
       </div>
     </div>
     <label class="flbl">Días de la semana</label>
@@ -2557,12 +2565,10 @@ const EV_DAY_INDEX = {'Lunes':0,'Martes':1,'Miércoles':2,'Jueves':3,'Viernes':4
 const EV_DIAS_LIST = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 const EV_HORARIOS_LIST = ['15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00'];
 const EV_CANCHAS_LIST = [
-  {label:'Cancha de 5 (ambas)', cancha:'Cancha de 5', numero_cancha:null},
-  {label:'Cancha de 5-A', cancha:'Cancha de 5', numero_cancha:1},
-  {label:'Cancha de 5-B', cancha:'Cancha de 5', numero_cancha:2},
-  {label:'Cancha de 6 (ambas)', cancha:'Cancha de 6', numero_cancha:null},
-  {label:'Cancha de 6-A', cancha:'Cancha de 6', numero_cancha:1},
-  {label:'Cancha de 6-B', cancha:'Cancha de 6', numero_cancha:2},
+  {label:'5-A', cancha:'Cancha de 5', numero_cancha:1},
+  {label:'5-B', cancha:'Cancha de 5', numero_cancha:2},
+  {label:'6-A', cancha:'Cancha de 6', numero_cancha:1},
+  {label:'6-B', cancha:'Cancha de 6', numero_cancha:2},
 ];
 
 // Eventos ahora vienen 100% de la base de datos
@@ -2764,6 +2770,12 @@ function openEventoModal(evId){
   document.getElementById('evmNombre').value = ev.nombre;
   document.getElementById('evmIcono').value = ev.icono;
   document.getElementById('evmColor').value = ev.color;
+  // Actualizar el círculo visual del color picker
+  const colorCircle = document.getElementById('evmColorCircle');
+  if(colorCircle) colorCircle.style.background = ev.color;
+  document.getElementById('evmColor').oninput = function(){
+    if(colorCircle) colorCircle.style.background = this.value;
+  };
 
   // Days chips
   document.getElementById('evmDias').innerHTML = EV_DIAS_LIST.map(d => {
