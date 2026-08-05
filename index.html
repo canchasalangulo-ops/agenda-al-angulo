@@ -2271,8 +2271,6 @@ function lastMondayFourAM(){
 async function applyAllTurnosFijosToWeeks(){
   try {
     // Guard: solo aplicar una vez por semana, después del lunes 04:00 AM.
-    // El bot de WhatsApp (n8n) puede cancelar turnos durante la semana; si
-    // aplicáramos en cada carga, resucitarían al refrescar.
     const cutoff = lastMondayFourAM();
     const { data: cfg } = await db.from('eventos_config')
       .select('updated_at').eq('id','last_tf_apply').maybeSingle();
@@ -2280,14 +2278,13 @@ async function applyAllTurnosFijosToWeeks(){
       return; // ya corrió esta semana
     }
 
+    // Marcar ANTES de ejecutar para que otras sesiones no corran en paralelo
+    await db.from('eventos_config').upsert({
+      id:'last_tf_apply', activo:true, updated_at:new Date().toISOString()
+    });
+
     const { data: fijos, error } = await db.from('turnos_fijos').select('*');
-    if(error || !fijos || !fijos.length){
-      // Igual marcamos el run para no reintentar hasta el próximo lunes
-      await db.from('eventos_config').upsert({
-        id:'last_tf_apply', activo:true, updated_at:new Date().toISOString()
-      });
-      return;
-    }
+    if(error || !fijos || !fijos.length) return;
 
     // Solo semana siguiente: la semana actual ya fue generada el lunes pasado
     // y sus cancelaciones deben respetarse.
@@ -2352,42 +2349,34 @@ async function applyAllTurnosFijosToWeeks(){
 async function tfSyncToAgenda(tf, isDelete=false){
   try {
     const fecha = tfNextOccurrence(tf.dia_semana);
-    const horario = (tf.horario||'').slice(0,5); // "20:00"
-    const horarioFull = horario + ':00';
+    const horario = (tf.horario||'').slice(0,5); // "20:00" — sin segundos
 
     if(isDelete){
-      // Find the turno and reset it to Disponible
       const { data } = await db.from('turnos').select('id')
-        .eq('fecha', fecha).eq('horario', horarioFull)
+        .eq('fecha', fecha).eq('horario', horario)
         .eq('cancha', tf.cancha).eq('cliente', tf.cliente)
         .neq('estado','Disponible').limit(1);
       if(data && data.length > 0){
         await db.from('turnos').update({estado:'Disponible',cliente:null,numero:null}).eq('id',data[0].id);
-        // Update local turnosMap
         for(const k of Object.keys(turnosMap)){
           const t = turnosMap[k];
           if(t.id === data[0].id){ turnosMap[k]={...t,estado:'Disponible',cliente:null,numero:null}; break; }
         }
       }
     } else {
-      // Find available slot for that date+horario+cancha
       const { data: slots } = await db.from('turnos').select('id,numero_cancha')
-        .eq('fecha', fecha).eq('horario', horarioFull)
+        .eq('fecha', fecha).eq('horario', horario)
         .eq('cancha', tf.cancha).eq('estado','Disponible')
         .order('numero_cancha').limit(1);
 
       if(slots && slots.length > 0){
-        await db.from('turnos').update({estado:'Pendiente',cliente:tf.cliente,numero:tf.numero}).eq('id',slots[0].id);
-        // Update local turnosMap
+        await db.from('turnos').update({
+          estado:'Pendiente', cliente:tf.cliente, numero:tf.numero, turno_fijo_id:tf.id
+        }).eq('id',slots[0].id);
         const mapKey = tKey(fecha, horario, tf.cancha, slots[0].numero_cancha);
-        if(turnosMap[mapKey]) turnosMap[mapKey]={...turnosMap[mapKey],estado:'Pendiente',cliente:tf.cliente,numero:tf.numero};
-      } else {
-        // Week not generated yet — insert directly
-        await db.from('turnos').insert({
-          fecha, horario:horarioFull, cancha:tf.cancha, numero_cancha:1,
-          estado:'Pendiente', cliente:tf.cliente, numero:tf.numero, evento:'Fútbol'
-        });
+        if(turnosMap[mapKey]) turnosMap[mapKey]={...turnosMap[mapKey],estado:'Pendiente',cliente:tf.cliente,numero:tf.numero,turno_fijo_id:tf.id};
       }
+      // Si no hay slot disponible, no hacer nada — no insertar duplicados
     }
     // Re-render agenda if affected date is visible
     const w = WEEKS[aWeek];
@@ -3196,28 +3185,53 @@ function applyRole(role) {
 async function autoClearPendientes(){
   const now = new Date();
   if(now.getHours() < 14) return; // solo después de las 14hs
+
+  // Lock: chequear si ya corrió hoy (cualquier sesión)
   const hoy = dk(today);
-  // Buscar turnos Pendiente del día actual en turnosMap
-  const pendientes = Object.entries(turnosMap).filter(([k,t]) =>
-    t.fecha === hoy && t.estado === 'Pendiente'
-  );
-  if(!pendientes.length) return;
-  console.log(`[Auto-limpieza] Liberando ${pendientes.length} turno(s) pendiente(s) del día ${hoy}`);
-  for(const [key, t] of pendientes){
-    try {
-      await db.from('turnos').update({
-        estado: 'Disponible', evento: 'Fútbol', cliente: null, numero: null, detalles: null
-      }).eq('id', t.id);
-      turnosMap[key] = {...t, estado:'Disponible', evento:'Fútbol', cliente:null, numero:null, detalles:null};
-    } catch(e){
-      console.error('[Auto-limpieza] Error:', e);
+  try {
+    const { data: lockRow } = await db.from('eventos_config')
+      .select('updated_at').eq('id','last_autoclear').maybeSingle();
+    if(lockRow && lockRow.updated_at){
+      const lastRun = lockRow.updated_at.slice(0,10); // "YYYY-MM-DD"
+      if(lastRun === hoy) return; // ya corrió hoy, salir
     }
+
+    // Marcar que estamos corriendo ANTES de ejecutar (para evitar que otra sesión corra en paralelo)
+    await db.from('eventos_config').upsert({
+      id: 'last_autoclear', activo: true, updated_at: new Date().toISOString()
+    });
+
+    // Buscar pendientes del día actual directamente en Supabase (no en turnosMap)
+    const { data: pendientes } = await db.from('turnos')
+      .select('id,fecha,horario,cancha,numero_cancha')
+      .eq('fecha', hoy).eq('estado', 'Pendiente');
+
+    if(!pendientes || !pendientes.length) return;
+
+    console.log('[Auto-limpieza] Liberando ' + pendientes.length + ' turno(s) pendiente(s) del día ' + hoy);
+
+    // Update masivo por IDs
+    const ids = pendientes.map(t => t.id);
+    await db.from('turnos').update({
+      estado: 'Disponible', evento: 'Fútbol', cliente: null, numero: null, detalles: null
+    }).in('id', ids);
+
+    // Actualizar turnosMap local
+    for(const t of pendientes){
+      const key = tKey(t.fecha, t.horario, t.cancha, t.numero_cancha);
+      if(turnosMap[key]){
+        turnosMap[key] = {...turnosMap[key], estado:'Disponible', evento:'Fútbol', cliente:null, numero:null, detalles:null};
+      }
+    }
+
+    renderGrid();
+    renderDStrip();
+    renderSBar();
+    renderLiveBoard();
+    showToast(pendientes.length + ' turno(s) pendiente(s) liberado(s) automáticamente');
+  } catch(e){
+    console.error('[Auto-limpieza] Error:', e);
   }
-  renderGrid();
-  renderDStrip();
-  renderSBar();
-  renderLiveBoard();
-  showToast(`${pendientes.length} turno(s) pendiente(s) liberado(s) automáticamente`);
 }
 
 function showApp() {
