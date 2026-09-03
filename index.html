@@ -2586,7 +2586,7 @@ async function initEventos(){
     const { data, error } = await db.from('eventos_config').select('*').order('es_predeterminado', {ascending:false}).order('nombre');
     if(error) throw error;
     // Filtrar registros de sistema (ej: last_tf_apply) que no son eventos reales
-    const SYSTEM_IDS = ['last_tf_apply'];
+    const SYSTEM_IDS = ['last_tf_apply','last_autoclear','last_ev_apply'];
     evList = (data||[]).filter(e => !SYSTEM_IDS.includes(e.id) && e.nombre).map(e => ({
       id: e.id,
       nombre: e.nombre || e.id,
@@ -3234,12 +3234,88 @@ async function autoClearPendientes(){
   }
 }
 
+// ═══════════════════════════════════════════════
+// AUTO-APPLY EVENTOS: aplica eventos activos a la semana siguiente
+// Solo corre 1 vez por semana (lock en DB). Solo toca slots Disponibles.
+// ═══════════════════════════════════════════════
+async function autoApplyEventos(){
+  try {
+    // Guard: solo correr una vez por semana (mismo cutoff que turnos fijos)
+    var cutoff = lastMondayFourAM();
+    var lockRes = await db.from('eventos_config')
+      .select('updated_at').eq('id','last_ev_apply').maybeSingle();
+    if(lockRes.data && lockRes.data.updated_at && new Date(lockRes.data.updated_at) >= cutoff){
+      return; // ya corrió esta semana
+    }
+
+    // Marcar lock ANTES de ejecutar (evitar paralelo)
+    await db.from('eventos_config').upsert({
+      id: 'last_ev_apply', activo: true, updated_at: new Date().toISOString()
+    });
+
+    // Cargar eventos activos (si evList aún no está cargado)
+    if(!evList || !evList.length){
+      var evRes = await db.from('eventos_config').select('*');
+      var SYS = ['last_tf_apply','last_autoclear','last_ev_apply'];
+      if(evRes.data) evList = evRes.data.filter(function(e){ return !SYS.includes(e.id) && e.nombre; }).map(function(e){
+        return {
+          id: e.id, nombre: e.nombre || e.id, icono: e.icono || '', color: e.color || '#f97316',
+          activo: !!e.activo,
+          dias: Array.isArray(e.dias) ? e.dias : [],
+          horarios: Array.isArray(e.horarios) ? e.horarios : [],
+          canchas: Array.isArray(e.canchas) ? e.canchas : [],
+          es_predeterminado: !!e.es_predeterminado
+        };
+      });
+    }
+
+    var eventosActivos = evList.filter(function(ev){ return ev.activo && ev.dias.length && ev.horarios.length && ev.canchas.length; });
+    if(!eventosActivos.length) return;
+
+    // Para cada evento activo, chequear si YA tiene turnos en la semana siguiente
+    var semSigStart = dk(WEEKS[1].s);
+    var semSigEnd = dk(WEEKS[1].e);
+
+    for(var i = 0; i < eventosActivos.length; i++){
+      var ev = eventosActivos[i];
+      // Contar cuántos turnos de este evento existen en la semana siguiente
+      var countRes = await db.from('turnos')
+        .select('id', {count: 'exact', head: true})
+        .gte('fecha', semSigStart).lte('fecha', semSigEnd)
+        .eq('evento', ev.nombre);
+      var existentes = countRes.count || 0;
+
+      if(existentes === 0){
+        // No hay ningún turno de este evento en la semana siguiente → aplicar
+        console.log('[AutoApplyEventos] Aplicando ' + ev.nombre + ' a semana ' + semSigStart);
+        await evAplicarTurnos(ev, WEEKS[1].s);
+      }
+      // Si ya hay turnos (aunque sea parcial), no tocar nada
+    }
+
+    // Recargar semana siguiente en turnosMap
+    var refRes = await db.from('turnos')
+      .select('id,fecha,horario,cancha,numero_cancha,estado,evento,cliente,numero,facturacion_efectivo,facturacion_transferencia,detalles,turno_fijo_id')
+      .gte('fecha', semSigStart).lte('fecha', semSigEnd);
+    if(refRes.data){
+      for(var j = 0; j < refRes.data.length; j++){
+        var t = refRes.data[j];
+        turnosMap[tKey(t.fecha, t.horario, t.cancha, t.numero_cancha)] = t;
+      }
+    }
+    renderAgenda();
+
+  } catch(e){
+    console.warn('autoApplyEventos error:', e.message);
+  }
+}
+
 function showApp() {
   hideLoginOverlay();
   applyRole(currentRole);
   // Precargar eventos en background para tenerlos disponibles en el modal de turno
   db.from('eventos_config').select('*').then(({data}) => {
-    const SYSTEM_IDS = ['last_tf_apply'];
+    const SYSTEM_IDS = ['last_tf_apply','last_autoclear','last_ev_apply'];
     if(data) evList = data.filter(e => !SYSTEM_IDS.includes(e.id) && e.nombre).map(e => ({
       id: e.id, nombre: e.nombre || e.id, icono: e.icono || '⚡', color: e.color || '#f97316',
       activo: !!e.activo,
@@ -3253,6 +3329,7 @@ function showApp() {
     initRealtime();
     renderLiveBoard();
     autoClearPendientes();
+    autoApplyEventos();
   });
 }
 
