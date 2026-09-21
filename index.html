@@ -456,6 +456,10 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .tf-cell-cancha .c6{background:rgba(232,80,26,.2);color:#fb923c}
 .tf-cell-hora{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--text)}
 .tf-empty-day{padding:20px 16px;font-size:12px;color:var(--muted);font-style:italic}
+.tf-row-warn{background:rgba(232,80,26,.10)}
+.tf-row-warn:hover{background:rgba(232,80,26,.18)}
+.tf-warn-dot{color:#fb923c}
+.tf-warn-count{color:#fb923c;font-weight:700}
 
 .tf-modal-inner{width:420px}
 @media(max-width:768px){
@@ -1140,12 +1144,12 @@ function setSyncErr(){ syncDot.className='sync-dot error'; }
 // TOAST
 // ═══════════════════════════════════════════════
 let toastTimer;
-function showToast(msg, type='ok'){
+function showToast(msg, type='ok', ms=3000){
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = `toast show ${type}`;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.classList.remove('show'), 3000);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), ms);
 }
 
 // ═══════════════════════════════════════════════
@@ -2243,6 +2247,26 @@ setInterval(function(){
 // ═══════════════════════════════════════════════
 const TF_DAY_MAP = {'Domingo':0,'Lunes':1,'Martes':2,'Miércoles':3,'Jueves':4,'Viernes':5,'Sábado':6};
 
+// Cuántas canchas físicas hay de un tipo ("Cancha de 5" → 2, "Cancha de 6" → 2).
+// Es el techo de turnos fijos que pueden convivir en un mismo día y horario.
+function tfCapacidad(cancha){
+  return CANCHAS.filter(c => c.cancha === cancha).length;
+}
+
+// IDs de turnos fijos que no tienen NINGÚN turno en toda la bisemana cargada.
+// Se mira la bisemana y no solo la semana siguiente para no marcar en falso un
+// fijo recién creado, que se aplica a la próxima fecha y puede caer en la
+// semana actual. Un fijo cancelado a mano conserva turno_fijo_id en el slot,
+// así que tampoco da falsa alarma: acá solo caen los que nunca se colocaron.
+function tfSinAplicar(){
+  const ini = dk(WEEKS[0].s), fin = dk(WEEKS[1].e);
+  const aplicados = new Set();
+  for(const t of Object.values(turnosMap)){
+    if(t.turno_fijo_id && t.fecha >= ini && t.fecha <= fin) aplicados.add(t.turno_fijo_id);
+  }
+  return new Set(allTF.filter(tf => !aplicados.has(tf.id)).map(tf => tf.id));
+}
+
 function tfNextOccurrence(diaSemana){
   // Next occurrence starting from TOMORROW to avoid overwriting today's bookings
   const target = TF_DAY_MAP[diaSemana];
@@ -2291,6 +2315,8 @@ async function applyAllTurnosFijosToWeeks(){
     const start = WEEKS[1].s;
     const end   = WEEKS[1].e;
 
+    const noAplicados = [];
+
     for(const tf of fijos){
       const targetDay  = TF_DAY_MAP[tf.dia_semana];
       const horario    = (tf.horario||'').slice(0,5);
@@ -2332,6 +2358,10 @@ async function applyAllTurnosFijosToWeeks(){
             break; // solo el primer Disponible de ese tipo de cancha
           }
         }
+
+        // No entró: no quedaba ninguna cancha de ese tipo libre a esa hora.
+        // Antes esto pasaba sin dejar rastro y el fijo desaparecía por semanas.
+        if(!applied) noAplicados.push(`${tf.cliente} (${tf.dia_semana} ${horario}, ${tf.cancha})`);
       }
     }
 
@@ -2340,6 +2370,11 @@ async function applyAllTurnosFijosToWeeks(){
       id:'last_tf_apply', activo:true, updated_at:new Date().toISOString()
     });
 
+    if(noAplicados.length){
+      console.warn('[TurnosFijos] Sin lugar en la semana siguiente:', noAplicados);
+      showToast(`⚠ ${noAplicados.length} turno(s) fijo(s) sin lugar la semana que viene: ${noAplicados.join(' · ')}`, 'err', 12000);
+    }
+
     renderAgenda();
   } catch(e){
     console.warn('applyAllTurnosFijosToWeeks error:', e.message);
@@ -2347,6 +2382,7 @@ async function applyAllTurnosFijosToWeeks(){
 }
 
 async function tfSyncToAgenda(tf, isDelete=false){
+  let colocado = true;
   try {
     const fecha = tfNextOccurrence(tf.dia_semana);
     const horario = (tf.horario||'').slice(0,5); // "20:00" — sin segundos
@@ -2375,8 +2411,11 @@ async function tfSyncToAgenda(tf, isDelete=false){
         }).eq('id',slots[0].id);
         const mapKey = tKey(fecha, horario, tf.cancha, slots[0].numero_cancha);
         if(turnosMap[mapKey]) turnosMap[mapKey]={...turnosMap[mapKey],estado:'Pendiente',cliente:tf.cliente,numero:tf.numero,turno_fijo_id:tf.id};
+      } else {
+        // No hay slot libre: no se inserta nada (evita duplicados), pero se avisa.
+        // Sin este aviso el fijo quedaba cargado en la lista sin existir en la agenda.
+        colocado = false;
       }
-      // Si no hay slot disponible, no hacer nada — no insertar duplicados
     }
     // Re-render agenda if affected date is visible
     const w = WEEKS[aWeek];
@@ -2384,6 +2423,7 @@ async function tfSyncToAgenda(tf, isDelete=false){
   } catch(e){
     console.warn('tfSyncToAgenda error:', e.message);
   }
+  return colocado;
 }
 // ═══════════════════════════════════════════════
 const TF_DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
@@ -2413,7 +2453,11 @@ async function initTurnosFijos(){
 }
 
 function renderTF(){
-  document.getElementById('tfCount').textContent = `${allTF.length} turno${allTF.length !== 1 ? 's' : ''} fijo${allTF.length !== 1 ? 's' : ''}`;
+  const sinAplicar = tfSinAplicar();
+  const base = `${allTF.length} turno${allTF.length !== 1 ? 's' : ''} fijo${allTF.length !== 1 ? 's' : ''}`;
+  document.getElementById('tfCount').innerHTML = sinAplicar.size
+    ? `${base} · <span class="tf-warn-count">${sinAplicar.size} sin lugar</span>`
+    : base;
 
   if(!allTF.length){
     document.getElementById('tfList').innerHTML = '<div class="empty-state"><span class="empty-icon">📌</span>Sin turnos fijos registrados</div>';
@@ -2448,8 +2492,9 @@ function renderTF(){
         ${items.map(tf => {
           const isc5 = tf.cancha === 'Cancha de 5';
           const hora = tf.horario ? tf.horario.slice(0,5) : '--:--';
-          return `<div class="tf-row" onclick="openEditTF(${JSON.stringify(tf).replace(/"/g,'&quot;')})">
-            <div class="tf-cell-name">${tf.cliente||'—'}</div>
+          const sinLugar = sinAplicar.has(tf.id);
+          return `<div class="tf-row${sinLugar?' tf-row-warn':''}" onclick="openEditTF(${JSON.stringify(tf).replace(/"/g,'&quot;')})"${sinLugar?' title="No hay cancha libre a esa hora: este turno fijo no se está aplicando a la agenda"':''}>
+            <div class="tf-cell-name">${sinLugar?'<span class="tf-warn-dot">⚠</span> ':''}${tf.cliente||'—'}</div>
             <div class="tf-cell-phone">${tf.numero||'—'}</div>
             <div class="tf-cell-cancha"><span class="${isc5?'c5':'c6'}">${tf.cancha}</span></div>
             <div class="tf-cell-hora">${hora}</div>
@@ -2510,23 +2555,42 @@ async function saveTF(){
     numero:     document.getElementById('tfNumero').value.trim() || null,
   };
   if(!payload.cliente){ showToast('El nombre del cliente es obligatorio','err'); return; }
+
+  // Techo de capacidad: no puede haber más fijos que canchas de ese tipo en el
+  // mismo día y horario. Si se permite, el sobrante nunca se aplica a la agenda
+  // y el cliente se queda sin turno y sin recordatorio, en silencio.
   btn.disabled = true; btn.textContent = 'Guardando...';
   try {
+    const cap = tfCapacidad(payload.cancha);
+    let q = db.from('turnos_fijos').select('id,cliente')
+      .eq('dia_semana', payload.dia_semana)
+      .eq('horario', payload.horario)
+      .eq('cancha', payload.cancha);
+    if(tfEditingId) q = q.neq('id', tfEditingId);
+    const { data: choque, error: eChoque } = await q;
+    if(eChoque) throw eChoque;
+    if(choque && choque.length >= cap){
+      showToast(`No hay lugar: ${payload.dia_semana} ${payload.horario} en ${payload.cancha} ya tiene ${choque.length} fijo(s) y solo hay ${cap} cancha(s) — ${choque.map(c=>c.cliente).join(', ')}`, 'err', 9000);
+      return;
+    }
+
     if(tfEditingId){
       const { error } = await db.from('turnos_fijos').update(payload).eq('id', tfEditingId);
       if(error) throw error;
       const idx = allTF.findIndex(t => t.id === tfEditingId);
       if(idx > -1) allTF[idx] = { ...allTF[idx], ...payload };
-      await tfSyncToAgenda({...allTF.find(t=>t.id===tfEditingId),...payload});
-      showToast('Turno fijo actualizado ✓');
+      const ok = await tfSyncToAgenda({...allTF.find(t=>t.id===tfEditingId),...payload});
+      showToast(ok ? 'Turno fijo actualizado ✓'
+                   : '⚠ Turno fijo actualizado, pero no había cancha libre en la próxima fecha — cargalo a mano', ok?'ok':'err', ok?3000:9000);
     } else {
       const { data, error } = await db.from('turnos_fijos').insert(payload).select().single();
       if(error) throw error;
       allTF.push(data);
       allTF.sort((a,b) => TF_DIAS.indexOf(a.dia_semana) - TF_DIAS.indexOf(b.dia_semana) || (a.horario||'').localeCompare(b.horario||''));
       tfOpenGroups.add(payload.dia_semana);
-      await tfSyncToAgenda(data);
-      showToast('Turno fijo creado ✓');
+      const ok = await tfSyncToAgenda(data);
+      showToast(ok ? 'Turno fijo creado ✓'
+                   : '⚠ Turno fijo creado, pero no había cancha libre en la próxima fecha — cargalo a mano', ok?'ok':'err', ok?3000:9000);
     }
     closeTFModal();
     renderTF();
