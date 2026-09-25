@@ -60,6 +60,28 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .page.on{display:flex}
 
 /* TOAST */
+/* ─── AVISO CENTRADO ───
+   Para lo que el toast de abajo no alcanza a comunicar: avisos de varias
+   lineas que el usuario tiene que leer si o si. El toast queda para los
+   "Guardado ✓" y para errores de un renglon. */
+.av-bg{display:none;position:fixed;inset:0;background:rgba(6,10,18,.62);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:20px}
+.av-bg.on{display:flex;animation:avfade .18s ease}
+@keyframes avfade{from{opacity:0}to{opacity:1}}
+.av-card{position:relative;width:440px;max-width:100%;max-height:85vh;overflow-y:auto;background:rgba(14,20,38,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border-md);border-top:3px solid var(--naranja);border-radius:18px;padding:30px 32px 26px;box-shadow:0 20px 60px rgba(0,0,0,.55);animation:fup .22s ease}
+.av-icon{width:46px;height:46px;border-radius:50%;background:var(--naranja-pale);border:1px solid rgba(232,80,26,.35);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.av-ttl{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--text);line-height:1.1;margin-bottom:10px;padding-right:34px}
+.av-msg{font-size:14px;line-height:1.65;color:#c9d4e0;margin-bottom:24px;white-space:pre-line}
+.av-msg strong{color:#fb923c;font-weight:700}
+.av-btn{width:100%;background:var(--naranja);color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:13px;border-radius:11px;border:none;cursor:pointer;transition:background .15s}
+.av-btn:hover{background:var(--naranja-dk)}
+.av-x{position:absolute;top:18px;right:18px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.07);border:none;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.av-x:hover{background:var(--naranja);color:#fff;transform:rotate(90deg)}
+@media(max-width:768px){
+  .av-card{width:100%;padding:26px 22px 22px}
+  .av-ttl{font-size:23px}
+  .av-msg{font-size:13.5px}
+}
+
 .toast{position:fixed;bottom:24px;right:24px;background:var(--negro);color:#fff;font-size:12px;font-weight:600;padding:12px 20px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:500;transform:translateY(60px);opacity:0;transition:all .25s;max-width:300px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{border-left:3px solid #4ade80}
@@ -1074,6 +1096,17 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- AVISO CENTRADO -->
+<div class="av-bg" id="avisoBg" onclick="if(event.target===this)closeAviso()">
+  <div class="av-card" role="alertdialog" aria-modal="true" aria-labelledby="avisoTtl">
+    <button class="av-x" onclick="closeAviso()" aria-label="Cerrar">✕</button>
+    <div class="av-icon" id="avisoIcon">⚠</div>
+    <div class="av-ttl" id="avisoTtl">Aviso</div>
+    <div class="av-msg" id="avisoMsg"></div>
+    <button class="av-btn" onclick="closeAviso()">Entendido</button>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════
 // SUPABASE CONFIG
@@ -1144,6 +1177,24 @@ function setSyncErr(){ syncDot.className='sync-dot error'; }
 // TOAST
 // ═══════════════════════════════════════════════
 let toastTimer;
+// Cartel centrado con ✕, para avisos que el usuario tiene que leer entero.
+// El toast de abajo a la derecha no da para tres renglones: se lee mal y se va
+// solo antes de que lo alcances a leer.
+function showAviso(titulo, msg, icono='⚠'){
+  document.getElementById('avisoIcon').textContent = icono;
+  document.getElementById('avisoTtl').textContent = titulo;
+  document.getElementById('avisoMsg').textContent = msg;
+  document.getElementById('avisoBg').classList.add('on');
+}
+
+function closeAviso(){
+  document.getElementById('avisoBg').classList.remove('on');
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('avisoBg').classList.contains('on')) closeAviso();
+});
+
 function showToast(msg, type='ok', ms=3000){
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -2372,7 +2423,11 @@ async function applyAllTurnosFijosToWeeks(){
 
     if(noAplicados.length){
       console.warn('[TurnosFijos] Sin lugar en la semana siguiente:', noAplicados);
-      showToast(`⚠ ${noAplicados.length} turno(s) fijo(s) sin lugar la semana que viene: ${noAplicados.join(' · ')}`, 'err', 12000);
+      const n = noAplicados.length;
+      showAviso(n === 1 ? 'Un turno fijo se quedó sin lugar' : `${n} turnos fijos se quedaron sin lugar`,
+        `Para la semana que viene no había cancha libre a esa hora, así que ${n === 1 ? 'este turno no se creó' : 'estos turnos no se crearon'} y ${n === 1 ? 'el cliente no va a recibir' : 'los clientes no van a recibir'} el recordatorio:\n\n` +
+        noAplicados.map(t => `• ${t}`).join('\n') +
+        `\n\nQuedan marcados con ⚠ en la pestaña Turnos Fijos.`);
     }
 
     renderAgenda();
@@ -2570,7 +2625,10 @@ async function saveTF(){
     const { data: choque, error: eChoque } = await q;
     if(eChoque) throw eChoque;
     if(choque && choque.length >= cap){
-      showToast(`No hay lugar: ${payload.dia_semana} ${payload.horario} en ${payload.cancha} ya tiene ${choque.length} fijo(s) y solo hay ${cap} cancha(s) — ${choque.map(c=>c.cliente).join(', ')}`, 'err', 9000);
+      showAviso('No hay lugar',
+        `Los ${payload.dia_semana} a las ${payload.horario} hay ${cap} ${payload.cancha.replace('Cancha', cap === 1 ? 'cancha' : 'canchas')}, y ${cap === 1 ? 'ya tiene' : `las ${cap} ya tienen`} turno fijo:\n\n` +
+        choque.map(c => `• ${c.cliente}`).join('\n') +
+        `\n\nPara que ${payload.cliente} entre ahí, primero hay que liberar uno de esos. Si no, probá con otro horario o con la otra cancha.`);
       return;
     }
 
@@ -2580,8 +2638,9 @@ async function saveTF(){
       const idx = allTF.findIndex(t => t.id === tfEditingId);
       if(idx > -1) allTF[idx] = { ...allTF[idx], ...payload };
       const ok = await tfSyncToAgenda({...allTF.find(t=>t.id===tfEditingId),...payload});
-      showToast(ok ? 'Turno fijo actualizado ✓'
-                   : '⚠ Turno fijo actualizado, pero no había cancha libre en la próxima fecha — cargalo a mano', ok?'ok':'err', ok?3000:9000);
+      if(ok) showToast('Turno fijo actualizado ✓');
+      else showAviso('Guardado, pero todavía no está en la agenda',
+        `El turno fijo de ${payload.cliente} quedó actualizado y va a aplicarse solo los lunes a las 04:00.\n\nPero en la próxima fecha no quedaba ninguna ${payload.cancha.replace('Cancha','cancha')} libre a las ${payload.horario}, así que ese turno hay que cargarlo a mano desde la Agenda.`);
     } else {
       const { data, error } = await db.from('turnos_fijos').insert(payload).select().single();
       if(error) throw error;
@@ -2589,8 +2648,9 @@ async function saveTF(){
       allTF.sort((a,b) => TF_DIAS.indexOf(a.dia_semana) - TF_DIAS.indexOf(b.dia_semana) || (a.horario||'').localeCompare(b.horario||''));
       tfOpenGroups.add(payload.dia_semana);
       const ok = await tfSyncToAgenda(data);
-      showToast(ok ? 'Turno fijo creado ✓'
-                   : '⚠ Turno fijo creado, pero no había cancha libre en la próxima fecha — cargalo a mano', ok?'ok':'err', ok?3000:9000);
+      if(ok) showToast('Turno fijo creado ✓');
+      else showAviso('Creado, pero todavía no está en la agenda',
+        `El turno fijo de ${payload.cliente} quedó creado y va a aplicarse solo los lunes a las 04:00.\n\nPero en la próxima fecha no quedaba ninguna ${payload.cancha.replace('Cancha','cancha')} libre a las ${payload.horario}, así que ese turno hay que cargarlo a mano desde la Agenda.`);
     }
     closeTFModal();
     renderTF();
