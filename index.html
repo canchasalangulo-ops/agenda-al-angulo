@@ -3159,8 +3159,11 @@ function applyRole(role) {
   const tabNames = ['agenda','historial','resumenes','contactos','turnos-fijos','eventos'];
 
   if (role === 'canchas') {
-    // Ve Agenda + Turnos Fijos + Eventos
-    const tabsCanchas = ['agenda','turnos-fijos','eventos'];
+    // Ve Agenda + Contactos + Turnos Fijos + Eventos.
+    // Contactos se sumó el 2026-09-25: antes solo el dueño podía dar de alta un
+    // cliente y las canchas quedaban trabadas. Acceso completo, igual que el dueño
+    // (crear, editar y eliminar) — decidido así a pedido de Agustín.
+    const tabsCanchas = ['agenda','contactos','turnos-fijos','eventos'];
     allTabs.forEach((tab, i) => {
       tab.style.display = tabsCanchas.includes(tabNames[i]) ? '' : 'none';
     });
