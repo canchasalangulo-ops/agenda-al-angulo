@@ -2013,17 +2013,35 @@ let contactsLoaded = false;
 let expandedGroups = new Set();
 let editingContactId = null;
 
+// Supabase corta toda respuesta en 1000 filas. Sin paginar, la app mostraba
+// los primeros 1000 contactos de 1959 y el resto era invisible: no aparecian
+// en la lista NI en el buscador, que filtra sobre lo ya cargado. Por eso se
+// intentaba dar de alta gente que ya existia y saltaba el unique de numero.
+// El segundo .order('id') es el desempate: sin una clave unica, dos contactos
+// con el mismo nombre pueden repetirse o saltearse entre paginas.
+async function fetchAllContactos() {
+  const PAGINA = 1000;
+  let desde = 0, todos = [];
+  for(;;) {
+    const { data, error } = await db
+      .from('contactos')
+      .select('id, nombre_completo, nombre, numero, suscriber_id')
+      .order('nombre_completo', { ascending: true })
+      .order('id', { ascending: true })
+      .range(desde, desde + PAGINA - 1);
+    if (error) throw error;
+    todos = todos.concat(data || []);
+    if (!data || data.length < PAGINA) return todos;
+    desde += PAGINA;
+  }
+}
+
 async function initContactos() {
   if (contactsLoaded) { renderContacts(); return; }
   document.getElementById('conList').innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando contactos...</div>';
   setSyncing();
   try {
-    const { data, error } = await db
-      .from('contactos')
-      .select('id, nombre_completo, nombre, numero, suscriber_id')
-      .order('nombre_completo', { ascending: true });
-    if (error) throw error;
-    allContacts = data || [];
+    allContacts = await fetchAllContactos();
     contactsLoaded = true;
     setSynced();
     renderContacts();
@@ -2153,6 +2171,26 @@ async function saveContact() {
 
   btn.disabled = true; btn.textContent = 'Guardando...';
   try {
+    // El numero es unique en la base. Sin este chequeo, el intento fallaba con
+    // el texto crudo de Postgres ("duplicate key value violates unique
+    // constraint contactos_numero_key"), que no le dice nada a nadie.
+    let dupQ = db.from('contactos').select('id, nombre_completo').eq('numero', numero);
+    if (editingContactId) dupQ = dupQ.neq('id', editingContactId);
+    const { data: dup, error: dupErr } = await dupQ;
+    if (dupErr) throw dupErr;
+    if (dup && dup.length) {
+      closeConModal();
+      // Dejar la lista filtrada por ese numero, para que al cerrar el aviso
+      // el contacto que ya existe este a la vista.
+      const buscador = document.getElementById('conSearch');
+      if (buscador) { buscador.value = numero; renderContacts(); }
+      showAviso('Ese número ya está agendado',
+        `${dup[0].nombre_completo || 'Un contacto'} ya tiene el número ${numero}.\n\n` +
+        `No se creó un contacto nuevo para no duplicarlo. Te dejé la lista filtrada por ese número: si el nombre está mal, editalo ahí.`,
+        '👤');
+      return;
+    }
+
     if (editingContactId) {
       const { error } = await db.from('contactos')
         .update({ nombre_completo, numero, suscriber_id })
@@ -2173,7 +2211,12 @@ async function saveContact() {
     closeConModal();
     renderContacts();
   } catch(e) {
-    showToast('Error: ' + e.message, 'err');
+    if (e.code === '23505' || /contactos_numero_key/.test(e.message || '')) {
+      showAviso('Ese número ya está agendado',
+        `Otro contacto ya tiene el número ${numero}, así que no se guardó para no duplicarlo.`, '👤');
+    } else {
+      showToast('Error: ' + e.message, 'err');
+    }
   } finally {
     btn.disabled = false; btn.textContent = 'Guardar';
   }
