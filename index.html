@@ -1361,16 +1361,25 @@ async function loadHistorialMonth(year, month){
   setSynced();
   // Transformar: calcular f5pct/f6pct y normalizar nombres de campos, ordenar desc por semana
   const sorted = (data || []).sort((a,b) => b.semana_inicio > a.semana_inicio ? 1 : -1);
-  historialData[key] = sorted.map(row => ({
-    semana_inicio: new Date(row.semana_inicio + 'T00:00:00'),
-    semana_fin:    new Date(row.semana_fin    + 'T00:00:00'),
-    reservados:    parseInt(row.reservados)    || 0,
-    libres:        parseInt(row.libres)        || 0,
-    efectivo:      parseInt(row.efectivo)      || 0,
-    transferencia: parseInt(row.transferencia) || 0,
-    f5pct: (parseInt(row.f5_total)||0) > 0 ? Math.round((parseInt(row.f5_res)||0) / (parseInt(row.f5_total)||1) * 100) : 0,
-    f6pct: (parseInt(row.f6_total)||0) > 0 ? Math.round((parseInt(row.f6_res)||0) / (parseInt(row.f6_total)||1) * 100) : 0
-  }));
+  // Las columnas *_futbol las agregó el SQL del 2026-11-12 (ver el vault). Si por lo que
+  // sea la función volviera a la versión vieja, se cae a las columnas de siempre en vez
+  // de dejar el Historial en blanco.
+  const num = (v, alt) => parseInt(v != null ? v : alt) || 0;
+  historialData[key] = sorted.map(row => {
+    const f5t = num(row.f5_total_futbol, row.f5_total), f5r = num(row.f5_res_futbol, row.f5_res);
+    const f6t = num(row.f6_total_futbol, row.f6_total), f6r = num(row.f6_res_futbol, row.f6_res);
+    return {
+      semana_inicio: new Date(row.semana_inicio + 'T00:00:00'),
+      semana_fin:    new Date(row.semana_fin    + 'T00:00:00'),
+      reservados:    num(row.reservados_futbol, row.reservados),
+      libres:        num(row.libres_futbol, row.libres),
+      eventos:       num(row.reservados_eventos, 0),
+      efectivo:      num(row.efectivo, 0),
+      transferencia: num(row.transferencia, 0),
+      f5pct: f5t > 0 ? Math.round(f5r / f5t * 100) : 0,
+      f6pct: f6t > 0 ? Math.round(f6r / f6t * 100) : 0
+    };
+  });
   return historialData[key];
 }
 
@@ -1579,11 +1588,15 @@ async function initHistorial(){
     histMonthsData = {};
     for(const row of allData){
       const k = `${row.anio}-${String(row.mes).padStart(2,'0')}`;
+      // `reservados` acá es solo fútbol (columna agregada el 2026-11-12); los
+      // turnos de evento se cuentan aparte y no se mezclan con la demanda.
+      const resFut = parseInt(row.reservados_futbol != null ? row.reservados_futbol : row.reservados) || 0;
       histMonthsData[k] = {
         year: row.anio,
         month: row.mes - 1,       // JS months son 0-indexed
-        total: row.reservados,
-        reservados: parseInt(row.reservados) || 0,
+        total: resFut,
+        reservados: resFut,
+        eventos: parseInt(row.reservados_eventos) || 0,
         efectivo: parseInt(row.efectivo) || 0,
         transferencia: parseInt(row.transferencia) || 0
       };
@@ -1603,7 +1616,8 @@ async function initHistorial(){
             <span class="hist-month-year">${m.year}</span>
           </div>
           <div class="hist-month-right">
-            <div class="hist-month-badges" id="hmg-${k}"><span class="hmb hmb-res">⚽ ${m.reservados} reservados</span>
+            <div class="hist-month-badges" id="hmg-${k}"><span class="hmb hmb-res">⚽ ${m.reservados} de fútbol</span>
+            ${m.eventos>0?`<span class="hmb">🎉 ${m.eventos} de eventos</span>`:''}
             ${m.efectivo>0?`<span class="hmb hmb-ef">💵 $${m.efectivo.toLocaleString('es-AR')}</span>`:''}
             ${m.transferencia>0?`<span class="hmb hmb-tr">🏦 $${m.transferencia.toLocaleString('es-AR')}</span>`:''}
           </div>
@@ -1660,8 +1674,9 @@ function renderHistMonthBody(k, year, month, data){
     return;
   }
 
-  // Totales exactos del RPC
+  // Totales exactos del RPC — `reservados` ya viene filtrado a fútbol
   const totalR  = data.reduce((s,r)=>s+r.reservados, 0);
+  const totalEv = data.reduce((s,r)=>s+(r.eventos||0), 0);
   const totalEf = data.reduce((s,r)=>s+r.efectivo, 0);
   const totalTr = data.reduce((s,r)=>s+r.transferencia, 0);
   const totalFact = totalEf + totalTr;
@@ -1669,7 +1684,8 @@ function renderHistMonthBody(k, year, month, data){
   // Sincronizar badge del header con datos exactos del RPC
   const badgeWrap = document.getElementById(`hmg-${k}`);
   if(badgeWrap){
-    let pills = `<span class="hmb hmb-res">⚽ ${totalR} reservados</span>`;
+    let pills = `<span class="hmb hmb-res">⚽ ${totalR} de fútbol</span>`;
+    if(totalEv>0) pills += `<span class="hmb">🎉 ${totalEv} de eventos</span>`;
     pills += `<span class="hmb hmb-ef">💵 $${totalEf.toLocaleString('es-AR')}</span>`;
     pills += `<span class="hmb hmb-tr">🏦 $${totalTr.toLocaleString('es-AR')}</span>`;
     badgeWrap.innerHTML = pills;
@@ -1703,7 +1719,7 @@ function renderHistMonthBody(k, year, month, data){
         </div>
         <div class="wcard-right">
           <div class="wcpct" style="color:${color}">${pct}%</div>
-          <div class="wcpctlb" style="color:${color}">Ocupación</div>
+          <div class="wcpctlb" style="color:${color}">Ocupación fútbol</div>
         </div>
       </div>
       <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:${color}"></div></div>
@@ -1711,6 +1727,7 @@ function renderHistMonthBody(k, year, month, data){
         <div class="wcstat"><div class="wcsv" style="color:${neonGreen};text-shadow:0 0 14px ${neonGreen}99">${row.reservados}</div><div class="wcsl">Reservados</div></div>
         <div class="wcstat"><div class="wcsv" style="color:${neonGray}">${row.libres}</div><div class="wcsl">Libres</div></div>
       </div>
+      ${row.eventos>0?`<div class="wcsl" style="text-align:center;margin-top:6px;opacity:.75">+ ${row.eventos} de eventos, fuera de la ocupación</div>`:''}
       ${showFact ? `<div class="wcard-fact">
         <div class="wfstat"><div class="wfl">💵 Efectivo</div><div class="wfv" style="color:${neonGreen};text-shadow:0 0 10px ${neonGreen}66">${fmtP(ef)}</div></div>
         <div class="wfstat"><div class="wfl">🏦 Transf.</div><div class="wfv" style="color:${neonBlue};text-shadow:0 0 10px ${neonBlue}66">${fmtP(tr)}</div></div>
@@ -1729,7 +1746,7 @@ function renderHistMonthBody(k, year, month, data){
     </div>`;
   }).join('');
 
-  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:14px">${data.length} semanas · ${totalR} reservados${mFactStr}</div>
+  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:14px">${data.length} semanas · ${totalR} de fútbol${totalEv>0?` · ${totalEv} de eventos`:''}${mFactStr}</div>
     <div class="wcards">${weekCards}</div>`;
 }
 
