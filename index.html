@@ -2651,8 +2651,10 @@ const LE_ESTADOS = {
 };
 
 async function initListaEspera(){
-  if(leLoaded){ renderLE(); return; }
-  document.getElementById('leList').innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando lista de espera...</div>';
+  // A diferencia de Turnos Fijos, esta tabla la edita el agente de WhatsApp todo
+  // el tiempo por fuera de la agenda — no se puede cachear como si fuera estática,
+  // se perdería lo que se anotó después de la primera carga. Siempre trae de nuevo.
+  if(!leLoaded) document.getElementById('leList').innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando lista de espera...</div>';
   setSyncing();
   try {
     const { data, error } = await db
@@ -3627,6 +3629,10 @@ function showApp() {
 
 // Chequear cada minuto por si la página está abierta y pasan las 14hs
 setInterval(autoClearPendientes, 60000);
+
+// Lista de Espera la anota el agente en cualquier momento: si la pestaña está
+// abierta (dejada en pantalla en la cancha), refrescarla sola cada 30s.
+setInterval(() => { if(currentPage === 'lista-espera') initListaEspera(); }, 30000);
 
 // Enter en los inputs del login
 document.addEventListener('DOMContentLoaded', () => {
