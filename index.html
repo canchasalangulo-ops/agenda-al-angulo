@@ -1764,16 +1764,35 @@ function renderHistorialMonth(year, month, data){
 // ═══════════════════════════════════════════════
 // RENDER: RESÚMENES
 // ═══════════════════════════════════════════════
+// ¿Es un turno de fútbol? Los de evento (Escuelita, Torneo, Cumpleaños) no cuentan
+// como demanda de cancha: ocupan franjas fijas y no tienen cliente ni teléfono.
+function esFutbol(t){ return (t.evento||'Fútbol')==='Fútbol'; }
+
 async function initResumenes(){
   document.getElementById('rgrid').innerHTML='<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando resúmenes...</div>';
   try {
     const eightWeeksAgo = add(WEEKS[0].s, -56);
-    const { data, error } = await db
-      .from('turnos')
-      .select('fecha, horario, cancha, numero_cancha, estado, cliente, numero, facturacion_efectivo, facturacion_transferencia, reservado_por_lista_espera')
-      .gte('fecha', dk(eightWeeksAgo))
-      .lt('fecha', dk(WEEKS[0].s));
-    if(error) throw error;
+    // OJO: Supabase corta en 1.000 filas y 8 semanas son ~2.000. Sin paginar,
+    // las semanas más recientes no llegaban nunca y la tarjeta "Última semana"
+    // mostraba una semana de un mes atrás (2026-11-12). Se pagina con `id` como
+    // desempate: sin un orden único las páginas se pisan.
+    const PAGE = 1000;
+    let data = [], desde = 0;
+    for(;;){
+      const r = await db
+        .from('turnos')
+        .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, reservado_por_lista_espera')
+        .gte('fecha', dk(eightWeeksAgo))
+        .lt('fecha', dk(WEEKS[0].s))
+        .order('fecha',{ascending:true})
+        .order('id',{ascending:true})
+        .range(desde, desde+PAGE-1);
+      if(r.error) throw r.error;
+      const pagina = r.data||[];
+      data = data.concat(pagina);
+      if(pagina.length < PAGE) break;
+      desde += PAGE;
+    }
     if(!data||!data.length){
       document.getElementById('rgrid').innerHTML='<div class="empty-state"><span class="empty-icon">📊</span>Sin semanas cerradas aún</div>';
       return;
@@ -1791,35 +1810,40 @@ function renderResumenes(data){
     return;
   }
   document.getElementById('rgrid').innerHTML=weeks.map((w,i)=>{
-    const tot=w.turnos.length;
-    const res=w.turnos.filter(t=>t.estado==='Reservado').length;
-    const pen=w.turnos.filter(t=>t.estado==='Pendiente'||t.estado==='Pendiente de seña').length;
-    const can=w.turnos.filter(t=>t.estado==='Disponible').length;
-    const le=w.turnos.filter(t=>t.reservado_por_lista_espera).length;
+    // La ocupación mide demanda de fútbol: los turnos de evento quedan afuera del
+    // cálculo y se muestran aparte, abajo. Mezclarlos inflaba el porcentaje y
+    // ponía horarios de escuelita como los más pedidos (2026-11-12).
+    const futbol=w.turnos.filter(esFutbol);
+    const evts=w.turnos.filter(t=>!esFutbol(t));
+    const tot=futbol.length;
+    const res=futbol.filter(t=>t.estado==='Reservado').length;
+    const pen=futbol.filter(t=>t.estado==='Pendiente'||t.estado==='Pendiente de seña').length;
+    const can=futbol.filter(t=>t.estado==='Disponible').length;
+    const le=futbol.filter(t=>t.reservado_por_lista_espera).length;
     const pct=tot>0?Math.round(res/tot*100):0;
 
-    const c5tot=w.turnos.filter(t=>t.cancha==='Cancha de 5').length;
-    const c5res=w.turnos.filter(t=>t.cancha==='Cancha de 5'&&t.estado==='Reservado').length;
-    const c6tot=w.turnos.filter(t=>t.cancha==='Cancha de 6').length;
-    const c6res=w.turnos.filter(t=>t.cancha==='Cancha de 6'&&t.estado==='Reservado').length;
+    const c5tot=futbol.filter(t=>t.cancha==='Cancha de 5').length;
+    const c5res=futbol.filter(t=>t.cancha==='Cancha de 5'&&t.estado==='Reservado').length;
+    const c6tot=futbol.filter(t=>t.cancha==='Cancha de 6').length;
+    const c6res=futbol.filter(t=>t.cancha==='Cancha de 6'&&t.estado==='Reservado').length;
     const p5=c5tot>0?Math.round(c5res/c5tot*100):0;
     const p6=c6tot>0?Math.round(c6res/c6tot*100):0;
 
     // top cliente
     const clientes={};
-    for(const t of w.turnos) if(t.cliente&&t.estado==='Reservado') clientes[t.cliente]=(clientes[t.cliente]||0)+1;
+    for(const t of futbol) if(t.cliente&&t.estado==='Reservado') clientes[t.cliente]=(clientes[t.cliente]||0)+1;
     const topC=Object.entries(clientes).sort((a,b)=>b[1]-a[1])[0];
 
     // top horario
     const horarios={};
-    for(const t of w.turnos) if(t.estado==='Reservado'&&t.horario) horarios[t.horario.slice(0,5)]=(horarios[t.horario.slice(0,5)]||0)+1;
+    for(const t of futbol) if(t.estado==='Reservado'&&t.horario) horarios[t.horario.slice(0,5)]=(horarios[t.horario.slice(0,5)]||0)+1;
     const topH=Object.entries(horarios).sort((a,b)=>b[1]-a[1])[0];
 
     // Ocupación real por sub-cancha
-    const c5a=w.turnos.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===1);
-    const c5b=w.turnos.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===2);
-    const c6a=w.turnos.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===1);
-    const c6b=w.turnos.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===2);
+    const c5a=futbol.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===1);
+    const c5b=futbol.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===2);
+    const c6a=futbol.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===1);
+    const c6b=futbol.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===2);
     const pct5a=c5a.length?Math.round(c5a.filter(t=>t.estado==='Reservado').length/c5a.length*100):0;
     const pct5b=c5b.length?Math.round(c5b.filter(t=>t.estado==='Reservado').length/c5b.length*100):0;
     const pct6a=c6a.length?Math.round(c6a.filter(t=>t.estado==='Reservado').length/c6a.length*100):0;
@@ -1838,7 +1862,7 @@ function renderResumenes(data){
         </div>
         <div style="text-align:right">
           <div class="rcbig" style="color:${pctColor(pct)}">${pct}%</div>
-          <div class="rcbiglb" style="color:${pctColor(pct)}">Ocupación</div>
+          <div class="rcbiglb" style="color:${pctColor(pct)}">Ocupación fútbol</div>
         </div>
       </div>
       <div class="rcmid">
@@ -1859,12 +1883,13 @@ function renderResumenes(data){
         </div>
         <div class="rcdiv"></div>
         <div class="rcturnos">
-          <div class="rcturno-ttl">Turnos</div>
+          <div class="rcturno-ttl">Turnos de fútbol</div>
           <div class="rcsr">
             <div class="rcst"><div class="rcsv" style="color:#39ff6e">${res}</div><div class="rcsl">Reservados</div></div>
             <div class="rcst"><div class="rcsv" style="color:rgba(255,255,255,.35)">${can}</div><div class="rcsl">Libres</div></div>
             <div class="rcst"><div class="rcsv" style="color:var(--naranja)">${le}</div><div class="rcsl">Por lista de espera</div></div>
           </div>
+          ${evts.length?`<div class="rcsl" style="margin-top:6px;opacity:.75">+ ${evts.filter(t=>t.estado==='Reservado').length} de eventos, fuera de la ocupación</div>`:''}
           <div class="rctags">
             ${topC?`<span class="rctag-pill">⭐ ${topC[0].split(' ')[0]}</span>`:''}
             ${topH?`<span class="rctag-pill">🕐 ${topH[0]}</span>`:''}
@@ -1880,15 +1905,15 @@ function renderResumenes(data){
       </div>
       <div class="rcbtitle">Eventos por cancha</div>
       <div class="rcocc">
-        ${[{lbl:'Cancha 5',ts:w.turnos.filter(t=>t.cancha==='Cancha de 5'&&t.estado==='Reservado')},
-           {lbl:'Cancha 6',ts:w.turnos.filter(t=>t.cancha==='Cancha de 6'&&t.estado==='Reservado')}
+        ${[{lbl:'Cancha 5',ts:evts.filter(t=>t.cancha==='Cancha de 5'&&t.estado==='Reservado')},
+           {lbl:'Cancha 6',ts:evts.filter(t=>t.cancha==='Cancha de 6'&&t.estado==='Reservado')}
         ].map(g=>{
           const evCounts={};
-          g.ts.forEach(t=>{const ev=t.evento||'Fútbol';evCounts[ev]=(evCounts[ev]||0)+1;});
+          g.ts.forEach(t=>{const ev=t.evento||'Evento';evCounts[ev]=(evCounts[ev]||0)+1;});
           const pills=Object.entries(evCounts).map(([ev,n])=>`<span class="rctag-pill">${ev}: ${n}</span>`).join(' ');
           return `<div class="cbrow" style="flex-direction:column;align-items:flex-start;gap:4px;padding:6px 0">
             <span class="cblbl" style="min-width:auto;font-weight:600">${g.lbl}</span>
-            <div style="display:flex;flex-wrap:wrap;gap:4px">${pills||'<span class="rctag-pill" style="opacity:.4">Sin reservas</span>'}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">${pills||'<span class="rctag-pill" style="opacity:.4">Sin eventos</span>'}</div>
           </div>`;
         }).join('')}
       </div>
