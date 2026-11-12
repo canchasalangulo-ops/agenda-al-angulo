@@ -372,11 +372,15 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   .con-list{padding:12px}
   .con-cols,.con-row{grid-template-columns:1fr 1fr}
 
-  /* Turnos Fijos */
-  .tf-topbar{padding:12px;flex-direction:column;align-items:flex-start;gap:8px}
-  .btn-nuevo-tf{width:100%;text-align:center}
-  .tf-list{padding:12px}
-  .tf-cols,.tf-row{grid-template-columns:1fr 1fr 90px 70px}
+  /* Turnos Fijos y Lista de Espera: 4 columnas apretadas no entran en un celular
+     real (el teléfono quedaba pegado contra la cancha/estado, sin aire —
+     encontrado el 2026-11-12 en capturas reales de los chicos). Se pasa a una
+     grilla 2×2: Cliente/Teléfono arriba, Cancha-Estado/Horario abajo.
+     Ojo: esta regla va ANTES que la base (.tf-cols/.tf-row más abajo en el
+     archivo) con la misma especificidad — sin el ".tf-list" de acá adelante,
+     la base de más abajo le gana por orden en el archivo y la regla de mobile
+     queda muerta (eso es lo que pasaba: esta regla nunca se aplicaba). */
+  .tf-list .tf-cols,.tf-list .tf-row{grid-template-columns:1fr 1fr;gap:6px 12px}
   .tf-day-name{font-size:16px;width:80px}
 
   /* Modals */
@@ -475,9 +479,9 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 
 .tf-body{display:none;background:rgba(18,26,42,0.55);backdrop-filter:blur(6px)}
 .tf-body.open{display:block}
-.tf-cols{display:grid;grid-template-columns:1fr 1fr 140px 100px;padding:8px 16px 4px;border-bottom:1px solid var(--border)}
+.tf-cols{display:grid;grid-template-columns:1fr 1fr 140px 100px;gap:8px;padding:8px 16px 4px;border-bottom:1px solid var(--border)}
 .tf-col-hdr{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-.tf-row{display:grid;grid-template-columns:1fr 1fr 140px 100px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer;align-items:center}
+.tf-row{display:grid;grid-template-columns:1fr 1fr 140px 100px;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer;align-items:center}
 .tf-row:last-child{border-bottom:none}
 .tf-row:hover{background:rgba(255,255,255,.04)}
 .tf-cell-name{font-size:13px;font-weight:600;color:var(--text)}
@@ -496,7 +500,6 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 @media(max-width:768px){
   .tf-topbar{padding:12px 16px}
   .tf-list{padding:12px 16px}
-  .tf-cols,.tf-row{grid-template-columns:1fr 1fr 110px 80px}
   .tf-modal-inner{width:calc(100vw - 32px)}
 }
 
