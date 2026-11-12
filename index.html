@@ -861,6 +861,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   <div class="ntab" onclick="showPage('resumenes')">📊 Resúmenes</div>
   <div class="ntab" onclick="showPage('contactos')">👥 Contactos</div>
   <div class="ntab" onclick="showPage('turnos-fijos')">📌 Turnos Fijos</div>
+  <div class="ntab" onclick="showPage('lista-espera')">⏳ Lista de Espera</div>
   <div class="ntab" onclick="showPage('eventos')">⚡ Eventos</div>
 </nav>
 
@@ -1085,6 +1086,18 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
       <button class="bsave" id="tfSaveBtn" onclick="saveTF()">Guardar</button>
     </div>
     <button class="mdel" id="tfDelBtn" onclick="deleteTF()" style="display:none">Eliminar turno fijo</button>
+  </div>
+</div>
+
+<!-- LISTA DE ESPERA (solo lectura: la anota el agente de WhatsApp, acá solo se mira) -->
+<div class="page" id="page-lista-espera">
+  <div class="tf-wrap">
+    <div class="tf-topbar">
+      <div class="tf-count-badge" id="leCount">0 en espera hoy</div>
+    </div>
+    <div class="tf-list" id="leList">
+      <div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span></div>
+    </div>
   </div>
 </div>
 
@@ -1886,11 +1899,12 @@ function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
   document.getElementById('page-'+n).classList.add('on');
-  document.querySelectorAll('.ntab')[['agenda','historial','resumenes','contactos','turnos-fijos','eventos'].indexOf(n)].classList.add('on');
+  document.querySelectorAll('.ntab')[['agenda','historial','resumenes','contactos','turnos-fijos','lista-espera','eventos'].indexOf(n)].classList.add('on');
   if(n==='historial' && !aMon) initHistorial();
   if(n==='resumenes') initResumenes();
   if(n==='contactos') initContactos();
   if(n==='turnos-fijos') initTurnosFijos();
+  if(n==='lista-espera') initListaEspera();
   if(n==='eventos') initEventos();
 }
 
@@ -2624,6 +2638,94 @@ function renderTF(){
   document.getElementById('tfList').innerHTML = html || '<div class="empty-state">Sin turnos para mostrar</div>';
 }
 
+// ═══════════════════════════════════════════════
+// LISTA DE ESPERA (solo lectura — la anota el agente de WhatsApp)
+// ═══════════════════════════════════════════════
+let allLE = [];
+let leLoaded = false;
+const LE_ESTADOS = {
+  esperando: { label: 'Esperando', color: 'var(--text)' },
+  notificado: { label: 'Avisado', color: 'var(--naranja)' },
+  asignado: { label: 'Reservado', color: 'var(--verde-lt)' },
+  vencido: { label: 'Venció', color: 'var(--muted)' }
+};
+
+async function initListaEspera(){
+  if(leLoaded){ renderLE(); return; }
+  document.getElementById('leList').innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando lista de espera...</div>';
+  setSyncing();
+  try {
+    const { data, error } = await db
+      .from('lista_espera')
+      .select('*')
+      .eq('fecha', dk(today))
+      .order('horario', { ascending: true });
+    if(error) throw error;
+    allLE = data || [];
+    leLoaded = true;
+    setSynced();
+    renderLE();
+  } catch(e) {
+    setSyncErr();
+    document.getElementById('leList').innerHTML = `<div class="empty-state"><span class="empty-icon">⏳</span>Error al cargar: ${e.message}</div>`;
+  }
+}
+
+function renderLE(){
+  const activos = allLE.filter(le => le.estado === 'esperando' || le.estado === 'notificado').length;
+  document.getElementById('leCount').textContent = `${activos} en espera hoy`;
+
+  if(!allLE.length){
+    document.getElementById('leList').innerHTML = '<div class="empty-state"><span class="empty-icon">⏳</span>Nadie anotado en la lista de espera hoy</div>';
+    return;
+  }
+
+  // Agrupar por horario
+  const groups = {};
+  for(const le of allLE){
+    if(!groups[le.horario]) groups[le.horario] = [];
+    groups[le.horario].push(le);
+  }
+  const horarios = Object.keys(groups).sort();
+
+  const html = horarios.map(horario => {
+    const items = groups[horario];
+    return `<div class="tf-group">
+      <div class="tf-group-header" onclick="toggleLEGroup('${horario}')">
+        <span class="tf-day-name">${horario}</span>
+        <span class="tf-day-count">${items.length}</span>
+      </div>
+      <div class="tf-body ${leOpenGroups.has(horario)?'open':''}">
+        <div class="tf-cols">
+          <span class="tf-col-hdr">Cliente</span>
+          <span class="tf-col-hdr">Teléfono</span>
+          <span class="tf-col-hdr">Estado</span>
+          <span class="tf-col-hdr">Anotado</span>
+        </div>
+        ${items.map(le => {
+          const est = LE_ESTADOS[le.estado] || { label: le.estado, color: 'var(--muted)' };
+          const hora = le.created_at ? new Date(le.created_at).toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'}) : '—';
+          return `<div class="tf-row" style="cursor:default">
+            <div class="tf-cell-name">${le.nombre||'—'}</div>
+            <div class="tf-cell-phone">${le.numero||'—'}</div>
+            <div class="tf-cell-cancha" style="color:${est.color}">${est.label}</div>
+            <div class="tf-cell-hora">${hora}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('leList').innerHTML = html || '<div class="empty-state">Sin turnos para mostrar</div>';
+}
+
+let leOpenGroups = new Set();
+function toggleLEGroup(horario){
+  if(leOpenGroups.has(horario)) leOpenGroups.delete(horario);
+  else leOpenGroups.add(horario);
+  renderLE();
+}
+
 function toggleTFGroup(dia){
   if(tfOpenGroups.has(dia)) tfOpenGroups.delete(dia);
   else tfOpenGroups.add(dia);
@@ -3340,16 +3442,17 @@ async function handleLogout() {
 }
 
 function applyRole(role) {
-  const tabsEmpleado = ['historial','resumenes','contactos','turnos-fijos','eventos'];
+  const tabsEmpleado = ['historial','resumenes','contactos','turnos-fijos','lista-espera','eventos'];
   const allTabs = document.querySelectorAll('.ntab');
-  const tabNames = ['agenda','historial','resumenes','contactos','turnos-fijos','eventos'];
+  const tabNames = ['agenda','historial','resumenes','contactos','turnos-fijos','lista-espera','eventos'];
 
   if (role === 'canchas') {
-    // Ve Agenda + Contactos + Turnos Fijos + Eventos.
+    // Ve Agenda + Contactos + Turnos Fijos + Lista de Espera + Eventos.
     // Contactos se sumó el 2026-09-25: antes solo el dueño podía dar de alta un
     // cliente y las canchas quedaban trabadas. Acceso completo, igual que el dueño
-    // (crear, editar y eliminar) — decidido así a pedido de Agustín.
-    const tabsCanchas = ['agenda','contactos','turnos-fijos','eventos'];
+    // (crear, editar y eliminar) — decidido así a pedido de Agustín. Lista de Espera
+    // se sumó el 2026-11-12: solo lectura, la anota el agente de WhatsApp.
+    const tabsCanchas = ['agenda','contactos','turnos-fijos','lista-espera','eventos'];
     allTabs.forEach((tab, i) => {
       tab.style.display = tabsCanchas.includes(tabNames[i]) ? '' : 'none';
     });
