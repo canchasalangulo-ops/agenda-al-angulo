@@ -3263,6 +3263,8 @@ function initRealtime(){
   if (existingTurnos) db.removeChannel(existingTurnos);
   const existingContactos = db.getChannels().find(c => c.topic === 'realtime:contactos-live');
   if (existingContactos) db.removeChannel(existingContactos);
+  const existingLE = db.getChannels().find(c => c.topic === 'realtime:lista-espera-live');
+  if (existingLE) db.removeChannel(existingLE);
 
   // Realtime: turnos
   db.channel('turnos-live')
@@ -3347,6 +3349,30 @@ function initRealtime(){
       }
       // Si el tab contactos está abierto, re-renderizar
       if (currentPage === 'contactos') renderContacts();
+    })
+    .subscribe();
+
+  // Realtime: lista de espera (la anota el agente de WhatsApp en cualquier
+  // momento — sin esto, la pestaña podía mostrar datos viejos hasta el
+  // refresco de 30s. Mismo patrón que contactos-live).
+  db.channel('lista-espera-live')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'lista_espera'
+    }, payload => {
+      if (payload.eventType === 'INSERT') {
+        const le = payload.new;
+        if (!allLE.find(x => x.id === le.id)) allLE.push(le);
+      } else if (payload.eventType === 'UPDATE') {
+        const idx = allLE.findIndex(x => x.id === payload.new.id);
+        if (idx > -1) allLE[idx] = payload.new;
+        else allLE.push(payload.new);
+      } else if (payload.eventType === 'DELETE') {
+        allLE = allLE.filter(x => x.id !== payload.old.id);
+      }
+      // Si el tab lista de espera está abierto, re-renderizar
+      if (currentPage === 'lista-espera') renderLE();
     })
     .subscribe();
 }
