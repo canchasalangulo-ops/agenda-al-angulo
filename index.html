@@ -1770,7 +1770,7 @@ async function initResumenes(){
     const eightWeeksAgo = add(WEEKS[0].s, -56);
     const { data, error } = await db
       .from('turnos')
-      .select('fecha, horario, cancha, numero_cancha, estado, cliente, numero, facturacion_efectivo, facturacion_transferencia')
+      .select('fecha, horario, cancha, numero_cancha, estado, cliente, numero, facturacion_efectivo, facturacion_transferencia, reservado_por_lista_espera')
       .gte('fecha', dk(eightWeeksAgo))
       .lt('fecha', dk(WEEKS[0].s));
     if(error) throw error;
@@ -1795,6 +1795,7 @@ function renderResumenes(data){
     const res=w.turnos.filter(t=>t.estado==='Reservado').length;
     const pen=w.turnos.filter(t=>t.estado==='Pendiente'||t.estado==='Pendiente de seña').length;
     const can=w.turnos.filter(t=>t.estado==='Disponible').length;
+    const le=w.turnos.filter(t=>t.reservado_por_lista_espera).length;
     const pct=tot>0?Math.round(res/tot*100):0;
 
     const c5tot=w.turnos.filter(t=>t.cancha==='Cancha de 5').length;
@@ -1862,6 +1863,7 @@ function renderResumenes(data){
           <div class="rcsr">
             <div class="rcst"><div class="rcsv" style="color:#39ff6e">${res}</div><div class="rcsl">Reservados</div></div>
             <div class="rcst"><div class="rcsv" style="color:rgba(255,255,255,.35)">${can}</div><div class="rcsl">Libres</div></div>
+            <div class="rcst"><div class="rcsv" style="color:var(--naranja)">${le}</div><div class="rcsl">Por lista de espera</div></div>
           </div>
           <div class="rctags">
             ${topC?`<span class="rctag-pill">⭐ ${topC[0].split(' ')[0]}</span>`:''}
