@@ -808,6 +808,12 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .rv-who small{display:block;color:var(--ink3);font-weight:500;font-size:10px}
 .rv-ph{color:var(--ink2);font-variant-numeric:tabular-nums;font-size:12px}
 
+/* semana en curso */
+.rv-tb.curso .rv-tb-bar{background:transparent;border:1px solid var(--g4);border-bottom:0}
+.rv-tb-e{font-size:8px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--naranja);margin-top:-3px}
+.rv-tile.fut{border-color:rgba(232,80,26,.38)}
+.rv-cell.fut{opacity:.5}
+
 /* ═══ RANKING ═══ */
 .rk-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .rk-k{cursor:pointer;text-align:left;background:rgba(24,31,46,.82);border:1px solid var(--border-md);border-radius:20px;padding:15px 18px;color:#fff;font-family:inherit;transition:border-color .15s,box-shadow .15s}
@@ -1099,7 +1105,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- RESÚMENES -->
 <div class="page" id="page-resumenes">
   <div class="rcontent">
-    <div class="rsem-ttl-label">Solo fútbol · generado al cierre de cada semana</div>
+    <div class="rsem-ttl-label">Solo fútbol · la semana en curso y las cerradas</div>
     <div class="rsem-ttl">Resúmenes semanales</div>
     <div class="rv-sub">La ocupación se mide <b>de las 18:00 en adelante</b>, que es el horario que pide la gente. Lo anterior va aparte, con quién lo pide.</div>
     <div class="rgrid" id="rgrid"><div class="empty-state"><span class="empty-icon">📊</span>Cargando resúmenes...</div></div>
@@ -2025,6 +2031,10 @@ function rvBin(res, cap){
 let rvSemanas = [];
 let rvSel = 0;
 
+// Una franja "ya empezó" si su fecha y hora son anteriores a este momento. Sirve para la semana en curso:
+// los turnos que todavía no se jugaron figuran como libres y, si se contaran, tirarían la ocupación para abajo.
+const yaEmpezo = (t, ahora) => new Date(t.fecha+'T'+String(t.horario).slice(0,5)+':00') <= ahora;
+
 async function initResumenes(){
   document.getElementById('rgrid').innerHTML='<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando resúmenes...</div>';
   try {
@@ -2040,7 +2050,7 @@ async function initResumenes(){
         .from('turnos')
         .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, facturacion_efectivo, facturacion_transferencia, reservado_por_lista_espera')
         .gte('fecha', dk(eightWeeksAgo))
-        .lt('fecha', dk(WEEKS[0].s))
+        .lt('fecha', dk(add(WEEKS[0].s, 7)))   // hasta el domingo de ESTA semana (la semana en curso entra)
         .order('fecha',{ascending:true})
         .order('id',{ascending:true})
         .range(desde, desde+PAGE-1);
@@ -2067,21 +2077,31 @@ function esFutbol(t){ return (t.evento||'Fútbol')==='Fútbol'; }
 // Todo lo que se muestra de una semana, calculado una sola vez.
 function rvStats(w){
   const esRes = t => t.estado==='Reservado';
+  const esPend = t => t.estado==='Pendiente' || t.estado==='Pendiente de seña';
+  const enCurso = !!w.enCurso;
+  const ahora = new Date();
+  const enAlcance = t => !enCurso || yaEmpezo(t, ahora);   // semana en curso: solo lo que ya empezó
   const fut = w.turnos.filter(esFutbol);
-  const noche = fut.filter(esNoche);
-  const tarde = fut.filter(t=>!esNoche(t));
+  const todaNoche = fut.filter(esNoche);                    // para el mapa de calor y "lo que falta"
+  const noche = todaNoche.filter(enAlcance);                // base de la ocupación
+  const tarde = fut.filter(t=>!esNoche(t)).filter(enAlcance);
   const resN = noche.filter(esRes);
-  const resT = tarde.filter(esRes).sort((a,b)=>(a.fecha+a.horario).localeCompare(b.fecha+b.horario));
+  // la lista de la tarde muestra todo lo reservado (incluso lo que viene); el porcentaje, solo lo ya jugado
+  const resT = fut.filter(t=>!esNoche(t)&&esRes(t)).sort((a,b)=>(a.fecha+a.horario).localeCompare(b.fecha+b.horario));
   const pct = noche.length ? Math.round(resN.length/noche.length*100) : 0;
-  const pctT = tarde.length ? Math.round(resT.length/tarde.length*100) : 0;
+  const pctT = tarde.length ? Math.round(tarde.filter(esRes).length/tarde.length*100) : 0;
 
-  // mapa de calor: día de la semana × hora, solo desde las 18:00
-  const horas = [...new Set(noche.map(horaDe))].sort((a,b)=>a-b);
+  // lo que falta de la semana en curso: franjas desde las 18:00 que todavía no empezaron
+  const faltan = enCurso ? todaNoche.filter(t=>!enAlcance(t)) : [];
+
+  // mapa de calor: día de la semana × hora, solo desde las 18:00 (con lo que viene, marcado aparte)
+  const horas = [...new Set(todaNoche.map(horaDe))].sort((a,b)=>a-b);
   const cel = {};
-  noche.forEach(t=>{
+  todaNoche.forEach(t=>{
     const k = diaLun(t.fecha)+'|'+horaDe(t);
-    const c = cel[k] = cel[k] || {res:0,cap:0};
+    const c = cel[k] = cel[k] || {res:0,cap:0,fut:false};
     c.cap++; if(esRes(t)) c.res++;
+    if(enCurso && !yaEmpezo(t, ahora)) c.fut = true;
   });
 
   // ocupación por cancha (desde las 18:00)
@@ -2100,7 +2120,7 @@ function rvStats(w){
   const tc = top(resN, t=>t.numero || t.cliente);
   const nombreTc = tc ? (resN.find(t=>(t.numero||t.cliente)===tc[0])||{}).cliente : null;
 
-  const porHora = horas.map(h=>{ const ts = noche.filter(t=>horaDe(t)===h); const r = ts.filter(esRes).length; return {nombre:h+':00', res:r, cap:ts.length, pct: ts.length?Math.round(r/ts.length*100):0}; });
+  const porHora = [...new Set(noche.map(horaDe))].sort((a,b)=>a-b).map(h=>{ const ts = noche.filter(t=>horaDe(t)===h); const r = ts.filter(esRes).length; return {nombre:h+':00', res:r, cap:ts.length, pct: ts.length?Math.round(r/ts.length*100):0}; });
 
   const eventos = {};
   w.turnos.filter(t=>!esFutbol(t)).forEach(t=>{ const k = t.evento||'Evento'; eventos[k] = (eventos[k]||0)+1; });
@@ -2110,7 +2130,8 @@ function rvStats(w){
   const tr = w.turnos.reduce((s,t)=>s+(Number(t.facturacion_transferencia)||0),0);
 
   return {
-    pct, pctT, res:resN.length, cap:noche.length, resT, capT:tarde.length,
+    enCurso, pct, pctT, res:resN.length, cap:noche.length, resT, capT:tarde.length,
+    faltaRes: faltan.filter(esRes).length, faltaPend: faltan.filter(esPend).length, faltaCap: faltan.length,
     libres: noche.filter(t=>t.estado==='Disponible').length,
     lista: noche.filter(t=>t.reservado_por_lista_espera).length,
     horas, cel, canchas, porHora, topH:th, topC:tc, nombreTc, eventos, nEventos, ef, tr
@@ -2121,17 +2142,17 @@ function rvTendencia(){
   const orden = rvSemanas.map((w,i)=>({w,i,s:rvStats(w)})).reverse();   // de la más vieja a la más nueva
   const maxP = Math.max(1, ...orden.map(o=>o.s.pct));
   return `<div class="rv-trend" role="tablist">${orden.map(({w,i,s})=>`
-    <button class="rv-tb ${i===rvSel?'on':''}" onclick="rvElegir(${i})" role="tab" aria-selected="${i===rvSel}">
+    <button class="rv-tb ${w.enCurso?'curso':''} ${i===rvSel?'on':''}" onclick="rvElegir(${i})" role="tab" aria-selected="${i===rvSel}">
       <span class="rv-tb-v">${s.pct}%</span>
       <span class="rv-tb-track"><span class="rv-tb-bar" style="height:${Math.max(8,Math.round(s.pct/maxP*100))}%"></span></span>
-      <span class="rv-tb-d">${fs(w.start)}</span>
+      <span class="rv-tb-d">${fs(w.start)}</span>${w.enCurso?'<span class="rv-tb-e">en curso</span>':''}
     </button>`).join('')}</div>`;
 }
 
 function rvHero(w, s, sp, esReciente){
   const C = 2*Math.PI*52;
   const delta = sp ? s.pct - sp.pct : null;
-  const dtxt = delta==null ? '' : (delta>0 ? `<span class="rv-delta up"><i>▲</i> +${delta} pts vs semana anterior</span>`
+  const dtxt = s.enCurso ? '<span class="rv-delta eq"><i>•</i> no se compara hasta que cierre la semana</span>' : delta==null ? '' : (delta>0 ? `<span class="rv-delta up"><i>▲</i> +${delta} pts vs semana anterior</span>`
     : delta<0 ? `<span class="rv-delta dn"><i>▼</i> ${delta} pts vs semana anterior</span>`
     : `<span class="rv-delta eq"><i>=</i> igual que la semana anterior</span>`);
   const evTxt = s.nEventos ? Object.entries(s.eventos).map(([k,v])=>`${rvEsc(k)} ${v}`).join(' · ') : 'ninguno';
@@ -2139,8 +2160,8 @@ function rvHero(w, s, sp, esReciente){
   return `
   <div class="rv-hero">
     <div class="rv-hero-top">
-      <div class="rv-wk"><small>SEMANA CERRADA</small>${fs(w.start)} → ${fs(w.end)}</div>
-      ${esReciente?'<span class="rv-badge">Reciente</span>':''}
+      <div class="rv-wk"><small>${s.enCurso?'SEMANA EN CURSO':'SEMANA CERRADA'}</small>${fs(w.start)} → ${fs(w.end)}</div>
+      ${s.enCurso?'<span class="rv-badge">En curso</span>':esReciente?'<span class="rv-badge">Reciente</span>':''}
     </div>
     <div class="rv-ringcol">
       <div class="rv-ringbox">
@@ -2150,16 +2171,17 @@ function rvHero(w, s, sp, esReciente){
         </svg>
         <div class="rv-ring-c">
           <div class="rv-ring-n">${s.pct}<small>%</small></div>
-          <div class="rv-ring-l">Ocupación<br>${CORTE_HORA}:00 en adelante</div>
+          <div class="rv-ring-l">Ocupación<br>${CORTE_HORA}:00 en adelante${s.enCurso?'<br>hasta ahora':''}</div>
           <div class="rv-ring-s">${s.res} de ${s.cap} franjas</div>
         </div>
       </div>
       ${dtxt?`<div class="rv-deltarow">${dtxt}</div>`:''}
     </div>
     <div class="rv-tiles">
-      <div class="rv-tile"><div class="rv-tile-v">${s.res}</div><div class="rv-tile-l">Reservados</div></div>
-      <div class="rv-tile"><div class="rv-tile-v">${s.libres}</div><div class="rv-tile-l">Libres</div></div>
+      <div class="rv-tile"><div class="rv-tile-v">${s.res}</div><div class="rv-tile-l">Reservados</div>${s.enCurso?'<div class="rv-tile-s">ya jugados</div>':''}</div>
+      <div class="rv-tile"><div class="rv-tile-v">${s.libres}</div><div class="rv-tile-l">Libres</div>${s.enCurso?'<div class="rv-tile-s">ya jugados</div>':''}</div>
       <div class="rv-tile"><div class="rv-tile-v">${s.lista}</div><div class="rv-tile-l">Por lista de espera</div></div>
+      ${s.enCurso?`<div class="rv-tile fut"><div class="rv-tile-v">${s.faltaRes}</div><div class="rv-tile-l">Ya reservados para lo que falta</div><div class="rv-tile-s">de ${s.faltaCap} franjas${s.faltaPend?' · '+s.faltaPend+' por confirmar':''}</div></div>`:''}
       <div class="rv-tile"><div class="rv-tile-v">${s.topH?s.topH[0]:'—'}</div><div class="rv-tile-l">🕐 Horario estrella</div>${s.topH?`<div class="rv-tile-s">${s.topH[1]} turnos</div>`:''}</div>
       <div class="rv-tile"><div class="rv-tile-v txt">${s.topC?rvEsc(primerNombre(s.nombreTc)||'—'):'—'}</div><div class="rv-tile-l">⭐ Cliente estrella</div>${s.topC?`<div class="rv-tile-s">${s.topC[1]} turnos</div>`:''}</div>
       <div class="rv-tile"><div class="rv-tile-v">${s.nEventos}</div><div class="rv-tile-l">Eventos · aparte</div><div class="rv-tile-s">${evTxt}</div></div>
@@ -2176,11 +2198,11 @@ function rvCalorHTML(w, s){
     s.horas.forEach(h=>{
       const c = s.cel[d+'|'+h];
       if(!c){ celdas.push('<div class="rv-cell vac">·</div>'); return; }
-      celdas.push(`<div class="rv-cell b${rvBin(c.res,c.cap)}" title="${DIAS_LUN[d]} ${h}:00 · ${c.res} de ${c.cap} canchas reservadas">${c.res}/${c.cap}</div>`);
+      celdas.push(`<div class="rv-cell b${rvBin(c.res,c.cap)} ${c.fut?'fut':''}" title="${DIAS_LUN[d]} ${h}:00 · ${c.res} de ${c.cap} canchas reservadas${c.fut?' (todavía no se jugó)':''}">${c.res}/${c.cap}</div>`);
     });
   }
   return `<div class="rv-heat" style="--cols:${s.horas.length}">${celdas.join('')}</div>
-    <div class="rv-leg">0 <span class="rv-leg-sw"><i></i><i></i><i></i><i></i><i></i><i></i></span> todas las canchas · cada casilla = reservadas / canchas de fútbol de esa hora</div>`;
+    <div class="rv-leg">0 <span class="rv-leg-sw"><i></i><i></i><i></i><i></i><i></i><i></i></span> todas las canchas · cada casilla = reservadas / canchas de fútbol de esa hora${w.enCurso?' · las tenues todavía no se jugaron':''}</div>`;
 }
 
 function rvBarras(lista){
@@ -2251,13 +2273,14 @@ function rvElegir(i){ rvSel = i; rvPintar(); }
 function rvPintar(){
   const w = rvSemanas[rvSel];
   const s = rvStats(w);
-  const sp = rvSemanas[rvSel+1] ? rvStats(rvSemanas[rvSel+1]) : null;
+  const sp = (!w.enCurso && rvSemanas[rvSel+1]) ? rvStats(rvSemanas[rvSel+1]) : null;
+  const primeraCerrada = rvSemanas[0].enCurso ? 1 : 0;
   document.getElementById('rgrid').innerHTML = `
     ${rvTendencia()}
-    ${rvHero(w, s, sp, rvSel===0)}
+    ${rvHero(w, s, sp, rvSel===primeraCerrada)}
     <div class="rv-cols">
-      <div class="rv-panel"><div class="rv-pt">Cómo se llenó la semana<span>desde las ${CORTE_HORA}:00</span></div>${rvCalorHTML(w, s)}</div>
-      <div class="rv-panel"><div class="rv-pt">Por cancha<span>desde las ${CORTE_HORA}:00</span></div>${rvCanchasHTML(s)}
+      <div class="rv-panel"><div class="rv-pt">${w.enCurso?'Cómo viene la semana':'Cómo se llenó la semana'}<span>desde las ${CORTE_HORA}:00</span></div>${rvCalorHTML(w, s)}</div>
+      <div class="rv-panel"><div class="rv-pt">Por cancha<span>desde las ${CORTE_HORA}:00${w.enCurso?' · hasta ahora':''}</span></div>${rvCanchasHTML(s)}
         <div class="rv-pt" style="margin-top:22px">Por horario</div>${rvHorasHTML(s)}</div>
     </div>
     ${rvTardeHTML(s)}
@@ -2266,7 +2289,8 @@ function rvPintar(){
 
 function renderResumenes(data){
   rvSemanas = groupByWeek(data);
-  rvSel = 0;
+  rvSemanas.forEach(w=>{ w.enCurso = w.start.getTime() === WEEKS[0].s.getTime(); });
+  rvSel = 0;                       // se abre en la semana en curso, si hay datos de ella
   if(!rvSemanas.length){
     document.getElementById('rgrid').innerHTML='<div class="empty-state"><span class="empty-icon">📊</span>Sin semanas cerradas aún</div>';
     return;
