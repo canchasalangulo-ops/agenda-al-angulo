@@ -182,9 +182,9 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .hist-month-right{display:flex;align-items:center;gap:12px}
 .hist-month-badges{display:flex;align-items:center;gap:6px}
 .hmb{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
-.hmb-res{color:#39ff6e;background:rgba(57,255,110,0.08);border:1px solid rgba(57,255,110,0.3);text-shadow:0 0 8px #39ff6e88}
-.hmb-ef{color:#39ff6e;background:rgba(57,255,110,0.06);border:1px solid rgba(57,255,110,0.2);text-shadow:0 0 8px #39ff6e66}
-.hmb-tr{color:#4dc8ff;background:rgba(77,200,255,0.06);border:1px solid rgba(77,200,255,0.2);text-shadow:0 0 8px #4dc8ff66}
+.hmb-res{color:#EFEFEF;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)}
+.hmb-ef{color:rgba(239,239,239,.74);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10)}
+.hmb-tr{color:rgba(239,239,239,.74);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10)}
 .hist-month-arrow{font-size:11px;color:var(--muted);transition:transform .2s}
 .hist-month-header.open .hist-month-arrow{transform:rotate(180deg)}
 .hist-month-body{display:none;flex-direction:column;padding:20px 24px;gap:10px;width:100%;box-sizing:border-box}
@@ -194,30 +194,34 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .wcard:hover{border-color:rgba(255,255,255,.14);box-shadow:0 8px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.1)}
 .wcard-top{padding:20px 26px 14px;display:flex;justify-content:space-between;align-items:flex-start}
 .wcard-left{display:flex;flex-direction:column;gap:3px}
-.wcard-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.wcard-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.56)}
 .wcdates{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#fff}
 .wcard-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
-.wcpct{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:1px;line-height:1;filter:brightness(1.2)}
+.wcpct{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:1px;line-height:1;color:#EFEFEF}
 .wcpctlb{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;text-align:right}
 .wcbar{height:2px;background:rgba(255,255,255,.06);overflow:hidden}
 .wcbarfill{height:100%;transition:width .5s ease}
 .wcard-stats{padding:16px 26px;display:flex;gap:0;border-top:1px solid rgba(255,255,255,.05)}
 .wcstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}
 .wcstat+.wcstat::before{content:'';position:absolute;left:0;top:15%;height:70%;width:1px;background:rgba(255,255,255,.06)}
-.wcsv{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;line-height:1;filter:brightness(1.1)}
-.wcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.3);text-align:center}
+.wcsv{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;line-height:1;color:#EFEFEF}
+.wcsl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.56);text-align:center}
 .wcard-fact{padding:12px 26px;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05);display:flex;gap:0}
 .wfstat{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
 .wfstat+.wfstat{border-left:1px solid rgba(255,255,255,.06)}
-.wfv{font-size:15px;font-weight:800;letter-spacing:.3px}
-.wfl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.wfv{font-size:15px;font-weight:800;letter-spacing:.3px;color:#EFEFEF}
+.wfl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.56)}
 .wcard-canchas{padding:10px 26px 16px;display:flex;gap:16px}
 .wcbar-mini{flex:1;display:flex;flex-direction:column;gap:5px}
 .wcbar-mini-label{display:flex;justify-content:space-between;align-items:center}
-.wcbar-mini-name{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.wcbar-mini-name{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.56)}
 .wcbar-mini-pct{font-size:9px;font-weight:800}
 .wcbar-mini-track{height:2px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
 .wcbar-mini-fill{height:100%;border-radius:2px}
+.wcpctlb{color:rgba(239,239,239,.74)}
+.wcpctlb small{display:block;font-weight:600;letter-spacing:.8px;text-transform:none;opacity:.8}
+.wc-aparte{font-size:10px;color:rgba(255,255,255,.56);text-align:center;margin-top:8px;padding:0 26px;line-height:1.5}
+.wc-aparte b{color:#EFEFEF}
 
 /* ─── RESÚMENES ─── */
 .rcontent{flex:1;overflow-y:auto;padding:24px 28px;background:transparent}
@@ -1582,13 +1586,25 @@ async function loadHistorialMonth(year, month){
   // de dejar el Historial en blanco.
   const num = (v, alt) => parseInt(v != null ? v : alt) || 0;
   historialData[key] = sorted.map(row => {
-    const f5t = num(row.f5_total_futbol, row.f5_total), f5r = num(row.f5_res_futbol, row.f5_res);
-    const f6t = num(row.f6_total_futbol, row.f6_total), f6r = num(row.f6_res_futbol, row.f6_res);
+    // Ocupación desde las 19:00 (columnas *_noche, SQL del 2026-11-14): es la misma regla de Resúmenes y
+    // cuenta solo franjas de fútbol que ya empezaron. Si la función de la base fuera la versión anterior,
+    // se cae a todas las horas de fútbol en vez de dejar el Historial en blanco.
+    const noche = row.reservados_noche != null;
+    const resFut = num(row.reservados_futbol, row.reservados);          // fútbol, todas las horas
+    const libFut = num(row.libres_futbol, row.libres);
+    const f5t = noche ? num(row.f5_total_noche) : num(row.f5_total_futbol, row.f5_total);
+    const f5r = noche ? num(row.f5_res_noche)   : num(row.f5_res_futbol, row.f5_res);
+    const f6t = noche ? num(row.f6_total_noche) : num(row.f6_total_futbol, row.f6_total);
+    const f6r = noche ? num(row.f6_res_noche)   : num(row.f6_res_futbol, row.f6_res);
     return {
       semana_inicio: new Date(row.semana_inicio + 'T00:00:00'),
       semana_fin:    new Date(row.semana_fin    + 'T00:00:00'),
-      reservados:    num(row.reservados_futbol, row.reservados),
-      libres:        num(row.libres_futbol, row.libres),
+      noche,
+      reservados:    resFut,                                              // para los totales del mes
+      resN:          noche ? num(row.reservados_noche) : resFut,          // lo que cuenta en la ocupación
+      capN:          noche ? num(row.franjas_noche)    : resFut + libFut,
+      libresN:       noche ? num(row.libres_noche)     : libFut,
+      resT:          noche ? num(row.reservados_tarde) : 0,               // antes de las 19:00, aparte
       eventos:       num(row.reservados_eventos, 0),
       efectivo:      num(row.efectivo, 0),
       transferencia: num(row.transferencia, 0),
@@ -1890,43 +1906,33 @@ function renderHistMonthBody(k, year, month, data){
     return;
   }
 
-  // Totales exactos del RPC — `reservados` ya viene filtrado a fútbol
+  // Totales del mes. "reservados" = fútbol, todas las horas. La ocupación sale de las franjas desde CORTE_HORA.
   const totalR  = data.reduce((s,r)=>s+r.reservados, 0);
   const totalEv = data.reduce((s,r)=>s+(r.eventos||0), 0);
   const totalEf = data.reduce((s,r)=>s+r.efectivo, 0);
   const totalTr = data.reduce((s,r)=>s+r.transferencia, 0);
   const totalFact = totalEf + totalTr;
+  const conCorte = data.every(r=>r.noche);
+  const mRes = data.reduce((s,r)=>s+r.resN, 0), mCap = data.reduce((s,r)=>s+r.capN, 0);
+  const mPct = mCap > 0 ? Math.round(mRes/mCap*100) : 0;
+  const corteTxt = conCorte ? ' desde las '+CORTE_HORA+':00' : '';
+  const fmtP = n => n > 0 ? '$' + n.toLocaleString('es-AR') : '$0';
 
-  // Sincronizar badge del header con datos exactos del RPC
+  // badge del header con los totales exactos
   const badgeWrap = document.getElementById(`hmg-${k}`);
   if(badgeWrap){
     let pills = `<span class="hmb hmb-res">⚽ ${totalR} de fútbol</span>`;
     if(totalEv>0) pills += `<span class="hmb">🎉 ${totalEv} de eventos</span>`;
-    pills += `<span class="hmb hmb-ef">💵 $${totalEf.toLocaleString('es-AR')}</span>`;
-    pills += `<span class="hmb hmb-tr">🏦 $${totalTr.toLocaleString('es-AR')}</span>`;
+    if(totalEf>0) pills += `<span class="hmb hmb-ef">💵 ${fmtP(totalEf)}</span>`;
+    if(totalTr>0) pills += `<span class="hmb hmb-tr">🏦 ${fmtP(totalTr)}</span>`;
     badgeWrap.innerHTML = pills;
   }
 
-  const mFactStr = totalFact > 0
-    ? ` · 💵 <span style="color:#39ff6e">$${totalEf.toLocaleString('es-AR')}</span> · 🏦 <span style="color:#4dc8ff">$${totalTr.toLocaleString('es-AR')}</span> · Total <span style="color:#fff">$${totalFact.toLocaleString('es-AR')}</span>`
-    : '';
+  const mFactStr = totalFact > 0 ? ` · 💵 ${fmtP(totalEf)} · 🏦 ${fmtP(totalTr)} · Total ${fmtP(totalFact)}` : '';
 
-  // Renderizar tarjeta por semana usando datos del RPC
   const weekCards = data.map(row => {
-    const pct   = (row.reservados + row.libres) > 0
-      ? Math.round(row.reservados / (row.reservados + row.libres) * 100) : 0;
-    const color = pctColor(pct);
-    const ef    = row.efectivo;
-    const tr    = row.transferencia;
-    const tot   = ef + tr;
-    const fmtP  = n => n > 0 ? '$' + n.toLocaleString('es-AR') : '$0';
-    const neonGreen = '#39ff6e';
-    const neonBlue  = '#4dc8ff';
-    const neonWhite = '#ffffff';
-    const neonGray  = 'rgba(255,255,255,0.35)';
-    const f5pct = row.f5pct;
-    const f6pct = row.f6pct;
-    const showFact = tot > 0;
+    const pct = row.capN > 0 ? Math.round(row.resN / row.capN * 100) : 0;
+    const tot = row.efectivo + row.transferencia;
     return `<div class="wcard">
       <div class="wcard-top">
         <div class="wcard-left">
@@ -1934,35 +1940,36 @@ function renderHistMonthBody(k, year, month, data){
           <div class="wcdates">${ff(row.semana_inicio)} — ${ff(row.semana_fin)}</div>
         </div>
         <div class="wcard-right">
-          <div class="wcpct" style="color:${color}">${pct}%</div>
-          <div class="wcpctlb" style="color:${color}">Ocupación fútbol</div>
+          <div class="wcpct">${pct}%</div>
+          <div class="wcpctlb">Ocupación fútbol${conCorte?`<small>desde las ${CORTE_HORA}:00</small>`:''}</div>
         </div>
       </div>
-      <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:#53957d"></div></div>
       <div class="wcard-stats">
-        <div class="wcstat"><div class="wcsv" style="color:${neonGreen};text-shadow:0 0 14px ${neonGreen}99">${row.reservados}</div><div class="wcsl">Reservados</div></div>
-        <div class="wcstat"><div class="wcsv" style="color:${neonGray}">${row.libres}</div><div class="wcsl">Libres</div></div>
+        <div class="wcstat"><div class="wcsv">${row.resN}</div><div class="wcsl">Reservados</div></div>
+        <div class="wcstat"><div class="wcsv" style="color:rgba(239,239,239,.56)">${row.libresN}</div><div class="wcsl">Libres</div></div>
       </div>
-      ${row.eventos>0?`<div class="wcsl" style="text-align:center;margin-top:6px;opacity:.75">+ ${row.eventos} de eventos, fuera de la ocupación</div>`:''}
-      ${showFact ? `<div class="wcard-fact">
-        <div class="wfstat"><div class="wfl">💵 Efectivo</div><div class="wfv" style="color:${neonGreen};text-shadow:0 0 10px ${neonGreen}66">${fmtP(ef)}</div></div>
-        <div class="wfstat"><div class="wfl">🏦 Transf.</div><div class="wfv" style="color:${neonBlue};text-shadow:0 0 10px ${neonBlue}66">${fmtP(tr)}</div></div>
-        <div class="wfstat"><div class="wfl">📊 Total</div><div class="wfv" style="color:${neonWhite};text-shadow:0 0 10px rgba(255,255,255,0.4)">${fmtP(tot)}</div></div>
+      ${row.resT>0?`<div class="wc-aparte"><b>+ ${row.resT}</b> de fútbol antes de las ${CORTE_HORA}:00, aparte (no cuentan en la ocupación)</div>`:''}
+      ${row.eventos>0?`<div class="wc-aparte"><b>+ ${row.eventos}</b> de eventos, fuera de la ocupación</div>`:''}
+      ${tot > 0 ? `<div class="wcard-fact">
+        <div class="wfstat"><div class="wfl">💵 Efectivo</div><div class="wfv">${fmtP(row.efectivo)}</div></div>
+        <div class="wfstat"><div class="wfl">🏦 Transf.</div><div class="wfv">${fmtP(row.transferencia)}</div></div>
+        <div class="wfstat"><div class="wfl">📊 Total</div><div class="wfv">${fmtP(tot)}</div></div>
       </div>` : ''}
       <div class="wcard-canchas">
         <div class="wcbar-mini">
-          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 6</span><span class="wcbar-mini-pct" style="color:${pctColor(f6pct)}">${f6pct}%</span></div>
-          <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${f6pct}%;background:${pctColor(f6pct)}"></div></div>
+          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 6</span><span class="wcbar-mini-pct" style="color:rgba(239,239,239,.74)">${row.f6pct}%</span></div>
+          <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${row.f6pct}%;background:#53957d"></div></div>
         </div>
         <div class="wcbar-mini">
-          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 5</span><span class="wcbar-mini-pct" style="color:${pctColor(f5pct)}">${f5pct}%</span></div>
-          <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${f5pct}%;background:${pctColor(f5pct)}"></div></div>
+          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 5</span><span class="wcbar-mini-pct" style="color:rgba(239,239,239,.74)">${row.f5pct}%</span></div>
+          <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${row.f5pct}%;background:#53957d"></div></div>
         </div>
       </div>
     </div>`;
   }).join('');
 
-  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:14px">${data.length} semanas · ${totalR} de fútbol${totalEv>0?` · ${totalEv} de eventos`:''}${mFactStr}</div>
+  body.innerHTML = `<div style="font-size:11px;font-weight:500;color:rgba(239,239,239,.74);margin-bottom:14px">${data.length} semanas · ${totalR} de fútbol${totalEv>0?` · ${totalEv} de eventos`:''} · <b style="color:#EFEFEF">${mPct}% de ocupación${corteTxt}</b>${mFactStr}</div>
     <div class="wcards">${weekCards}</div>`;
 }
 
