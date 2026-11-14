@@ -1933,6 +1933,10 @@ function renderHistMonthBody(k, year, month, data){
   const weekCards = data.map(row => {
     const pct = row.capN > 0 ? Math.round(row.resN / row.capN * 100) : 0;
     const tot = row.efectivo + row.transferencia;
+    // semana que todavía no empezó: no hay franjas jugadas y un 0 % engañaría; semana en curso: es parcial
+    const sinJugar = row.noche && row.capN === 0;
+    const enCurso = row.semana_inicio <= today && today <= row.semana_fin;
+    const sub = !conCorte ? '' : sinJugar ? 'todavía no empezó' : enCurso ? 'en curso · desde las '+CORTE_HORA+':00, hasta ahora' : 'desde las '+CORTE_HORA+':00';
     return `<div class="wcard">
       <div class="wcard-top">
         <div class="wcard-left">
@@ -1940,14 +1944,14 @@ function renderHistMonthBody(k, year, month, data){
           <div class="wcdates">${ff(row.semana_inicio)} — ${ff(row.semana_fin)}</div>
         </div>
         <div class="wcard-right">
-          <div class="wcpct">${pct}%</div>
-          <div class="wcpctlb">Ocupación fútbol${conCorte?`<small>desde las ${CORTE_HORA}:00</small>`:''}</div>
+          <div class="wcpct">${sinJugar?'—':pct+'%'}</div>
+          <div class="wcpctlb">Ocupación fútbol${sub?`<small>${sub}</small>`:''}</div>
         </div>
       </div>
-      <div class="wcbar"><div class="wcbarfill" style="width:${pct}%;background:#53957d"></div></div>
+      <div class="wcbar"><div class="wcbarfill" style="width:${sinJugar?0:pct}%;background:#53957d"></div></div>
       <div class="wcard-stats">
-        <div class="wcstat"><div class="wcsv">${row.resN}</div><div class="wcsl">Reservados</div></div>
-        <div class="wcstat"><div class="wcsv" style="color:rgba(239,239,239,.56)">${row.libresN}</div><div class="wcsl">Libres</div></div>
+        <div class="wcstat"><div class="wcsv">${sinJugar?'—':row.resN}</div><div class="wcsl">Reservados</div></div>
+        <div class="wcstat"><div class="wcsv" style="color:rgba(239,239,239,.56)">${sinJugar?'—':row.libresN}</div><div class="wcsl">Libres</div></div>
       </div>
       ${row.resT>0?`<div class="wc-aparte"><b>+ ${row.resT}</b> de fútbol antes de las ${CORTE_HORA}:00, aparte (no cuentan en la ocupación)</div>`:''}
       ${row.eventos>0?`<div class="wc-aparte"><b>+ ${row.eventos}</b> de eventos, fuera de la ocupación</div>`:''}
@@ -1958,11 +1962,11 @@ function renderHistMonthBody(k, year, month, data){
       </div>` : ''}
       <div class="wcard-canchas">
         <div class="wcbar-mini">
-          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 6</span><span class="wcbar-mini-pct" style="color:rgba(239,239,239,.74)">${row.f6pct}%</span></div>
+          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 6</span><span class="wcbar-mini-pct" style="color:rgba(239,239,239,.74)">${sinJugar?'—':row.f6pct+'%'}</span></div>
           <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${row.f6pct}%;background:#53957d"></div></div>
         </div>
         <div class="wcbar-mini">
-          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 5</span><span class="wcbar-mini-pct" style="color:rgba(239,239,239,.74)">${row.f5pct}%</span></div>
+          <div class="wcbar-mini-label"><span class="wcbar-mini-name">Fútbol 5</span><span class="wcbar-mini-pct" style="color:rgba(239,239,239,.74)">${sinJugar?'—':row.f5pct+'%'}</span></div>
           <div class="wcbar-mini-track"><div class="wcbar-mini-fill" style="width:${row.f5pct}%;background:#53957d"></div></div>
         </div>
       </div>
