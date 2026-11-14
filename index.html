@@ -695,7 +695,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 }
 /* ═══════════════════════════════════════════════
    RESÚMENES v3 (calmo) + RANKING DE CLIENTES (2026-11-14)
-   Solo fútbol · ocupación medida desde las 18:00
+   Solo fútbol · ocupación medida desde las 19:00
    Color: UNA escala del verde del escudo (#1A6B55) para la cantidad; naranja de marca solo como acento;
    verde/rojo de estado solo en la variación semanal, siempre con flecha y texto. Sin resplandores.
 ═══════════════════════════════════════════════ */
@@ -790,7 +790,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .rv-bar-v{font-size:12px;font-weight:700;color:var(--ink);text-align:right;line-height:1.15}
 .rv-bar-v small{display:block;color:var(--ink3);font-weight:600;font-size:10px}
 
-/* aparte: antes de las 18:00 */
+/* aparte: antes de las 19:00 */
 .rv-det{margin-bottom:14px;overflow:hidden}
 .rv-det>summary{list-style:none;cursor:pointer;padding:17px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink)}
 .rv-det>summary::-webkit-details-marker{display:none}
@@ -1107,7 +1107,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   <div class="rcontent">
     <div class="rsem-ttl-label">Solo fútbol · la semana en curso y las cerradas</div>
     <div class="rsem-ttl">Resúmenes semanales</div>
-    <div class="rv-sub">La ocupación se mide <b>de las 18:00 en adelante</b>, que es el horario que pide la gente. Lo anterior va aparte, con quién lo pide.</div>
+    <div class="rv-sub">La ocupación se mide <b>de las 19:00 en adelante</b>, que es el horario que pide la gente. Lo anterior va aparte, con quién lo pide.</div>
     <div class="rgrid" id="rgrid"><div class="empty-state"><span class="empty-icon">📊</span>Cargando resúmenes...</div></div>
   </div>
 </div>
@@ -1995,12 +1995,12 @@ function renderHistorialMonth(year, month, data){
 }
 
 // ═══════════════════════════════════════════════
-// RESÚMENES v2 · solo fútbol, ocupación desde las 18:00 (2026-11-14)
+// RESÚMENES v2 · solo fútbol, ocupación desde las 19:00 (2026-11-14)
 // ═══════════════════════════════════════════════
 // Pedido de Juan Pablo: la ocupación mezclaba eventos y horas de la mañana/tarde, donde casi nadie
-// pide turno (trabajo, clima). El horario "normal" arranca a las 18:00: ahí se mide el 100 %.
+// pide turno (trabajo, clima). El horario "normal" arranca a las 19:00: ahí se mide el 100 % (primero fue 18:00; Ezequiel lo subió a 19:00 el 2026-11-14).
 // Los turnos de fútbol antes de esa hora se muestran aparte, con nombre y teléfono, para seguirlos.
-const CORTE_HORA = 18;          // desde esta hora se mide la ocupación
+const CORTE_HORA = 19;          // desde esta hora se mide la ocupación (si cambia, cambiarlo también en el SQL del Historial)
 const RK_MIN_TURNOS = 5;        // el ranking incluye clientes con MÁS de este número de turnos de fútbol
 const RK_DESDE = '2026-06-01';  // el sistema registra turnos desde fines de junio de 2026
 const DIAS_LUN = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
@@ -2091,10 +2091,10 @@ function rvStats(w){
   const pct = noche.length ? Math.round(resN.length/noche.length*100) : 0;
   const pctT = tarde.length ? Math.round(tarde.filter(esRes).length/tarde.length*100) : 0;
 
-  // lo que falta de la semana en curso: franjas desde las 18:00 que todavía no empezaron
+  // lo que falta de la semana en curso: franjas desde las 19:00 que todavía no empezaron
   const faltan = enCurso ? todaNoche.filter(t=>!enAlcance(t)) : [];
 
-  // mapa de calor: día de la semana × hora, solo desde las 18:00 (con lo que viene, marcado aparte)
+  // mapa de calor: día de la semana × hora, solo desde las 19:00 (con lo que viene, marcado aparte)
   const horas = [...new Set(todaNoche.map(horaDe))].sort((a,b)=>a-b);
   const cel = {};
   todaNoche.forEach(t=>{
@@ -2104,7 +2104,7 @@ function rvStats(w){
     if(enCurso && !yaEmpezo(t, ahora)) c.fut = true;
   });
 
-  // ocupación por cancha (desde las 18:00)
+  // ocupación por cancha (desde las 19:00)
   const canchas = [['Cancha de 5',1,'5-A'],['Cancha de 5',2,'5-B'],['Cancha de 6',1,'6-A'],['Cancha de 6',2,'6-B']].map(([c,n,nombre])=>{
     const ts = noche.filter(t=>t.cancha===c && Number(t.numero_cancha)===n);
     const r = ts.filter(esRes).length;
