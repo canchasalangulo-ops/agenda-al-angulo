@@ -693,6 +693,192 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   #bgVideo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;display:block}
   .page{background:transparent}
 }
+/* ═══════════════════════════════════════════════
+   RESÚMENES v2 + RANKING DE CLIENTES (2026-11-14)
+   Solo fútbol · ocupación medida desde las 18:00
+═══════════════════════════════════════════════ */
+.t-alta{--c1:#5dff94;--c2:#1fb86a;--glow:rgba(57,255,110,.5)}
+.t-media{--c1:#ffd54a;--c2:#d4930a;--glow:rgba(255,200,60,.45)}
+.t-baja{--c1:#ff8a5c;--c2:#E8501A;--glow:rgba(232,80,26,.55)}
+
+.rv-sub{font-size:12px;color:rgba(255,255,255,.5);margin:-12px 0 18px;font-weight:500;line-height:1.5}
+.rv-sub b{color:var(--naranja);font-weight:700}
+
+/* tendencia: una barra por semana, se toca para ver el detalle */
+.rv-trend{display:flex;gap:6px;align-items:flex-end;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));border:1px solid var(--border-md);border-radius:20px;padding:14px 14px 10px;margin-bottom:16px}
+.rv-tb{flex:1;min-width:0;background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 2px;border-radius:14px;color:inherit;font-family:inherit;transition:background .15s}
+.rv-tb:hover{background:rgba(255,255,255,.06)}
+.rv-tb.on{background:rgba(232,80,26,.16);box-shadow:0 0 0 1px rgba(232,80,26,.5) inset}
+.rv-tb-v{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:.6px;color:#fff;line-height:1}
+.rv-tb-track{height:66px;width:100%;max-width:40px;display:flex;align-items:flex-end}
+.rv-tb-bar{width:100%;border-radius:9px 9px 4px 4px;min-height:4px;background:linear-gradient(180deg,var(--c1),var(--c2));box-shadow:0 0 12px var(--glow)}
+.rv-tb-d{font-size:9px;font-weight:700;letter-spacing:.8px;color:rgba(255,255,255,.4);text-transform:uppercase}
+.rv-tb.on .rv-tb-d{color:#fff}
+
+/* hero de la semana */
+.rv-hero{position:relative;display:grid;grid-template-columns:minmax(220px,290px) 1fr;gap:26px;align-items:center;padding:24px 28px 26px;border-radius:26px;border:1px solid var(--border-md);background:radial-gradient(120% 140% at 0% 0%,rgba(26,107,85,.38),transparent 55%),radial-gradient(90% 120% at 100% 100%,rgba(232,80,26,.24),transparent 60%),rgba(24,31,46,.86);box-shadow:var(--shadow-md);margin-bottom:16px}
+.rv-hero-top{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.rv-wk{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1.6px;color:#fff;line-height:1}
+.rv-wk small{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.2px;color:rgba(255,255,255,.45);display:block;margin-bottom:5px}
+.rv-badge{font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;padding:5px 11px;border-radius:999px;background:var(--naranja);color:#fff}
+.rv-ringbox{position:relative;width:min(240px,100%);aspect-ratio:1;margin:0 auto}
+.rv-ringbox svg{width:100%;height:100%;display:block;overflow:visible}
+.rv-ringcol{display:flex;flex-direction:column;align-items:center}
+.rv-deltarow{margin-top:14px;text-align:center}
+.rv-ring-bg{fill:none;stroke:rgba(255,255,255,.07);stroke-width:9}
+.rv-ring-fg{fill:none;stroke:var(--c1);stroke-width:9;stroke-linecap:round;filter:drop-shadow(0 0 7px var(--glow))}
+.rv-ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.rv-ring-n{font-family:'Bebas Neue',sans-serif;font-size:84px;line-height:.9;color:#fff;text-shadow:0 0 28px var(--glow)}
+.rv-ring-n small{font-size:34px;color:var(--c1);margin-left:2px}
+.rv-ring-l{font-size:9px;letter-spacing:2px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:8px;line-height:1.5}
+.rv-ring-s{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;font-weight:600}
+.rv-delta{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.6px;padding:4px 10px;border-radius:999px}
+.rv-delta.up{background:rgba(57,255,110,.16);color:#5dff94}
+.rv-delta.dn{background:rgba(255,106,74,.18);color:#ff8a5c}
+.rv-delta.eq{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
+.rv-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rv-tile{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:18px;padding:15px 16px;min-width:0}
+.rv-tile-v{font-family:'Bebas Neue',sans-serif;font-size:46px;line-height:1;color:#fff}
+.rv-tile-v.txt{font-size:27px;line-height:1.15;padding-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-tile-l{font-size:9px;letter-spacing:1.7px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.45);margin-top:5px}
+.rv-tile-s{font-size:10px;color:rgba(255,255,255,.4);margin-top:3px;font-weight:600}
+.rv-tile.ok .rv-tile-v{color:#5dff94}
+
+/* paneles */
+.rv-cols{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:16px}
+.rv-panel{background:rgba(24,31,46,.82);border:1px solid var(--border-md);border-radius:22px;padding:20px 22px;min-width:0}
+.rv-pt{font-size:10px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:14px}
+.rv-pt span{color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:none;font-weight:600;margin-left:6px}
+
+/* mapa de calor día × hora */
+.rv-heat{display:grid;grid-template-columns:58px repeat(var(--cols),minmax(0,1fr));gap:5px}
+.rv-hh{font-size:10px;font-weight:700;color:rgba(255,255,255,.45);text-align:center;letter-spacing:.8px;padding-bottom:3px}
+.rv-hd{font-size:12px;font-weight:700;color:rgba(255,255,255,.8);display:flex;flex-direction:column;justify-content:center;line-height:1.15}
+.rv-hd small{font-size:9px;color:rgba(255,255,255,.35);font-weight:600}
+.rv-cell{height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.8px}
+.rv-cell.vac{background:rgba(255,255,255,.035);color:rgba(255,255,255,.2)}
+.rv-cell.full{box-shadow:0 0 16px rgba(57,255,110,.6)}
+.rv-leg{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:10px;color:rgba(255,255,255,.4);font-weight:600}
+.rv-leg i{flex:0 0 120px;height:8px;border-radius:5px;background:linear-gradient(90deg,rgb(20,28,43),rgb(26,140,104),rgb(57,255,110))}
+
+/* ocupación por cancha */
+.rv-bar{display:grid;grid-template-columns:50px 1fr 82px;gap:10px;align-items:center;margin-bottom:13px}
+.rv-bar:last-child{margin-bottom:0}
+.rv-bar-n{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.8px;color:#fff}
+.rv-bar-t{height:13px;border-radius:8px;background:rgba(255,255,255,.07);overflow:hidden}
+.rv-bar-f{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--c2),var(--c1));box-shadow:0 0 10px var(--glow)}
+.rv-bar-v{font-size:12px;font-weight:700;color:#fff;text-align:right;line-height:1.1}
+.rv-bar-v small{display:block;color:rgba(255,255,255,.4);font-weight:600;font-size:10px}
+
+/* aparte: antes de las 18:00 */
+.rv-det{background:rgba(24,31,46,.82);border:1px solid rgba(255,200,60,.28);border-radius:22px;margin-bottom:16px;overflow:hidden}
+.rv-det>summary{list-style:none;cursor:pointer;padding:17px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#ffd54a}
+.rv-det>summary::-webkit-details-marker{display:none}
+.rv-det>summary::after{content:'▾';margin-left:auto;transition:transform .2s;color:rgba(255,255,255,.45);font-size:14px}
+.rv-det[open]>summary::after{transform:rotate(180deg)}
+.rv-chip{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:none;padding:4px 10px;border-radius:999px;background:rgba(255,200,60,.14);color:#ffd54a}
+.rv-chip.mute{background:rgba(255,255,255,.07);color:rgba(255,255,255,.6)}
+.rv-det-b{padding:0 22px 18px}
+.rv-det-n{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:6px}
+.rv-trow{display:grid;grid-template-columns:100px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--border);font-size:13px}
+.rv-when{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;color:#ffd54a;line-height:1.1}
+.rv-when small{display:block;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.5px}
+.rv-who{font-weight:600;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-who small{display:block;color:var(--muted);font-weight:500;font-size:10px}
+.rv-ph{color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums;font-size:12px}
+.rv-wa{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;text-decoration:none;color:#06210f;background:linear-gradient(135deg,#5dff94,#1fb86a);padding:7px 12px;border-radius:999px;white-space:nowrap}
+.rv-wa:hover{filter:brightness(1.1)}
+.rv-evs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px;font-size:11px;color:rgba(255,255,255,.5);font-weight:600}
+.rv-ev{padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:#fff;font-weight:700}
+.rv-ev b{color:var(--naranja);margin-left:4px}
+
+/* ═══ RANKING ═══ */
+.rk-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.rk-k{cursor:pointer;text-align:left;background:rgba(24,31,46,.82);border:1px solid var(--border-md);border-radius:20px;padding:15px 18px;color:#fff;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+.rk-k:hover{border-color:rgba(255,255,255,.3)}
+.rk-k.on{border-color:var(--naranja);box-shadow:0 0 0 1px var(--naranja) inset,0 0 26px rgba(232,80,26,.25)}
+.rk-k-v{font-family:'Bebas Neue',sans-serif;font-size:50px;line-height:1}
+.rk-k-l{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.5);margin-top:4px}
+.rk-k.act .rk-k-v{color:#5dff94}.rk-k.baj .rk-k-v{color:#ffd54a}.rk-k.ina .rk-k-v{color:#ff7a5a}
+.rk-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.rk-search{flex:1;min-width:200px;background:rgba(255,255,255,.06);border:1px solid var(--border-md);border-radius:14px;padding:11px 14px;color:#fff;font-family:inherit;font-size:13px;outline:none}
+.rk-search:focus{border-color:var(--naranja)}
+.rk-sort{display:flex;background:rgba(255,255,255,.06);border:1px solid var(--border-md);border-radius:14px;overflow:hidden}
+.rk-sort button{background:none;border:0;color:rgba(255,255,255,.55);font-family:inherit;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:11px 14px;cursor:pointer}
+.rk-sort button.on{background:var(--naranja);color:#fff}
+
+.rk-pod{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:14px;align-items:end;margin:34px 0 20px}
+.rk-pc{position:relative;border-radius:24px;padding:0 16px 18px;text-align:center;border:1px solid var(--border-md);background:linear-gradient(180deg,var(--m1),rgba(24,31,46,.94) 62%)}
+.rk-pc.p1{--m1:rgba(255,200,60,.3);box-shadow:0 0 44px rgba(255,200,60,.2);padding-bottom:22px}
+.rk-pc.p2{--m1:rgba(200,212,230,.2)}
+.rk-pc.p3{--m1:rgba(214,140,80,.26)}
+.rk-medal{width:46px;height:46px;border-radius:50%;margin:-23px auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:26px;color:#1a1204;background:linear-gradient(135deg,var(--me1),var(--me2));box-shadow:0 5px 18px rgba(0,0,0,.5)}
+.p1 .rk-medal{--me1:#ffe27a;--me2:#e0a800}.p2 .rk-medal{--me1:#f3f6fb;--me2:#a9b4c4}.p3 .rk-medal{--me1:#ffc08a;--me2:#b8702f}
+.rk-pn{font-weight:800;font-size:16px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-pph{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.rk-pt{font-family:'Bebas Neue',sans-serif;font-size:62px;line-height:1;margin:6px 0 0;color:#fff}
+.rk-pt small{display:block;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;margin-top:-2px}
+.rk-pc .rk-hs{justify-content:center;margin:10px 0 8px}
+
+.rk-list{display:flex;flex-direction:column;gap:8px}
+.rk-row{display:grid;grid-template-columns:40px minmax(150px,1.25fr) 66px minmax(140px,1.15fr) 112px minmax(130px,1fr) 128px;gap:14px;align-items:center;padding:13px 16px;border-radius:18px;border:1px solid var(--border);border-left:4px solid var(--st);background:rgba(24,31,46,.8)}
+.rk-row.act{--st:#2fe38a}.rk-row.baj{--st:#ffd54a}
+.rk-row.ina{--st:#ff6b4a;background:linear-gradient(90deg,rgba(90,24,12,.38),rgba(24,31,46,.8) 60%)}
+.rk-pos{font-family:'Bebas Neue',sans-serif;font-size:27px;color:rgba(255,255,255,.3);text-align:center}
+.rk-name{font-weight:700;color:#fff;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-name small{display:block;font-weight:500;color:var(--muted);font-size:11px;margin-top:1px}
+.rk-tot{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;text-align:center;color:#fff}
+.rk-tot small{display:block;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:1.6px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase}
+.rk-hs{display:flex;gap:6px;flex-wrap:wrap}
+.rk-h{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:#fff;white-space:nowrap}
+.rk-h i{font-style:normal;color:var(--naranja);margin-left:4px}
+.rk-spark{display:flex;align-items:flex-end;gap:4px;height:36px}
+.rk-sp{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}
+.rk-sb{width:100%;border-radius:3px;background:linear-gradient(180deg,#5dff94,#1fb86a);min-height:3px}
+.rk-sb.z{background:rgba(255,255,255,.1)}
+.rk-sp span{font-size:7px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.3px;text-transform:uppercase}
+.rk-last{font-size:11px;color:rgba(255,255,255,.55);line-height:1.35;min-width:0}
+.rk-last b{display:block;color:#fff;font-size:13px}
+.rk-row.ina .rk-last b{color:#ff8a6a}
+.rk-row.baj .rk-last b{color:#ffd54a}
+.rk-st{display:inline-block;font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.rk-st.act{background:rgba(57,255,110,.15);color:#5dff94}
+.rk-st.baj{background:rgba(255,200,60,.16);color:#ffd54a}
+.rk-st.ina{background:rgba(255,106,74,.2);color:#ff8a6a}
+.rk-act{display:flex;flex-direction:column;gap:6px;align-items:flex-end;justify-self:end}
+.rk-more{margin-top:14px;text-align:center}
+.rk-more button{background:rgba(255,255,255,.07);border:1px solid var(--border-md);color:#fff;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:1px;padding:11px 20px;border-radius:14px;cursor:pointer}
+.rk-note{font-size:11px;color:rgba(255,255,255,.38);line-height:1.6;margin-top:18px}
+
+@media(max-width:900px){
+  .rv-hero{grid-template-columns:1fr;gap:18px;padding:20px 16px}
+  .rv-tiles{grid-template-columns:repeat(2,1fr)}
+  .rv-cols{grid-template-columns:1fr}
+  .rv-wk{font-size:26px}
+  .rv-panel{padding:16px 14px}
+  .rk-kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .rv-trend{padding:10px 6px 8px;gap:2px}
+  .rv-tb-v{font-size:16px}
+  .rv-heat{grid-template-columns:46px repeat(var(--cols),minmax(0,1fr));gap:3px}
+  .rv-cell{height:34px;font-size:14px;border-radius:8px}
+  .rv-trow{grid-template-columns:78px minmax(0,1fr) auto;row-gap:2px}
+  .rv-ph{display:none}
+  .rk-pod{gap:8px;margin-top:30px}
+  .rk-pc{padding:0 6px 12px;border-radius:18px}
+  .rk-pn{font-size:12px}
+  .rk-pph,.rk-pc .rk-hs{display:none}
+  .rk-pt{font-size:44px}
+  .rk-pc .rk-st{font-size:8px;padding:4px 7px}
+  .rk-medal{width:38px;height:38px;font-size:21px;margin:-19px auto 8px}
+  .rk-pc .rk-last{font-size:10px}
+  .rk-row{grid-template-columns:34px minmax(0,1fr) 54px;row-gap:9px;column-gap:10px;padding:12px 12px}
+  .rk-row>.rk-hs,.rk-row>.rk-spark,.rk-row>.rk-last,.rk-row>.rk-act{grid-column:1/-1}
+  .rk-act{flex-direction:row;justify-content:space-between;align-items:center}
+  .rk-row>.rk-spark{height:30px;max-width:210px}
+}
+
 </style>
 </head>
 <body>
@@ -862,6 +1048,7 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
   <div class="ntab on" onclick="showPage('agenda')">📅 Agenda</div>
   <div class="ntab" onclick="showPage('historial')">🗂 Historial</div>
   <div class="ntab" onclick="showPage('resumenes')">📊 Resúmenes</div>
+  <div class="ntab" onclick="showPage('ranking')">🏆 Ranking</div>
   <div class="ntab" onclick="showPage('contactos')">👥 Contactos</div>
   <div class="ntab" onclick="showPage('turnos-fijos')">📌 Turnos Fijos</div>
   <div class="ntab" onclick="showPage('lista-espera')">⏳ Lista de Espera</div>
@@ -898,9 +1085,18 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <!-- RESÚMENES -->
 <div class="page" id="page-resumenes">
   <div class="rcontent">
-    <div class="rsem-ttl-label">Generado al cierre de cada semana</div>
+    <div class="rsem-ttl-label">Solo fútbol · generado al cierre de cada semana</div>
     <div class="rsem-ttl">Resúmenes semanales</div>
+    <div class="rv-sub">La ocupación se mide <b>de las 18:00 en adelante</b>, que es el horario que pide la gente. Lo anterior va aparte, con quién lo pide.</div>
     <div class="rgrid" id="rgrid"><div class="empty-state"><span class="empty-icon">📊</span>Cargando resúmenes...</div></div>
+  </div>
+</div>
+
+<div class="page" id="page-ranking">
+  <div class="rcontent">
+    <div class="rsem-ttl-label">Solo fútbol · para saber a quién escribirle</div>
+    <div class="rsem-ttl">Ranking de clientes</div>
+    <div id="rkroot"><div class="empty-state"><span class="empty-icon">🏆</span>Cargando ranking...</div></div>
   </div>
 </div>
 
@@ -1779,11 +1975,43 @@ function renderHistorialMonth(year, month, data){
 }
 
 // ═══════════════════════════════════════════════
-// RENDER: RESÚMENES
+// RESÚMENES v2 · solo fútbol, ocupación desde las 18:00 (2026-11-14)
 // ═══════════════════════════════════════════════
-// ¿Es un turno de fútbol? Los de evento (Escuelita, Torneo, Cumpleaños) no cuentan
-// como demanda de cancha: ocupan franjas fijas y no tienen cliente ni teléfono.
-function esFutbol(t){ return (t.evento||'Fútbol')==='Fútbol'; }
+// Pedido de Juan Pablo: la ocupación mezclaba eventos y horas de la mañana/tarde, donde casi nadie
+// pide turno (trabajo, clima). El horario "normal" arranca a las 18:00: ahí se mide el 100 %.
+// Los turnos de fútbol antes de esa hora se muestran aparte, con nombre y teléfono, para seguirlos.
+const CORTE_HORA = 18;          // desde esta hora se mide la ocupación
+const RK_MIN_TURNOS = 5;        // el ranking incluye clientes con MÁS de este número de turnos de fútbol
+const RK_DESDE = '2026-06-01';  // el sistema registra turnos desde fines de junio de 2026
+const DIAS_LUN = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MESES_CORTO = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+const rvEsc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const horaDe = t => parseInt(String(t.horario).slice(0,2),10);
+const esNoche = t => horaDe(t) >= CORTE_HORA;
+const diaLun = f => (new Date(f+'T00:00:00').getDay()+6)%7;      // 0 = lunes
+const soloDig = s => String(s||'').replace(/\D/g,'');
+const primerNombre = s => String(s||'').trim().split(/\s+/)[0] || '';
+const tono = p => p>=50 ? 't-alta' : (p>=30 ? 't-media' : 't-baja');
+const fechaCorta = f => f.slice(8,10)+'/'+f.slice(5,7);
+const canchaCorta = t => (t.cancha==='Cancha de 5'?'5':'6')+'-'+(Number(t.numero_cancha)===1?'A':'B');
+
+function rvWa(num, texto){
+  const d = soloDig(num);
+  if(!d) return '';
+  return `<a class="rv-wa" href="https://wa.me/${d}${texto?'?text='+encodeURIComponent(texto):''}" target="_blank" rel="noopener">💬 WhatsApp</a>`;
+}
+
+// color del mapa de calor: vacío → verde → verde brillante
+function rvCalor(l){
+  const a=[20,28,43], b=[26,140,104], c=[57,255,110];
+  const mix=(x,y,k)=>x.map((v,i)=>Math.round(v+(y[i]-v)*k));
+  const col = l<.5 ? mix(a,b,l/.5) : mix(b,c,(l-.5)/.5);
+  return `rgb(${col[0]},${col[1]},${col[2]})`;
+}
+
+let rvSemanas = [];
+let rvSel = 0;
 
 async function initResumenes(){
   document.getElementById('rgrid').innerHTML='<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando resúmenes...</div>';
@@ -1810,7 +2038,7 @@ async function initResumenes(){
       if(pagina.length < PAGE) break;
       desde += PAGE;
     }
-    if(!data||!data.length){
+    if(!data.length){
       document.getElementById('rgrid').innerHTML='<div class="empty-state"><span class="empty-icon">📊</span>Sin semanas cerradas aún</div>';
       return;
     }
@@ -1820,123 +2048,396 @@ async function initResumenes(){
   }
 }
 
+// ¿Es un turno de fútbol? Los de evento (Escuelita, Torneo, Cumpleaños) no cuentan
+// como demanda de cancha: ocupan franjas fijas y no tienen cliente ni teléfono.
+function esFutbol(t){ return (t.evento||'Fútbol')==='Fútbol'; }
+
+// Todo lo que se muestra de una semana, calculado una sola vez.
+function rvStats(w){
+  const esRes = t => t.estado==='Reservado';
+  const fut = w.turnos.filter(esFutbol);
+  const noche = fut.filter(esNoche);
+  const tarde = fut.filter(t=>!esNoche(t));
+  const resN = noche.filter(esRes);
+  const resT = tarde.filter(esRes).sort((a,b)=>(a.fecha+a.horario).localeCompare(b.fecha+b.horario));
+  const pct = noche.length ? Math.round(resN.length/noche.length*100) : 0;
+  const pctT = tarde.length ? Math.round(resT.length/tarde.length*100) : 0;
+
+  // mapa de calor: día de la semana × hora, solo desde las 18:00
+  const horas = [...new Set(noche.map(horaDe))].sort((a,b)=>a-b);
+  const cel = {};
+  noche.forEach(t=>{
+    const k = diaLun(t.fecha)+'|'+horaDe(t);
+    const c = cel[k] = cel[k] || {res:0,cap:0};
+    c.cap++; if(esRes(t)) c.res++;
+  });
+
+  // ocupación por cancha (desde las 18:00)
+  const canchas = [['Cancha de 5',1,'5-A'],['Cancha de 5',2,'5-B'],['Cancha de 6',1,'6-A'],['Cancha de 6',2,'6-B']].map(([c,n,nombre])=>{
+    const ts = noche.filter(t=>t.cancha===c && Number(t.numero_cancha)===n);
+    const r = ts.filter(esRes).length;
+    return {nombre, res:r, cap:ts.length, pct: ts.length ? Math.round(r/ts.length*100) : 0};
+  });
+
+  const top = (arr, clave) => {
+    const m = {};
+    arr.forEach(t=>{ const k = clave(t); if(k) m[k] = (m[k]||0)+1; });
+    return Object.entries(m).sort((a,b)=>b[1]-a[1])[0] || null;
+  };
+  const th = top(resN, t=>String(t.horario).slice(0,5));
+  const tc = top(resN, t=>t.numero || t.cliente);
+  const nombreTc = tc ? (resN.find(t=>(t.numero||t.cliente)===tc[0])||{}).cliente : null;
+
+  const porHora = horas.map(h=>{ const ts = noche.filter(t=>horaDe(t)===h); const r = ts.filter(esRes).length; return {nombre:h+':00', res:r, cap:ts.length, pct: ts.length?Math.round(r/ts.length*100):0}; });
+
+  const eventos = {};
+  w.turnos.filter(t=>!esFutbol(t)).forEach(t=>{ const k = t.evento||'Evento'; eventos[k] = (eventos[k]||0)+1; });
+  const nEventos = Object.values(eventos).reduce((a,b)=>a+b,0);
+
+  const ef = w.turnos.reduce((s,t)=>s+(Number(t.facturacion_efectivo)||0),0);
+  const tr = w.turnos.reduce((s,t)=>s+(Number(t.facturacion_transferencia)||0),0);
+
+  return {
+    pct, pctT, res:resN.length, cap:noche.length, resT, capT:tarde.length,
+    libres: noche.filter(t=>t.estado==='Disponible').length,
+    lista: noche.filter(t=>t.reservado_por_lista_espera).length,
+    horas, cel, canchas, porHora, topH:th, topC:tc, nombreTc, eventos, nEventos, ef, tr
+  };
+}
+
+function rvTendencia(){
+  const orden = rvSemanas.map((w,i)=>({w,i,s:rvStats(w)})).reverse();   // de la más vieja a la más nueva
+  const maxP = Math.max(1, ...orden.map(o=>o.s.pct));
+  return `<div class="rv-trend" role="tablist">${orden.map(({w,i,s})=>`
+    <button class="rv-tb ${tono(s.pct)} ${i===rvSel?'on':''}" onclick="rvElegir(${i})" role="tab" aria-selected="${i===rvSel}">
+      <span class="rv-tb-v">${s.pct}%</span>
+      <span class="rv-tb-track"><span class="rv-tb-bar" style="height:${Math.max(8,Math.round(s.pct/maxP*100))}%"></span></span>
+      <span class="rv-tb-d">${fs(w.start)}</span>
+    </button>`).join('')}</div>`;
+}
+
+function rvHero(w, s, sp, esReciente){
+  const C = 2*Math.PI*52;
+  const delta = sp ? s.pct - sp.pct : null;
+  const dtxt = delta==null ? '' : (delta>0 ? `<span class="rv-delta up">▲ +${delta} pts vs semana anterior</span>`
+    : delta<0 ? `<span class="rv-delta dn">▼ ${delta} pts vs semana anterior</span>`
+    : `<span class="rv-delta eq">= igual que la semana anterior</span>`);
+  const evTxt = s.nEventos ? Object.entries(s.eventos).map(([k,v])=>`${rvEsc(k)} ${v}`).join(' · ') : 'ninguno';
+  const ingresos = (s.ef+s.tr)>0 ? `<div class="rv-tile ok"><div class="rv-tile-v">$${(s.ef+s.tr).toLocaleString('es-AR')}</div><div class="rv-tile-l">Ingresos</div><div class="rv-tile-s">Efectivo $${s.ef.toLocaleString('es-AR')} · Transf. $${s.tr.toLocaleString('es-AR')}</div></div>` : '';
+  return `
+  <div class="rv-hero ${tono(s.pct)}">
+    <div class="rv-hero-top">
+      <div class="rv-wk"><small>SEMANA CERRADA</small>${fs(w.start)} → ${fs(w.end)}</div>
+      ${esReciente?'<span class="rv-badge">Reciente</span>':''}
+    </div>
+    <div class="rv-ringcol">
+      <div class="rv-ringbox">
+        <svg viewBox="-12 -12 144 144" aria-hidden="true">
+          <circle class="rv-ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="rv-ring-fg" cx="60" cy="60" r="52" transform="rotate(-90 60 60)" stroke-dasharray="${(C*s.pct/100).toFixed(1)} ${C.toFixed(1)}"/>
+        </svg>
+        <div class="rv-ring-c">
+          <div class="rv-ring-n">${s.pct}<small>%</small></div>
+          <div class="rv-ring-l">Ocupación<br>${CORTE_HORA}:00 en adelante</div>
+          <div class="rv-ring-s">${s.res} de ${s.cap} franjas</div>
+        </div>
+      </div>
+      ${dtxt?`<div class="rv-deltarow">${dtxt}</div>`:''}
+    </div>
+    <div class="rv-tiles">
+      <div class="rv-tile"><div class="rv-tile-v">${s.res}</div><div class="rv-tile-l">Reservados</div></div>
+      <div class="rv-tile"><div class="rv-tile-v">${s.libres}</div><div class="rv-tile-l">Libres</div></div>
+      <div class="rv-tile"><div class="rv-tile-v">${s.lista}</div><div class="rv-tile-l">Por lista de espera</div></div>
+      <div class="rv-tile"><div class="rv-tile-v">${s.topH?s.topH[0]:'—'}</div><div class="rv-tile-l">🕐 Horario estrella</div>${s.topH?`<div class="rv-tile-s">${s.topH[1]} turnos</div>`:''}</div>
+      <div class="rv-tile"><div class="rv-tile-v txt">${s.topC?rvEsc(primerNombre(s.nombreTc)||'—'):'—'}</div><div class="rv-tile-l">⭐ Cliente estrella</div>${s.topC?`<div class="rv-tile-s">${s.topC[1]} turnos</div>`:''}</div>
+      <div class="rv-tile"><div class="rv-tile-v">${s.nEventos}</div><div class="rv-tile-l">Eventos · aparte</div><div class="rv-tile-s">${evTxt}</div></div>
+      ${ingresos}
+    </div>
+  </div>`;
+}
+
+function rvCalorHTML(w, s){
+  if(!s.horas.length) return '<div class="rv-det-n">No hay franjas de fútbol desde las '+CORTE_HORA+':00 en esta semana.</div>';
+  const celdas = [`<div></div>`].concat(s.horas.map(h=>`<div class="rv-hh">${h}:00</div>`));
+  for(let d=0; d<7; d++){
+    celdas.push(`<div class="rv-hd">${DIAS_LUN[d]}<small>${fs(add(w.start,d))}</small></div>`);
+    s.horas.forEach(h=>{
+      const c = s.cel[d+'|'+h];
+      if(!c){ celdas.push('<div class="rv-cell vac">·</div>'); return; }
+      const l = c.cap ? c.res/c.cap : 0;
+      celdas.push(`<div class="rv-cell ${l>=1?'full':''}" style="background:${rvCalor(l)};color:${l>.55?'#06210f':'#fff'}" title="${DIAS_LUN[d]} ${h}:00 · ${c.res} de ${c.cap} canchas reservadas">${c.res}/${c.cap}</div>`);
+    });
+  }
+  return `<div class="rv-heat" style="--cols:${s.horas.length}">${celdas.join('')}</div>
+    <div class="rv-leg">vacío <i></i> lleno · cada casilla = canchas reservadas / canchas de fútbol de esa hora</div>`;
+}
+
+function rvBarras(lista){
+  return lista.map(c=>`
+    <div class="rv-bar ${tono(c.pct)}">
+      <div class="rv-bar-n">${c.nombre}</div>
+      <div class="rv-bar-t"><div class="rv-bar-f" style="width:${Math.max(c.pct,2)}%"></div></div>
+      <div class="rv-bar-v">${c.pct}%<small>${c.res} de ${c.cap}</small></div>
+    </div>`).join('');
+}
+const rvCanchasHTML = s => rvBarras(s.canchas);
+const rvHorasHTML = s => rvBarras(s.porHora);
+
+function rvTardeHTML(s){
+  const filas = s.resT.map(t=>`
+    <div class="rv-trow">
+      <div class="rv-when">${DIAS_LUN[diaLun(t.fecha)]} ${String(t.horario).slice(0,5)}<small>${fechaCorta(t.fecha)} · Cancha ${canchaCorta(t)}</small></div>
+      <div class="rv-who">${rvEsc(t.cliente||'Sin nombre')}${t.numero?'':'<small>sin teléfono cargado</small>'}</div>
+      <div class="rv-ph">${t.numero?rvEsc(t.numero):''}</div>
+      <div>${rvWa(t.numero)}</div>
+    </div>`).join('');
+  return `
+  <details class="rv-det" ${s.resT.length?'open':''}>
+    <summary>☀️ Antes de las ${CORTE_HORA}:00 · aparte
+      <span class="rv-chip">${s.resT.length} turno${s.resT.length===1?'':'s'}</span>
+      <span class="rv-chip mute">${s.pctT}% de ${s.capT} franjas</span>
+    </summary>
+    <div class="rv-det-b">
+      <div class="rv-det-n">Estos turnos no cuentan en la ocupación de arriba: a esta hora se pide poco (trabajo, clima). Acá están quiénes los piden.</div>
+      ${filas || '<div class="rv-det-n"><b>Ningún turno de fútbol antes de las '+CORTE_HORA+':00 esta semana.</b></div>'}
+    </div>
+  </details>`;
+}
+
+// quiénes piden de tarde en las 8 semanas: para seguirlos en el tiempo
+function rvHabituesHTML(){
+  const m = {};
+  rvSemanas.forEach(w=>w.turnos.filter(t=>esFutbol(t)&&!esNoche(t)&&t.estado==='Reservado').forEach(t=>{
+    const k = t.numero || ('n:'+t.cliente);
+    const o = m[k] = m[k] || {nombre:t.cliente, numero:t.numero, n:0, horas:{}, ult:''};
+    o.n++;
+    const h = String(t.horario).slice(0,5);
+    o.horas[h] = (o.horas[h]||0)+1;
+    if(t.fecha>o.ult) o.ult = t.fecha;
+  }));
+  const lista = Object.values(m).sort((a,b)=>b.n-a.n || b.ult.localeCompare(a.ult)).slice(0,15);
+  if(!lista.length) return '';
+  const filas = lista.map(o=>{
+    const hs = Object.entries(o.horas).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([h,n])=>`${h} ×${n}`).join(' · ');
+    return `<div class="rv-trow">
+      <div class="rv-when">${o.n}<small>turno${o.n===1?'':'s'}</small></div>
+      <div class="rv-who">${rvEsc(o.nombre||'Sin nombre')}<small>${hs} · último ${fechaCorta(o.ult)}</small></div>
+      <div class="rv-ph">${o.numero?rvEsc(o.numero):''}</div>
+      <div>${rvWa(o.numero)}</div>
+    </div>`;
+  }).join('');
+  return `
+  <details class="rv-det">
+    <summary>🔎 Quiénes piden de tarde · últimas ${rvSemanas.length} semanas
+      <span class="rv-chip mute">${lista.length} clientes</span>
+    </summary>
+    <div class="rv-det-b">${filas}</div>
+  </details>`;
+}
+
+function rvElegir(i){ rvSel = i; rvPintar(); }
+
+function rvPintar(){
+  const w = rvSemanas[rvSel];
+  const s = rvStats(w);
+  const sp = rvSemanas[rvSel+1] ? rvStats(rvSemanas[rvSel+1]) : null;
+  document.getElementById('rgrid').innerHTML = `
+    ${rvTendencia()}
+    ${rvHero(w, s, sp, rvSel===0)}
+    <div class="rv-cols">
+      <div class="rv-panel"><div class="rv-pt">Cómo se llenó la semana<span>desde las ${CORTE_HORA}:00</span></div>${rvCalorHTML(w, s)}</div>
+      <div class="rv-panel"><div class="rv-pt">Por cancha<span>desde las ${CORTE_HORA}:00</span></div>${rvCanchasHTML(s)}
+        <div class="rv-pt" style="margin-top:22px">Por horario</div>${rvHorasHTML(s)}</div>
+    </div>
+    ${rvTardeHTML(s)}
+    ${rvHabituesHTML()}`;
+}
+
 function renderResumenes(data){
-  const weeks=groupByWeek(data);
-  if(!weeks.length){
+  rvSemanas = groupByWeek(data);
+  rvSel = 0;
+  if(!rvSemanas.length){
     document.getElementById('rgrid').innerHTML='<div class="empty-state"><span class="empty-icon">📊</span>Sin semanas cerradas aún</div>';
     return;
   }
-  document.getElementById('rgrid').innerHTML=weeks.map((w,i)=>{
-    // La ocupación mide demanda de fútbol: los turnos de evento quedan afuera del
-    // cálculo y se muestran aparte, abajo. Mezclarlos inflaba el porcentaje y
-    // ponía horarios de escuelita como los más pedidos (2026-11-12).
-    const futbol=w.turnos.filter(esFutbol);
-    const evts=w.turnos.filter(t=>!esFutbol(t));
-    const tot=futbol.length;
-    const res=futbol.filter(t=>t.estado==='Reservado').length;
-    const pen=futbol.filter(t=>t.estado==='Pendiente'||t.estado==='Pendiente de seña').length;
-    const can=futbol.filter(t=>t.estado==='Disponible').length;
-    const le=futbol.filter(t=>t.reservado_por_lista_espera).length;
-    const pct=tot>0?Math.round(res/tot*100):0;
-
-    const c5tot=futbol.filter(t=>t.cancha==='Cancha de 5').length;
-    const c5res=futbol.filter(t=>t.cancha==='Cancha de 5'&&t.estado==='Reservado').length;
-    const c6tot=futbol.filter(t=>t.cancha==='Cancha de 6').length;
-    const c6res=futbol.filter(t=>t.cancha==='Cancha de 6'&&t.estado==='Reservado').length;
-    const p5=c5tot>0?Math.round(c5res/c5tot*100):0;
-    const p6=c6tot>0?Math.round(c6res/c6tot*100):0;
-
-    // top cliente
-    const clientes={};
-    for(const t of futbol) if(t.cliente&&t.estado==='Reservado') clientes[t.cliente]=(clientes[t.cliente]||0)+1;
-    const topC=Object.entries(clientes).sort((a,b)=>b[1]-a[1])[0];
-
-    // top horario
-    const horarios={};
-    for(const t of futbol) if(t.estado==='Reservado'&&t.horario) horarios[t.horario.slice(0,5)]=(horarios[t.horario.slice(0,5)]||0)+1;
-    const topH=Object.entries(horarios).sort((a,b)=>b[1]-a[1])[0];
-
-    // Ocupación real por sub-cancha
-    const c5a=futbol.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===1);
-    const c5b=futbol.filter(t=>t.cancha==='Cancha de 5'&&t.numero_cancha===2);
-    const c6a=futbol.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===1);
-    const c6b=futbol.filter(t=>t.cancha==='Cancha de 6'&&t.numero_cancha===2);
-    const pct5a=c5a.length?Math.round(c5a.filter(t=>t.estado==='Reservado').length/c5a.length*100):0;
-    const pct5b=c5b.length?Math.round(c5b.filter(t=>t.estado==='Reservado').length/c5b.length*100):0;
-    const pct6a=c6a.length?Math.round(c6a.filter(t=>t.estado==='Reservado').length/c6a.length*100):0;
-    const pct6b=c6b.length?Math.round(c6b.filter(t=>t.estado==='Reservado').length/c6b.length*100):0;
-    // Facturación
-    const ef=w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_efectivo)||0),0);
-    const tr=w.turnos.reduce((s,t)=>s+(parseInt(t.facturacion_transferencia)||0),0);
-    const totFact=ef+tr;
-    const fmtP=n=>n>0?'$'+n.toLocaleString('es-AR'):'$0';
-    const pctColor=p=>p>=60?'#39ff6e':p>=30?'#ffe44d':'#f87171';
-    return `<div class="rcard">
-      <div class="rchdr">
-        <div>
-          <div class="rcwlbl">${i===0?'Última semana':'Semana cerrada'}</div>
-          <div class="rcdates">${ff(w.start)} — ${ff(w.end)} ${i===0?'<span class="lbadge">Reciente</span>':''}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="rcbig" style="color:${pctColor(pct)}">${pct}%</div>
-          <div class="rcbiglb" style="color:${pctColor(pct)}">Ocupación fútbol</div>
-        </div>
-      </div>
-      <div class="rcmid">
-        <div class="rcingresos">
-          <div class="rcingr-ttl">Ingresos</div>
-          <div class="rcingr-row">
-            <span class="rcingr-label"><span class="rcingr-icon">📷</span>Efectivo</span>
-            <span class="rcingr-val" style="color:#39ff6e">${fmtP(ef)}</span>
-          </div>
-          <div class="rcingr-row">
-            <span class="rcingr-label"><span class="rcingr-icon">🏦</span>Transferencia</span>
-            <span class="rcingr-val" style="color:#4dc8ff">${fmtP(tr)}</span>
-          </div>
-          <div class="rcingr-total">
-            <span class="rcingr-total-label">Total semana</span>
-            <span class="rcingr-total-val">${fmtP(totFact)}</span>
-          </div>
-        </div>
-        <div class="rcdiv"></div>
-        <div class="rcturnos">
-          <div class="rcturno-ttl">Turnos de fútbol</div>
-          <div class="rcsr">
-            <div class="rcst"><div class="rcsv" style="color:#39ff6e">${res}</div><div class="rcsl">Reservados</div></div>
-            <div class="rcst"><div class="rcsv" style="color:rgba(255,255,255,.35)">${can}</div><div class="rcsl">Libres</div></div>
-            <div class="rcst"><div class="rcsv" style="color:var(--naranja)">${le}</div><div class="rcsl">Por lista de espera</div></div>
-          </div>
-          ${evts.length?`<div class="rcsl" style="margin-top:6px;opacity:.75">+ ${evts.filter(t=>t.estado==='Reservado').length} de eventos, fuera de la ocupación</div>`:''}
-          <div class="rctags">
-            ${topC?`<span class="rctag-pill">⭐ ${topC[0].split(' ')[0]}</span>`:''}
-            ${topH?`<span class="rctag-pill">🕐 ${topH[0]}</span>`:''}
-          </div>
-        </div>
-      </div>
-      <div class="rcbtitle">Ocupación por cancha</div>
-      <div class="rcocc">
-        <div class="cbrow"><span class="cblbl">Cancha 5-A</span><div class="cbtrack"><div class="cbfill c5" style="width:${pct5a}%"></div></div><span class="cbpct">${pct5a}% · ${c5a.filter(t=>t.estado==='Reservado').length} turnos</span></div>
-        <div class="cbrow"><span class="cblbl">Cancha 5-B</span><div class="cbtrack"><div class="cbfill c5" style="width:${pct5b}%"></div></div><span class="cbpct">${pct5b}% · ${c5b.filter(t=>t.estado==='Reservado').length} turnos</span></div>
-        <div class="cbrow"><span class="cblbl">Cancha 6-A</span><div class="cbtrack"><div class="cbfill c6" style="width:${pct6a}%"></div></div><span class="cbpct">${pct6a}% · ${c6a.filter(t=>t.estado==='Reservado').length} turnos</span></div>
-        <div class="cbrow"><span class="cblbl">Cancha 6-B</span><div class="cbtrack"><div class="cbfill c6" style="width:${pct6b}%"></div></div><span class="cbpct">${pct6b}% · ${c6b.filter(t=>t.estado==='Reservado').length} turnos</span></div>
-      </div>
-      <div class="rcbtitle">Eventos por cancha</div>
-      <div class="rcocc">
-        ${[{lbl:'Cancha 5',ts:evts.filter(t=>t.cancha==='Cancha de 5'&&t.estado==='Reservado')},
-           {lbl:'Cancha 6',ts:evts.filter(t=>t.cancha==='Cancha de 6'&&t.estado==='Reservado')}
-        ].map(g=>{
-          const evCounts={};
-          g.ts.forEach(t=>{const ev=t.evento||'Evento';evCounts[ev]=(evCounts[ev]||0)+1;});
-          const pills=Object.entries(evCounts).map(([ev,n])=>`<span class="rctag-pill">${ev}: ${n}</span>`).join(' ');
-          return `<div class="cbrow" style="flex-direction:column;align-items:flex-start;gap:4px;padding:6px 0">
-            <span class="cblbl" style="min-width:auto;font-weight:600">${g.lbl}</span>
-            <div style="display:flex;flex-wrap:wrap;gap:4px">${pills||'<span class="rctag-pill" style="opacity:.4">Sin eventos</span>'}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }).join('');
+  rvPintar();
 }
+
+// ═══════════════════════════════════════════════
+// RANKING DE CLIENTES (2026-11-14)
+// ═══════════════════════════════════════════════
+// Clientes con MÁS de RK_MIN_TURNOS turnos de fútbol, agrupados por teléfono. Sirve para ver quién
+// deja de pedir y escribirle. "Inactiva" se mide contra el ritmo de cada cliente, no con un número fijo:
+// alguien que juega todas las semanas no es lo mismo que alguien que juega una vez por mes.
+let rkClientes = null, rkCargadoEn = 0, rkEstado = 'todos', rkOrden = 'turnos', rkBusca = '', rkTodo = false;
+
+function rkConstruir(filas){
+  const hoyK = dk(today);
+  const dias = (a,b)=>Math.round((Date.parse(b+'T00:00:00')-Date.parse(a+'T00:00:00'))/86400000);
+  const por = {};
+  filas.forEach(t=>{ if(t.numero) (por[t.numero] = por[t.numero] || []).push(t); });
+  const meses = [];
+  for(let i=4;i>=0;i--){
+    const d = new Date(today.getFullYear(), today.getMonth()-i, 1);
+    meses.push({k:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), n:MESES_CORTO[d.getMonth()]});
+  }
+  const out = [];
+  Object.entries(por).forEach(([num, ts])=>{
+    const pas = ts.filter(t=>t.estado==='Reservado' && t.fecha<=hoyK);
+    if(pas.length <= RK_MIN_TURNOS) return;
+    const fut = ts.filter(t=>t.fecha>hoyK).sort((a,b)=>(a.fecha+a.horario).localeCompare(b.fecha+b.horario));
+    const fechas = [...new Set(pas.map(t=>t.fecha))].sort();
+    const ints = [];
+    for(let i=1;i<fechas.length;i++) ints.push(dias(fechas[i-1],fechas[i]));
+    const rec = ints.slice(-6).sort((a,b)=>a-b);
+    const med = rec.length ? rec[Math.floor(rec.length/2)] : null;
+    const ult = fechas[fechas.length-1];
+    const desde = dias(ult, hoyK);
+    const ref = Math.max(7, med||7);
+    let estado = 'act';
+    if(!fut.length){
+      if(desde > Math.max(30, 3*ref)) estado = 'ina';
+      else if(desde > Math.max(14, 2*ref)) estado = 'baj';
+    }
+    const cuenta = (f)=>{ const m={}; pas.forEach(t=>{ const k=f(t); m[k]=(m[k]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); };
+    const nombres = cuenta(t=>t.cliente||'');
+    const horas = cuenta(t=>String(t.horario).slice(0,5)).slice(0,3);
+    const diaTop = cuenta(t=>diaLun(t.fecha))[0];
+    const porMes = meses.map(m=>({n:m.n, v:pas.filter(t=>t.fecha.slice(0,7)===m.k).length}));
+    out.push({num, nombre:nombres[0]?nombres[0][0]:'Sin nombre', total:pas.length, horas, diaTop:diaTop?DIAS_LUN[Number(diaTop[0])]:'',
+      porMes, ult, desde, med, estado, prox:fut[0]||null, ritmo:med});
+  });
+  out.sort((a,b)=>b.total-a.total || b.ult.localeCompare(a.ult));
+  out.forEach((c,i)=>{ c.pos = i+1; });
+  return out;
+}
+
+async function initRanking(){
+  const raiz = document.getElementById('rkroot');
+  if(rkClientes && Date.now()-rkCargadoEn < 60000){ rkPintar(); return; }
+  raiz.innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Armando el ranking...</div>';
+  try {
+    const PAGE = 1000;
+    let filas = [], desde = 0;
+    for(;;){
+      const r = await db
+        .from('turnos')
+        .select('id, fecha, horario, cliente, numero, estado, evento')
+        .in('estado',['Reservado','Pendiente','Pendiente de seña'])
+        .not('numero','is',null)
+        .gte('fecha', RK_DESDE)
+        .or('evento.is.null,evento.eq.Fútbol')
+        .order('fecha',{ascending:true})
+        .order('id',{ascending:true})
+        .range(desde, desde+PAGE-1);
+      if(r.error) throw r.error;
+      const pagina = r.data||[];
+      filas = filas.concat(pagina);
+      if(pagina.length < PAGE) break;
+      desde += PAGE;
+    }
+    rkClientes = rkConstruir(filas);
+    rkCargadoEn = Date.now();
+    rkPintar();
+  } catch(e){
+    raiz.innerHTML = `<div class="empty-state">Error: ${rvEsc(e.message)}</div>`;
+  }
+}
+
+function rkHace(d){
+  if(d<=0) return 'hoy';
+  if(d===1) return 'ayer';
+  if(d<60) return 'hace '+d+' días';
+  return 'hace '+d+' días (~'+Math.round(d/30)+' meses)';
+}
+const rkEtiqueta = {act:'Activa', baj:'En baja', ina:'Inactiva'};
+
+function rkChips(c){
+  return c.horas.map(([h,n])=>`<span class="rk-h">${h}<i>×${n}</i></span>`).join('');
+}
+
+function rkSpark(c){
+  const max = Math.max(1, ...c.porMes.map(m=>m.v));
+  return `<div class="rk-spark" title="Turnos por mes">${c.porMes.map(m=>`<div class="rk-sp"><div class="rk-sb ${m.v?'':'z'}" style="height:${m.v?Math.max(12,Math.round(m.v/max*100)):0}%" title="${m.n}: ${m.v}"></div><span>${m.n}</span></div>`).join('')}</div>`;
+}
+
+function rkMensaje(c){
+  return `Hola ${primerNombre(c.nombre)}! 👋 Te escribimos de Al Ángulo. Hace un tiempo que no te vemos por la cancha ⚽ ¿Querés que te anotemos un turno esta semana?`;
+}
+
+function rkFila(c){
+  const ultTxt = `último turno ${DIAS_LUN[diaLun(c.ult)]} ${fechaCorta(c.ult)}`;
+  const prox = c.prox ? `<br>Próximo: ${DIAS_LUN[diaLun(c.prox.fecha)]} ${fechaCorta(c.prox.fecha)} ${String(c.prox.horario).slice(0,5)}` : '';
+  return `
+  <div class="rk-row ${c.estado}">
+    <div class="rk-pos">${c.pos}</div>
+    <div class="rk-name">${rvEsc(c.nombre)}<small>${rvEsc(c.num)}${c.diaTop?' · suele jugar los '+c.diaTop:''}</small></div>
+    <div class="rk-tot">${c.total}<small>turnos</small></div>
+    <div class="rk-hs">${rkChips(c)}</div>
+    ${rkSpark(c)}
+    <div class="rk-last"><b>${rkHace(c.desde)}</b>${ultTxt}${prox}</div>
+    <div class="rk-act"><span class="rk-st ${c.estado}">${c.estado==='ina'?'✕ ':c.estado==='baj'?'▼ ':'● '}${rkEtiqueta[c.estado]}</span>${c.estado!=='act'?rvWa(c.num, rkMensaje(c)):''}</div>
+  </div>`;
+}
+
+function rkPodio(top){
+  const orden = [top[1], top[0], top[2]].filter(Boolean);
+  return `<div class="rk-pod">${orden.map(c=>`
+    <div class="rk-pc p${c.pos}">
+      <div class="rk-medal">${c.pos}</div>
+      <div class="rk-pn">${rvEsc(c.nombre)}</div>
+      <div class="rk-pph">${rvEsc(c.num)}</div>
+      <div class="rk-pt">${c.total}<small>turnos</small></div>
+      <div class="rk-hs">${rkChips(c)}</div>
+      <span class="rk-st ${c.estado}">${c.estado==='ina'?'✕ ':c.estado==='baj'?'▼ ':'● '}${rkEtiqueta[c.estado]}</span>
+      <div class="rk-last" style="margin-top:8px"><b>${rkHace(c.desde)}</b></div>
+    </div>`).join('')}</div>`;
+}
+
+function rkPintar(){
+  const cuenta = {todos:rkClientes.length, act:0, baj:0, ina:0};
+  rkClientes.forEach(c=>cuenta[c.estado]++);
+  const kp = (k,l,cls)=>`<button class="rk-k ${cls} ${rkEstado===k?'on':''}" onclick="rkFiltrar('${k}')"><div class="rk-k-v">${cuenta[k]}</div><div class="rk-k-l">${l}</div></button>`;
+  document.getElementById('rkroot').innerHTML = `
+    <div class="rv-sub">Clientes con <b>más de ${RK_MIN_TURNOS} turnos</b> de fútbol, desde que se registran (junio 2026). Se agrupa por teléfono.</div>
+    <div class="rk-kpis">
+      ${kp('todos','En el ranking','')}
+      ${kp('act','Activas','act')}
+      ${kp('baj','En baja','baj')}
+      ${kp('ina','Inactivas','ina')}
+    </div>
+    <div class="rk-tools">
+      <input class="rk-search" id="rkBusca" type="search" placeholder="Buscar por nombre o teléfono" value="${rvEsc(rkBusca)}" oninput="rkBuscar(this.value)">
+      <div class="rk-sort">
+        <button class="${rkOrden==='turnos'?'on':''}" onclick="rkOrdenar('turnos')">Más turnos</button>
+        <button class="${rkOrden==='ausencia'?'on':''}" onclick="rkOrdenar('ausencia')">Más tiempo sin venir</button>
+      </div>
+    </div>
+    <div id="rkLista"></div>
+    <div class="rk-note"><b>Cómo se calcula.</b> Cuenta turnos de fútbol reservados (los eventos no entran). <b>En baja:</b> lleva más del doble de su ritmo habitual sin pedir turno (mínimo 14 días). <b>Inactiva:</b> más del triple (mínimo 30 días). Un turno futuro, reservado o fijo, la mantiene activa. El mensaje de WhatsApp se abre ya escrito para que lo revises y lo mandes vos.</div>`;
+  rkPintarLista();
+}
+
+function rkPintarLista(){
+  const q = rkBusca.trim().toLowerCase();
+  let lista = rkClientes.filter(c=>(rkEstado==='todos'||c.estado===rkEstado) && (!q || c.nombre.toLowerCase().includes(q) || c.num.includes(q.replace(/\D/g,'')||'§')));
+  if(rkOrden==='ausencia') lista = lista.slice().sort((a,b)=>b.desde-a.desde || b.total-a.total);
+  const conPodio = rkEstado==='todos' && !q && rkOrden==='turnos';
+  const el = document.getElementById('rkLista');
+  if(!lista.length){ el.innerHTML = '<div class="empty-state">No hay clientes con ese filtro.</div>'; return; }
+  const podio = conPodio ? rkPodio(lista.slice(0,3)) : '';
+  let resto = conPodio ? lista.slice(3) : lista;
+  const LIM = 25;
+  const hay = resto.length > LIM && !rkTodo;
+  if(hay) resto = resto.slice(0,LIM);
+  el.innerHTML = podio + `<div class="rk-list">${resto.map(rkFila).join('')}</div>` +
+    (hay ? `<div class="rk-more"><button onclick="rkVerTodo()">Ver los ${lista.length-(conPodio?3:0)-LIM} restantes</button></div>` : '');
+}
+
+function rkFiltrar(k){ rkEstado = k; rkTodo = false; rkPintar(); }
+function rkOrdenar(o){ rkOrden = o; rkPintar(); }
+function rkBuscar(v){ rkBusca = v; rkPintarLista(); }
+function rkVerTodo(){ rkTodo = true; rkPintarLista(); }
 
 // ═══════════════════════════════════════════════
 // ACTIONS
@@ -1946,9 +2447,10 @@ function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
   document.getElementById('page-'+n).classList.add('on');
-  document.querySelectorAll('.ntab')[['agenda','historial','resumenes','contactos','turnos-fijos','lista-espera','eventos'].indexOf(n)].classList.add('on');
+  document.querySelectorAll('.ntab')[['agenda','historial','resumenes','ranking','contactos','turnos-fijos','lista-espera','eventos'].indexOf(n)].classList.add('on');
   if(n==='historial' && !aMon) initHistorial();
   if(n==='resumenes') initResumenes();
+  if(n==='ranking') initRanking();
   if(n==='contactos') initContactos();
   if(n==='turnos-fijos') initTurnosFijos();
   if(n==='lista-espera') initListaEspera();
@@ -3517,9 +4019,9 @@ async function handleLogout() {
 }
 
 function applyRole(role) {
-  const tabsEmpleado = ['historial','resumenes','contactos','turnos-fijos','lista-espera','eventos'];
+  const tabsEmpleado = ['historial','resumenes','ranking','contactos','turnos-fijos','lista-espera','eventos'];
   const allTabs = document.querySelectorAll('.ntab');
-  const tabNames = ['agenda','historial','resumenes','contactos','turnos-fijos','lista-espera','eventos'];
+  const tabNames = ['agenda','historial','resumenes','ranking','contactos','turnos-fijos','lista-espera','eventos'];
 
   if (role === 'canchas') {
     // Ve Agenda + Contactos + Turnos Fijos + Lista de Espera + Eventos.
