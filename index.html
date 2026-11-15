@@ -818,6 +818,99 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 .rv-tile.fut{border-color:rgba(232,80,26,.38)}
 .rv-cell.fut{opacity:.5}
 
+/* ═══ HISTORIAL · QUÉ PASÓ UN DÍA (2026-11-14) · solo lectura, mismo tono calmo que Resúmenes ═══ */
+#hdRoot{--g1:#223f34;--g2:#2c5a4a;--g3:#3a7661;--g4:#53957d;--g5:#75b49c;--linea:rgba(255,255,255,.10);--ink:#EFEFEF;--ink2:rgba(239,239,239,.74);--ink3:rgba(239,239,239,.56);--panel:rgba(14,21,34,.72);--vacio:rgba(255,255,255,.05)}
+.hd-panel{background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--linea);border-radius:18px;padding:18px 20px;margin-bottom:14px;min-width:0}
+.hd-pt{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);margin-bottom:12px}
+.hd-ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.hd-btn{background:rgba(255,255,255,.07);border:1px solid var(--linea);color:var(--ink);font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:10px 14px;border-radius:12px;cursor:pointer}
+.hd-btn:hover{background:rgba(255,255,255,.12)}
+.hd-btn:disabled{opacity:.35;cursor:default}
+.hd-fecha{background:rgba(255,255,255,.07);border:1px solid var(--linea);color:var(--ink);font-family:inherit;font-size:13px;font-weight:600;padding:9px 12px;border-radius:12px;color-scheme:dark}
+.hd-tira{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px}
+.hd-chip{flex:0 0 auto;width:58px;background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:var(--ink);font-family:inherit}
+.hd-chip:hover{border-color:rgba(255,255,255,.3)}
+.hd-chip.on{border-color:var(--naranja);box-shadow:0 0 0 1px var(--naranja) inset}
+.hd-chip-d{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--ink3);text-transform:uppercase}
+.hd-chip-n{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1}
+.hd-chip-bar{width:14px;height:26px;border-radius:3px 3px 0 0;background:rgba(255,255,255,.07);display:flex;align-items:flex-end;overflow:hidden}
+.hd-chip-bar i{display:block;width:100%;background:var(--g4)}
+.hd-chip-p{font-size:10px;font-weight:700;color:var(--ink2)}
+.hd-dia-t{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1.4px;color:var(--ink);line-height:1.1;text-transform:capitalize}
+.hd-dia-s{font-size:11px;color:var(--ink3);margin:4px 0 14px;line-height:1.5}
+.hd-tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.hd-tile{background:rgba(255,255,255,.04);border:1px solid var(--linea);border-radius:14px;padding:13px 14px;min-width:0}
+.hd-tile-v{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:var(--ink)}
+.hd-tile-l{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--ink3);margin-top:5px}
+.hd-tile-s{font-size:10px;color:var(--ink3);margin-top:3px;font-weight:600}
+/* grilla hora × cancha */
+.hd-grid{display:grid;grid-template-columns:54px repeat(4,minmax(0,1fr));gap:4px}
+.hd-ch{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--ink2);text-align:center;padding:2px 0 6px}
+.hd-h{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--ink);display:flex;align-items:center}
+.hd-corte{grid-column:1/-1;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);padding:8px 0 3px;border-top:1px solid var(--linea);margin-top:3px}
+.hd-corte.antes{border-top:0;margin-top:0;padding-top:0}
+.hd-c{border-radius:10px;padding:8px 10px;min-height:54px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;font-size:12px}
+.hd-c.vacio{background:none;color:rgba(255,255,255,.16);align-items:center}
+.hd-c.libre{background:var(--vacio);color:var(--ink3);font-size:11px;font-weight:600;align-items:center}
+.hd-c.res{background:var(--g2);color:#fff}
+.hd-c.pen{background:transparent;border:1px solid #d4930a;color:var(--ink)}
+.hd-c.evt{background:rgba(255,255,255,.08);border:1px solid var(--linea);color:var(--ink)}
+.hd-tag{font-size:8px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;opacity:.8}
+.hd-c.pen .hd-tag{color:#d4930a;opacity:1}
+.hd-nom{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hd-tel{font-size:10px;opacity:.75;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hd-ext{font-size:9px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* tabla de detalle */
+.hd-tabla{width:100%;border-collapse:collapse;font-size:12px}
+.hd-tabla th{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);text-align:left;padding:6px 8px;border-bottom:1px solid var(--linea);font-weight:700;white-space:nowrap}
+.hd-tabla td{padding:8px;border-bottom:1px solid var(--linea);color:var(--ink);vertical-align:top}
+.hd-tabla td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.hd-tabla td.s{color:var(--ink2)}
+.hd-scroll{overflow-x:auto}
+.hd-acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hd-nota{font-size:11px;color:var(--ink3);line-height:1.6}
+/* buscador de clientes */
+.hd-bus{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.hd-q{flex:1;min-width:200px;background:rgba(255,255,255,.07);border:1px solid var(--linea);border-radius:12px;padding:10px 14px;color:var(--ink);font-family:inherit;font-size:13px;outline:none}
+.hd-q:focus{border-color:var(--naranja)}
+.hd-res{display:grid;grid-template-columns:96px 54px 54px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--linea);padding:9px 2px;color:var(--ink);font-family:inherit;font-size:12px;cursor:pointer}
+.hd-res:hover{background:rgba(255,255,255,.05)}
+.hd-res b{font-weight:700}
+.hd-est{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ink2)}
+/* archivo por mes (el Historial de siempre), plegado */
+.hd-arch{background:var(--panel);border:1px solid var(--linea);border-radius:18px;margin-bottom:14px;overflow:hidden}
+.hd-arch>summary{list-style:none;cursor:pointer;padding:16px 20px;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:10px}
+.hd-arch>summary::-webkit-details-marker{display:none}
+.hd-arch>summary::after{content:'▾';margin-left:auto;color:var(--ink3);font-size:14px;transition:transform .2s}
+.hd-arch[open]>summary::after{transform:rotate(180deg)}
+.hd-arch>summary small{font-weight:600;letter-spacing:.4px;text-transform:none;color:var(--ink3)}
+.hd-arch-b{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+@media(max-width:900px){
+  .hd-tiles{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .hd-grid{grid-template-columns:42px repeat(4,minmax(0,1fr));gap:3px}
+  .hd-c{padding:6px 5px;min-height:50px;font-size:10px;border-radius:8px}
+  .hd-nom{font-size:10px}
+  .hd-tel{display:none}
+  .hd-dia-t{font-size:24px}
+  .hd-res{grid-template-columns:78px 44px 1fr auto}
+  .hd-res .hd-ch5{display:none}
+  .hd-panel{padding:14px 12px}
+}
+/* imprimir / guardar como PDF: solo el día, en claro */
+@media print{
+  body{background:#fff!important}
+  body::before,body::after{display:none!important}
+  .hdr,.nav,#hdCtl,#hdTira,#hdBuscar,#hdArch,.hd-acc,.hist-header{display:none!important}
+  #page-historial,#page-historial .hist-wrap{display:block!important;overflow:visible!important;padding:0!important;background:#fff!important}
+  #hdRoot{--linea:#bbb;--ink:#111;--ink2:#333;--ink3:#555;--panel:#fff;--vacio:#eee;--g2:#cfe5db}
+  .hd-panel,.hd-tile{background:#fff!important;backdrop-filter:none!important;border-color:#bbb!important}
+  .hd-c{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hd-c.res{color:#111!important}
+  .hd-tabla td,.hd-tabla th{color:#111!important}
+}
+
 /* ═══ RANKING ═══ */
 .rk-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .rk-k{cursor:pointer;text-align:left;background:rgba(24,31,46,.82);border:1px solid var(--border-md);border-radius:20px;padding:15px 18px;color:#fff;font-family:inherit;transition:border-color .15s,box-shadow .15s}
@@ -1099,10 +1192,14 @@ body{font-family:'Montserrat',sans-serif;background:transparent;color:var(--text
 <div class="page" id="page-historial">
   <div class="hist-wrap" id="histWrap">
     <div class="hist-header">
-      <div class="rsem-ttl-label">Semanas pasadas por mes</div>
+      <div class="rsem-ttl-label">Qué pasó cada día · solo lectura</div>
       <div class="rsem-ttl">Historial</div>
     </div>
-    <div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando historial...</div>
+    <div id="hdRoot"></div>
+    <details class="hd-arch" id="hdArch" ontoggle="hdAbrirArchivo(this)" style="--ink:#EFEFEF;--ink3:rgba(239,239,239,.56);--panel:rgba(14,21,34,.72);--linea:rgba(255,255,255,.10)">
+      <summary>Archivo por mes <small>· ocupación de cada semana desde julio</small></summary>
+      <div class="hd-arch-b" id="hdArchBody"><div class="empty-state">Cargando archivo...</div></div>
+    </details>
   </div>
 </div>
 
@@ -1812,7 +1909,7 @@ let histMonthsData = {}; // key: "YYYY-MM" → {year, month, reservados, total}
 let histOpenMonths = new Set();
 
 async function initHistorial(){
-  const wrap = document.getElementById('histWrap');
+  const wrap = document.getElementById('hdArchBody');
   wrap.innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando historial...</div>';
   try {
     const allData = await loadHistorialMonths();
@@ -1860,12 +1957,6 @@ async function initHistorial(){
       </div>`;
     }).join('');
 
-    // Auto-open the most recent month
-    if(monthList.length){
-      const first = monthList[0];
-      const k = `${first.year}-${String(first.month+1).padStart(2,'0')}`;
-      await toggleHistMonth(k, first.year, first.month);
-    }
   } catch(e){
     wrap.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
   }
@@ -2486,6 +2577,241 @@ function rkBuscar(v){ rkBusca = v; rkPintarLista(); }
 function rkVerTodo(){ rkTodo = true; rkPintarLista(); }
 
 // ═══════════════════════════════════════════════
+// HISTORIAL · qué pasó un día determinado (2026-11-14)
+// ═══════════════════════════════════════════════
+// SOLO LECTURA. Muestra cómo QUEDÓ cada turno de un día. La base guarda el estado final: si un turno se
+// cancela vuelve a "libre" y no queda quién lo canceló ni cuándo (para eso haría falta un registro de cambios).
+// Se pide un solo día por vez (36 filas), así que no pesa en la memoria de la agenda.
+const ymdLocal = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const DIAS_LARGO = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const HD_DESDE = '2026-06-29';           // primer día con turnos en la base
+const hdCanchas = [['Cancha de 5',1,'5-A'],['Cancha de 5',2,'5-B'],['Cancha de 6',1,'6-A'],['Cancha de 6',2,'6-B']];
+let hdDia = null, hdCache = {}, hdListo = false, hdArchCargado = false;
+
+function hdEtiquetaDia(f){
+  const d = new Date(f+'T00:00:00');
+  return DIAS_LARGO[d.getDay()]+' '+d.getDate()+' de '+MESES[d.getMonth()].toLowerCase()+' de '+d.getFullYear();
+}
+const hdHora = t => String(t.horario).slice(0,5);
+const hdPesos = n => (Number(n)||0) > 0 ? '$'+Number(n).toLocaleString('es-AR') : '';
+const hdCuando = iso => {            // "último cambio" en hora local, dd/mm HH:MM
+  if(!iso) return '';
+  const d = new Date(iso);
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+};
+const hdEsLibre = t => t.estado === 'Disponible';
+
+async function hdDatosDia(f){
+  if(hdCache[f]) return hdCache[f];
+  const r = await db.from('turnos')
+    .select('id, fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero, detalles, facturacion_efectivo, facturacion_transferencia, reservado_por_lista_espera, updated_at')
+    .eq('fecha', f)
+    .order('horario',{ascending:true}).order('cancha',{ascending:true}).order('numero_cancha',{ascending:true});
+  if(r.error) throw r.error;
+  hdCache[f] = r.data || [];
+  return hdCache[f];
+}
+
+// Resumen del día. La ocupación sigue la misma regla de Resúmenes: fútbol, desde CORTE_HORA, solo franjas que ya empezaron.
+function hdResumen(rows, esHoy){
+  const ahora = new Date();
+  const fut = rows.filter(esFutbol);
+  const noche = fut.filter(esNoche).filter(t => !esHoy || yaEmpezo(t, ahora));
+  const resN = noche.filter(t => t.estado==='Reservado').length;
+  return {
+    pct: noche.length ? Math.round(resN/noche.length*100) : 0,
+    resN, capN: noche.length,
+    resFut: fut.filter(t => t.estado==='Reservado').length,
+    resTarde: fut.filter(t => !esNoche(t) && t.estado==='Reservado').length,
+    eventos: rows.filter(t => !esFutbol(t)).length,
+    pend: rows.filter(t => t.estado==='Pendiente' || t.estado==='Pendiente de seña').length,
+    ef: rows.reduce((s,t)=>s+(Number(t.facturacion_efectivo)||0),0),
+    tr: rows.reduce((s,t)=>s+(Number(t.facturacion_transferencia)||0),0)
+  };
+}
+
+function hdCelda(t){
+  if(!t) return '<div class="hd-c vacio">·</div>';
+  const evt = !esFutbol(t);
+  if(hdEsLibre(t) && !evt) return '<div class="hd-c libre">Libre</div>';
+  const clase = evt ? 'evt' : (t.estado==='Reservado' ? 'res' : 'pen');
+  const etiqueta = evt ? (t.evento||'Evento') : (t.estado==='Reservado' ? 'Reservado' : t.estado);
+  const extra = [t.detalles ? '📝 '+t.detalles : '', hdPesos((Number(t.facturacion_efectivo)||0)+(Number(t.facturacion_transferencia)||0)), t.reservado_por_lista_espera ? 'por lista de espera' : ''].filter(Boolean).join(' · ');
+  const titulo = [etiqueta, t.cliente, t.numero, t.detalles, 'último cambio '+hdCuando(t.updated_at)].filter(Boolean).join('\n');
+  return '<div class="hd-c '+clase+'" title="'+rvEsc(titulo)+'"><span class="hd-tag">'+rvEsc(etiqueta)+'</span>'
+    + (t.cliente ? '<span class="hd-nom">'+rvEsc(t.cliente)+'</span>' : '')
+    + (t.numero ? '<span class="hd-tel">'+rvEsc(t.numero)+'</span>' : '')
+    + (extra ? '<span class="hd-ext">'+rvEsc(extra)+'</span>' : '')
+    + '</div>';
+}
+
+function hdGridHTML(rows){
+  const horas = [...new Set(rows.map(hdHora))].sort();
+  if(!horas.length) return '';
+  const cel = (h,c) => rows.find(t => hdHora(t)===h && t.cancha===c[0] && Number(t.numero_cancha)===c[1]);
+  let out = '<div class="hd-grid"><div></div>'+hdCanchas.map(c=>'<div class="hd-ch">'+c[2]+'</div>').join('');
+  let marcado = false;
+  if(parseInt(horas[0]) < CORTE_HORA) out += '<div class="hd-corte antes">Antes de las '+CORTE_HORA+':00 · aparte</div>';
+  horas.forEach(h => {
+    if(!marcado && parseInt(h) >= CORTE_HORA){
+      out += '<div class="hd-corte'+(parseInt(horas[0])>=CORTE_HORA?' antes':'')+'">Desde las '+CORTE_HORA+':00 · cuenta en la ocupación</div>';
+      marcado = true;
+    }
+    out += '<div class="hd-h">'+h+'</div>'+hdCanchas.map(c=>hdCelda(cel(h,c))).join('');
+  });
+  return out+'</div>';
+}
+
+function hdTablaHTML(rows){
+  const ocupados = rows.filter(t => !hdEsLibre(t));
+  if(!ocupados.length) return '<div class="hd-nota">No hubo turnos ocupados ese día.</div>';
+  const filas = ocupados.map(t => '<tr><td class="n">'+hdHora(t)+'</td><td class="n">'+canchaCorta(t)+'</td><td>'+rvEsc(t.estado)+'</td><td>'+rvEsc(t.evento||'Fútbol')+'</td><td><b>'+rvEsc(t.cliente||'—')+'</b></td><td class="n">'+rvEsc(t.numero||'')+'</td><td class="n s">'+rvEsc(hdPesos(t.facturacion_efectivo))+'</td><td class="n s">'+rvEsc(hdPesos(t.facturacion_transferencia))+'</td><td class="s">'+rvEsc(t.detalles||'')+'</td><td class="n s">'+rvEsc(hdCuando(t.updated_at))+'</td></tr>').join('');
+  return '<div class="hd-scroll"><table class="hd-tabla"><thead><tr><th>Hora</th><th>Cancha</th><th>Estado</th><th>Evento</th><th>Cliente</th><th>Teléfono</th><th>Efectivo</th><th>Transf.</th><th>Detalles</th><th>Últ. cambio</th></tr></thead><tbody>'+filas+'</tbody></table></div>';
+}
+
+async function hdPintarDia(){
+  const cont = document.getElementById('hdDia');
+  if(!cont) return;
+  const mio = hdDia;
+  cont.innerHTML = '<div class="empty-state"><span class="loader-spin" style="margin:0 auto 12px"></span>Cargando el día...</div>';
+  try {
+    const rows = await hdDatosDia(mio);
+    if(mio !== hdDia) return;                     // el usuario ya eligió otro día
+    const s = hdResumen(rows, mio === ymdLocal(today));
+    const tile = (v,l,sub) => '<div class="hd-tile"><div class="hd-tile-v">'+v+'</div><div class="hd-tile-l">'+l+'</div>'+(sub?'<div class="hd-tile-s">'+sub+'</div>':'')+'</div>';
+    cont.innerHTML = '<div class="hd-panel" id="hdPrint">'
+      + '<div class="hd-dia-t">'+hdEtiquetaDia(mio)+'</div>'
+      + '<div class="hd-dia-s">Así quedó cada turno ese día. Si un turno se canceló, figura como libre: la agenda no guarda quién canceló ni cuándo.</div>'
+      + (rows.length ? '<div class="hd-tiles">'
+          + tile(s.capN ? s.pct+'%' : '—', 'Ocupación desde las '+CORTE_HORA+':00', s.capN ? s.resN+' de '+s.capN+' franjas' : 'sin franjas jugadas')
+          + tile(s.resFut, 'Reservas de fútbol', 'todas las horas')
+          + tile(s.resTarde, 'Antes de las '+CORTE_HORA+':00', 'aparte')
+          + tile(s.eventos, 'Eventos', 'aparte')
+          + tile(s.pend, 'Pendientes', s.pend ? 'sin confirmar' : '')
+          + '</div>'
+          + hdGridHTML(rows)
+          + '<div class="hd-pt" style="margin-top:20px">Detalle de los turnos ocupados</div>'
+          + hdTablaHTML(rows)
+          + ((s.ef+s.tr) > 0 ? '<div class="hd-nota" style="margin-top:10px">Ingresos cargados: efectivo '+hdPesos(s.ef)+' · transferencia '+hdPesos(s.tr)+'</div>' : '')
+          + '<div class="hd-acc"><button class="hd-btn" onclick="hdDescargar()">Descargar en Excel</button><button class="hd-btn" onclick="window.print()">Imprimir / guardar en PDF</button></div>'
+        : '<div class="empty-state">No hay turnos cargados para este día.</div>')
+      + '</div>';
+  } catch(e){
+    if(mio === hdDia) cont.innerHTML = '<div class="empty-state">Error: '+rvEsc(e.message)+'</div>';
+  }
+}
+
+// CSV para Excel (separador ";" y BOM, así abre bien en Excel en español). Se neutralizan las celdas que
+// empiezan con = + - @ para que un nombre cargado a mano no se interprete como fórmula.
+function hdCSV(rows, f){
+  const celda = v => {
+    let s = String(v==null?'':v);
+    if(/^[=+\-@]/.test(s)) s = "'"+s;
+    return '"'+s.replace(/"/g,'""')+'"';
+  };
+  const cab = ['Fecha','Hora','Cancha','Estado','Evento','Cliente','Teléfono','Efectivo','Transferencia','Detalles','Último cambio'];
+  const lineas = rows.filter(t => !hdEsLibre(t)).map(t => [t.fecha, hdHora(t), canchaCorta(t), t.estado, t.evento||'Fútbol', t.cliente||'', t.numero||'', t.facturacion_efectivo||0, t.facturacion_transferencia||0, t.detalles||'', hdCuando(t.updated_at)].map(celda).join(';'));
+  return '﻿'+cab.map(celda).join(';')+'\r\n'+lineas.join('\r\n')+'\r\n';
+}
+async function hdDescargar(){
+  const rows = await hdDatosDia(hdDia);
+  const blob = new Blob([hdCSV(rows, hdDia)], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'al-angulo-'+hdDia+'.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+
+// tira con los últimos 14 días (una barra por día con su ocupación desde las 19:00)
+async function hdPintarTira(){
+  const cont = document.getElementById('hdTira');
+  if(!cont) return;
+  try {
+    const hoyK = ymdLocal(today), desde = ymdLocal(add(today,-13));
+    const r = await db.from('turnos').select('fecha, horario, estado, evento').gte('fecha', desde).lte('fecha', hoyK).order('fecha',{ascending:true}).range(0,999);
+    if(r.error) throw r.error;
+    const ahora = new Date(), por = {};
+    (r.data||[]).forEach(t => { (por[t.fecha] = por[t.fecha] || []).push(t); });
+    const chips = [];
+    for(let i=13;i>=0;i--){
+      const f = ymdLocal(add(today,-i)), rows = por[f] || [];
+      const noche = rows.filter(esFutbol).filter(esNoche).filter(t => f!==hoyK || yaEmpezo(t, ahora));
+      const pct = noche.length ? Math.round(noche.filter(t=>t.estado==='Reservado').length/noche.length*100) : 0;
+      const d = new Date(f+'T00:00:00');
+      chips.push('<button class="hd-chip '+(f===hdDia?'on':'')+'" onclick="hdIr(\''+f+'\')" title="'+hdEtiquetaDia(f)+'"><span class="hd-chip-d">'+DIAS_LARGO[d.getDay()].slice(0,3)+'</span><span class="hd-chip-n">'+d.getDate()+'</span><span class="hd-chip-bar"><i style="height:'+Math.max(noche.length?6:0,pct)+'%"></i></span><span class="hd-chip-p">'+(noche.length?pct+'%':'—')+'</span></button>');
+    }
+    cont.innerHTML = chips.join('');
+  } catch(e){ cont.innerHTML = ''; }
+}
+
+function hdIr(f){
+  const hoyK = ymdLocal(today);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(f||'') || f > hoyK || f < HD_DESDE) return;
+  hdDia = f;
+  const inp = document.getElementById('hdFecha');
+  if(inp) inp.value = f;
+  const sig = document.getElementById('hdSig');
+  if(sig) sig.disabled = f >= hoyK;
+  hdPintarTira();
+  hdPintarDia();
+}
+function hdMover(n){
+  const d = new Date(hdDia+'T00:00:00');
+  d.setDate(d.getDate()+n);
+  hdIr(ymdLocal(d));
+}
+
+// buscar un cliente por nombre o teléfono: todos sus turnos
+async function hdBuscar(){
+  const cont = document.getElementById('hdBusq');
+  const q0 = (document.getElementById('hdQ').value || '').trim();
+  if(q0.length < 3){ cont.innerHTML = '<div class="hd-nota">Escribí al menos 3 letras o números.</div>'; return; }
+  const q = q0.replace(/[,()%*\\"']/g,' ').replace(/\s+/g,' ').trim();   // caracteres que rompen el filtro
+  const digs = soloDig(q0);
+  const filtro = digs.length >= 3 ? 'numero.ilike.*'+digs+'*,cliente.ilike.*'+q+'*' : 'cliente.ilike.*'+q+'*';
+  cont.innerHTML = '<div class="hd-nota">Buscando...</div>';
+  try {
+    const r = await db.from('turnos').select('fecha, horario, cancha, numero_cancha, estado, evento, cliente, numero')
+      .neq('estado','Disponible').or(filtro)
+      .order('fecha',{ascending:false}).order('horario',{ascending:false}).limit(200);
+    if(r.error) throw r.error;
+    const d = r.data || [];
+    if(!d.length){ cont.innerHTML = '<div class="hd-nota">No se encontró ningún turno para «'+rvEsc(q0)+'».</div>'; return; }
+    const hoyK = ymdLocal(today);
+    cont.innerHTML = '<div class="hd-nota" style="margin-bottom:6px"><b>'+d.length+(d.length===200?'+':'')+' turnos</b> para «'+rvEsc(q0)+'»'+(d.length===200?' (se muestran los 200 más recientes)':'')+'. Tocá uno para ver ese día.</div>'
+      + d.map(t => '<button class="hd-res" onclick="hdIr(\''+t.fecha+'\')"><span><b>'+fechaCorta(t.fecha)+'</b> '+DIAS_LARGO[new Date(t.fecha+'T00:00:00').getDay()].slice(0,3)+(t.fecha>hoyK?' · próximo':'')+'</span><span>'+hdHora(t)+'</span><span class="hd-ch5">'+canchaCorta(t)+'</span><span>'+rvEsc(t.cliente||'—')+' <span style="opacity:.6">'+rvEsc(t.numero||'')+'</span></span><span class="hd-est">'+rvEsc(!esFutbol(t)?(t.evento||'Evento'):t.estado)+'</span></button>').join('');
+  } catch(e){ cont.innerHTML = '<div class="hd-nota">Error: '+rvEsc(e.message)+'</div>'; }
+}
+
+function hdAbrirArchivo(det){
+  if(det.open && !hdArchCargado){ hdArchCargado = true; initHistorial(); }
+}
+
+function initHistorialDia(){
+  const raiz = document.getElementById('hdRoot');
+  if(!raiz) return;
+  if(!hdListo){
+    hdListo = true;
+    hdDia = ymdLocal(add(today,-1));               // se abre en ayer: el último día completo
+    raiz.innerHTML =
+        '<div id="hdCtl" class="hd-ctl">'
+      +   '<button class="hd-btn" onclick="hdMover(-1)" aria-label="Día anterior">◀</button>'
+      +   '<input class="hd-fecha" id="hdFecha" type="date" min="'+HD_DESDE+'" max="'+ymdLocal(today)+'" value="'+hdDia+'" onchange="hdIr(this.value)">'
+      +   '<button class="hd-btn" id="hdSig" onclick="hdMover(1)" aria-label="Día siguiente">▶</button>'
+      +   '<button class="hd-btn" onclick="hdIr(ymdLocal(add(today,-1)))">Ayer</button>'
+      +   '<button class="hd-btn" onclick="hdIr(ymdLocal(today))">Hoy</button>'
+      + '</div>'
+      + '<div id="hdTira" class="hd-tira"></div>'
+      + '<div id="hdDia"></div>'
+      + '<div id="hdBuscar" class="hd-panel"><div class="hd-pt">Buscar un cliente</div>'
+      +   '<div class="hd-bus"><input class="hd-q" id="hdQ" type="search" placeholder="Nombre o teléfono" onkeydown="if(event.key===\'Enter\')hdBuscar()"><button class="hd-btn" onclick="hdBuscar()">Buscar</button></div>'
+      +   '<div id="hdBusq"></div></div>';
+  }
+  hdIr(hdDia);
+}
+
+// ═══════════════════════════════════════════════
 // ACTIONS
 // ═══════════════════════════════════════════════
 function showPage(n){
@@ -2494,7 +2820,7 @@ function showPage(n){
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
   document.getElementById('page-'+n).classList.add('on');
   document.querySelectorAll('.ntab')[['agenda','historial','resumenes','ranking','contactos','turnos-fijos','lista-espera','eventos'].indexOf(n)].classList.add('on');
-  if(n==='historial' && !aMon) initHistorial();
+  if(n==='historial') initHistorialDia();
   if(n==='resumenes') initResumenes();
   if(n==='ranking') initRanking();
   if(n==='contactos') initContactos();
