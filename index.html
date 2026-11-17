@@ -3435,11 +3435,12 @@ async function applyAllTurnosFijosToWeeks(){
 
 async function tfSyncToAgenda(tf, isDelete=false){
   let colocado = true;
+  let fecha = null;
   try {
-    const fecha = tfNextOccurrence(tf.dia_semana);
     const horario = (tf.horario||'').slice(0,5); // "20:00" — sin segundos
 
     if(isDelete){
+      fecha = tfNextOccurrence(tf.dia_semana);
       const { data } = await db.from('turnos').select('id')
         .eq('fecha', fecha).eq('horario', horario)
         .eq('cancha', tf.cancha).eq('cliente', tf.cliente)
@@ -3452,26 +3453,46 @@ async function tfSyncToAgenda(tf, isDelete=false){
         }
       }
     } else {
-      const { data: slots } = await db.from('turnos').select('id,numero_cancha')
-        .eq('fecha', fecha).eq('horario', horario)
-        .eq('cancha', tf.cancha).eq('estado','Disponible')
-        .order('numero_cancha').limit(1);
+      // Recorrer todas las fechas ya generadas (desde mañana hasta el final de
+      // la bisemana cargada) que coincidan con el día del fijo, y quedarse con
+      // la primera que tenga lugar libre. Antes solo probaba la fecha más
+      // próxima (tfNextOccurrence): si esa ya estaba ocupada —alguien cargó
+      // algo a mano ahí— el fijo se quedaba sin lugar toda esa semana aunque
+      // la semana siguiente, ya generada, tuviera la cancha libre. Le pasó al
+      // fijo de Seba Marín, creado el 2026-11-11: la fecha más próxima (12/11)
+      // ya estaba tomada, y nunca se probó el 19/11, que seguía libre.
+      const targetDay = TF_DAY_MAP[tf.dia_semana];
+      const start = new Date(); start.setHours(0,0,0,0); start.setDate(start.getDate()+1);
+      const end = WEEKS[1].e;
+      let slot = null;
+      for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
+        if(d.getDay() !== targetDay) continue;
+        const f = dk(new Date(d));
+        const { data: slots } = await db.from('turnos').select('id,numero_cancha')
+          .eq('fecha', f).eq('horario', horario)
+          .eq('cancha', tf.cancha).eq('estado','Disponible')
+          .order('numero_cancha').limit(1);
+        if(slots && slots.length > 0){ fecha = f; slot = slots[0]; break; }
+      }
 
-      if(slots && slots.length > 0){
+      if(slot){
         await db.from('turnos').update({
           estado:'Pendiente', cliente:tf.cliente, numero:tf.numero, turno_fijo_id:tf.id
-        }).eq('id',slots[0].id);
-        const mapKey = tKey(fecha, horario, tf.cancha, slots[0].numero_cancha);
+        }).eq('id',slot.id);
+        const mapKey = tKey(fecha, horario, tf.cancha, slot.numero_cancha);
         if(turnosMap[mapKey]) turnosMap[mapKey]={...turnosMap[mapKey],estado:'Pendiente',cliente:tf.cliente,numero:tf.numero,turno_fijo_id:tf.id};
       } else {
-        // No hay slot libre: no se inserta nada (evita duplicados), pero se avisa.
-        // Sin este aviso el fijo quedaba cargado en la lista sin existir en la agenda.
+        // Ninguna fecha de la bisemana ya generada tenía lugar libre: no se
+        // inserta nada (evita duplicados), pero se avisa. Sin este aviso el
+        // fijo quedaba cargado en la lista sin existir en la agenda.
         colocado = false;
       }
     }
     // Re-render agenda if affected date is visible
-    const w = WEEKS[aWeek];
-    if(fecha >= dk(w.s) && fecha <= dk(w.e)) renderAgenda();
+    if(fecha){
+      const w = WEEKS[aWeek];
+      if(fecha >= dk(w.s) && fecha <= dk(w.e)) renderAgenda();
+    }
   } catch(e){
     console.warn('tfSyncToAgenda error:', e.message);
   }
